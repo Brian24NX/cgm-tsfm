@@ -1,0 +1,20 @@
+# cgm_tsfm dependencies.
+# Validated interpreter: mod-actigraphy-advanced/.venv (Python 3.12) which already
+# has all of these. To make a fresh env:  python -m venv .venv && pip install -r requirements.txt
+
+# Core (Arm A — frozen embeddings + classical regression)
+numpy>=1.26
+pandas>=2.0
+scikit-learn>=1.4
+scipy>=1.11
+
+# TSFM encoder (Chronos; imports as `chronos`). Pulls in torch.
+chronos-forecasting>=2.2.2
+torch>=2.4
+
+# Arm B (trainable regression head)
+lightning>=2.2
+torchmetrics>=1.4
+
+# Optional — XGBoost regressor in Arm A (needs libomp on macOS: `brew install libomp`)
+# xgboost>=2.0

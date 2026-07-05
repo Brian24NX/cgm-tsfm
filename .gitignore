@@ -1,0 +1,24 @@
+# Data (real merged CSVs live here; never commit patient data)
+/data/
+data/Merged_glucose_data/
+
+# Embedding cache & run logs
+/.cache/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.ipynb_checkpoints/
+
+# OS / IDE
+.DS_Store
+.idea/
+
+# Reference & sensitive documents — intentionally NOT pushed to GitHub (privacy/size).
+# Grant proposal, reference papers, Liuyi's answers, task screenshot.
+# Transfer to the server separately if ever needed; not required to run any code.
+*.pdf
+*.docx
+/liuyi_task_assignment.png
