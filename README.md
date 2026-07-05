@@ -34,11 +34,19 @@ docs/              overview, design, roadmap, meeting brief, open questions
 requirements.txt
 ```
 
+## Setup
+
+Migrating to the lab server? See **`docs/05_SERVER_SETUP.md`** (clone the private repo, GPU torch, data placement). One-time environment (laptop **or** server):
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt        # GPU server: install a CUDA build of torch first — see docs/05
+```
+
 ## Quick start
 
 ```bash
-# Interpreter that already has every dependency:
-PY=~/Desktop/mod-actigraphy-advanced/.venv/bin/python
+PY=python                              # venv active; add `--device cuda` on a GPU server
 
 # 1) Fully offline smoke test (no download): synthetic data + mock encoder
 $PY -m cgm_tsfm.run_demo --encoder mock
