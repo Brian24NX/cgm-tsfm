@@ -2,6 +2,14 @@
 
 Brian Zhou's research project, supervised by **Liuyi**. This is a separate project from `mod-actigraphy-advanced` (a labmate Ben's codebase, kept at `~/Desktop/mod-actigraphy-advanced`) — Ben's repo is being studied only as an architectural reference, not developed here.
 
+> ## 🔗 New session / on the lab server? START HERE
+> If you're a fresh Claude Code session (e.g. running on the lab server, or after a context reset), you will **not** have the prior chat history or Brian's laptop-local `~/.claude` memories — **this repo is the source of truth.** Get oriented fast:
+> 1. **`PLAIN_ENGLISH_SUMMARY.md`** — plain-language overview of what's built and why.
+> 2. **`docs/00_PROJECT_OVERVIEW.md`** + **`docs/02_ROADMAP.md`** — design + status/what's next.
+> 3. The `cgm_tsfm/` package is the runnable pipeline (Arm A + Arm B); `results/README.md` explains the outputs.
+>
+> **Current state (2026-07):** the full pipeline is built and validated on *synthetic* data; it was developed on Brian's laptop and pushed to the private GitHub repo **`Brian24NX/cgm-tsfm`**. **We are mid-migration to the lab server** so training runs on GPU. **Immediate task: follow `docs/05_SERVER_SETUP.md`** (clone → venv + CUDA torch → verify with the mock + synthetic runs → then real runs once the data CSVs are placed in `data/Merged_glucose_data/`). The one real blocker for scientific results is getting the data file from Liuyi.
+
 ## What this project is
 
 Studies how short-term blood glucose fluctuations affect real-time cognitive performance (working memory, processing speed) in youth with Type 1 Diabetes (T1D), using continuous glucose monitors (CGM) and a mobile cognitive-testing app, analyzed with time-series/ML methods. Full study design is in `Ray K01.pdf` (the driving NIH K01 grant proposal): Aim 1 tests whether glucose fluctuations predict cognitive performance in T1D youth (N=92, ages 9-16, Dexcom G6 CGM + "PARC" app cognitive tests 5x/day for 10 days); Aim 2 compares T1D youth to non-T1D controls during stable glucose.
