@@ -8,7 +8,9 @@ Brian Zhou's research project, supervised by **Liuyi**. This is a separate proje
 > 2. **`docs/00_PROJECT_OVERVIEW.md`** + **`docs/02_ROADMAP.md`** — design + status/what's next.
 > 3. The `cgm_tsfm/` package is the runnable pipeline (Arm A + Arm B); `results/README.md` explains the outputs.
 >
-> **Current state (2026-07):** the full pipeline is built and validated on *synthetic* data; it was developed on Brian's laptop and pushed to the private GitHub repo **`Brian24NX/cgm-tsfm`**. **We are mid-migration to the lab server** so training runs on GPU. **Immediate task: follow `docs/05_SERVER_SETUP.md`** (clone → venv + CUDA torch → verify with the mock + synthetic runs → then real runs once the data CSVs are placed in `data/Merged_glucose_data/`). The one real blocker for scientific results is getting the data file from Liuyi.
+> **Current state (2026-07):** the full pipeline is built and validated on *synthetic* data; it was developed on Brian's laptop and pushed to the private GitHub repo **`Brian24NX/cgm-tsfm`**. **We are mid-migration to the `cpsl-mds` lab server** so training runs on GPU. **Immediate task: follow `docs/05_SERVER_SETUP.md`.**
+> **⚠️ Server storage (Liuyi's policy):** on `cpsl-mds`, keep the repo, conda env, model downloads, data, and caches under **`/data_1_8TB_ssd/brian_workspace`** (the ~1 TB SSD) — NOT `/home` (≤300 GB, shared). Use a conda **prefix** env and set `HF_HOME`/pip/conda caches to the SSD (details in docs/05).
+> Then verify with the mock + synthetic runs, and do real runs once the data CSVs are placed in `data/Merged_glucose_data/` (copied **directly to the server**, never via git — it's patient data). The one real blocker for scientific results is getting the data file from Liuyi.
 
 ## What this project is
 
