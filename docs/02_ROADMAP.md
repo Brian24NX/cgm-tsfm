@@ -2,13 +2,18 @@
 
 *Living plan. Statuses reflect work completed after Liuyi's answers. The four numbered tasks are Liuyi's original assignment (`liuyi_task_assignment.png`), reinterpreted per his clarifications.*
 
+> **🆕 2026-07 update — supersedes some wording below.** Two decisions from the latest meeting (full context in [`PLAIN_ENGLISH_SUMMARY.md`](../PLAIN_ENGLISH_SUMMARY.md)):
+> 1. **Focus on our own TSFM approach — drop the head-to-head vs Mack's hand-crafted features.** Mack's 43 features stay in the code only as an optional sanity-check. (The "signal is likely weak, don't oversell" caveat still stands.)
+> 2. **Task 1 (lab-server env) is DONE** — built + GPU-validated on `cpsl-mds` (`docs/05_SERVER_SETUP.md`).
+> Also: the real data arrives after labmate **Phil** finishes his correlation analysis of the 20 patients.
+
 ---
 
 ## Status of the four assigned tasks
 
 | # | Task (as reinterpreted) | Status | Evidence |
 |---|---|---|---|
-| 1 | Dev environment on **compute2** | ⏸ **Deferred** (per earlier instruction) | Flagged for scheduling — see open questions Q6. |
+| 1 | Dev environment (lab server / **compute2**) | ✅ **Done (2026-07)** | Built + GPU-validated on `cpsl-mds` — Miniforge prefix env on the SSD, CUDA torch on an RTX 6000 Ada, real Chronos on GPU. See `docs/05_SERVER_SETUP.md`. *(Confirm whether "compute2" is a different machine.)* |
 | 2 | Understand Ben's codebase + TSFM input formats | ✅ **Done** | `PROGRESS_NOTES.md` + `01_PIPELINE_DESIGN.md §3,§5`. Confirmed Ben's `ChronosEncoder` is channel-agnostic and the 2-channel hardcode lives only in `FoundationModelClassifier`. |
 | 3 | Understand the TSFM raw input format & how to convert to it | ✅ **Done** (via the ICML repo, per Liuyi) | Studied `representations-in-tsfms`; distilled the exact `(B,1,L)→embed→mean-pool→(B,d)` recipe and **implemented + ran it** (`encoders.py`, real `chronos-bolt-small`, 512-d embeddings). |
 | 4 | Adapt Ben's code for regression output (single channel) | ✅ **Prototype done** | `ben_adapter/` — single-channel `FoundationModelRegressor` + regression `CGMRegressionModule`, smoke-tested. Full training pending real data. |
@@ -30,7 +35,7 @@
 
 ### M1 — Run on the real data ⛔ (blocked ONLY on data access — tooling is built)
 - [ ] Obtain `Cohort1_scores_merged_with_glucose.csv` + `Cohort2_scores_with_glucose.csv` (or run where they live). → **Ask Liuyi (Q1).**
-- [ ] `python -m cgm_tsfm.run_headtohead --encoder chronos --real` → the **Chronos-embeddings vs Mack's-43-features** table for all 3 targets under identical grouped CV (the head-to-head runner already exists and is validated on synthetic data).
+- [ ] `python -m cgm_tsfm.run_headtohead --encoder chronos --real --with-arm-b` → the first **real TSFM results** (Arm A + Arm B) for all 3 targets under grouped CV. *(The runner can still show Mack's 43 features alongside as an optional internal sanity-check — no longer the deliverable.)*
 - [ ] Also run `--cv session` for the subject-baseline diagnostic, and `run_demo --real` for the full per-model breakdown.
 - [ ] Report R²/RMSE/MAE per target with the mean-baseline reference; interpret via the subject-baseline diagnostic.
 
@@ -51,7 +56,7 @@
 
 1. **Data access & the window.** Get the merged CSVs; define the pre-test lookback; is the *raw* CGM stream available (not just the pre-clipped array)?
 2. **Prices inversion + score semantics.** Confirm negation; what do Grids/Symbols/Prices actually measure (units)?
-3. **Success criteria given Mack's null results.** Is the goal to confirm/refute with learned representations, or to chase a specific hypothesis (e.g. hypoglycemia windows, within-subject effects)?
+3. ✅ ~~**Success criteria given Mack's null results.**~~ **Resolved (2026-07): focus on our own TSFM approach; no head-to-head vs Mack.** Success = an honest, leakage-free evaluation of Arm A + Arm B on the 3 scores, plus the within-subject baseline test.
 4. **Encoder family/size.** Standardize on Chronos-Bolt vs T5, and which checkpoint size.
 
 ---
@@ -61,4 +66,4 @@
 - **The target may have little generalizable signal.** Mack's arm found none; a frozen general-purpose TSFM won't create signal. Frame deliverables as a *fair comparison and characterization*, not a promised accuracy win.
 - **High-dim embeddings + ~19 subjects → overfitting.** Grouped CV + regularization/PCA are non-negotiable (already built in; Linear-model blow-up demonstrates the failure mode).
 - **Synthetic ≠ real.** The synthetic harness validates plumbing and the CV diagnostic only; it is not evidence about Chronos-vs-features on real data.
-- **No GPU assumed.** Everything runs on CPU with `bolt-small`; larger checkpoints will want compute2 (ties back to Task 1).
+- **GPU now available (Task 1 done).** The pipeline is GPU-validated on `cpsl-mds` (RTX 6000 Ada), so larger checkpoints / Arm-B training at scale are unblocked. (It still runs on CPU with `bolt-small` for quick local work.)

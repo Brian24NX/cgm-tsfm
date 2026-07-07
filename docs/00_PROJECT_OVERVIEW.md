@@ -2,6 +2,11 @@
 
 *Brian Zhou, supervised by Liuyi. Written after receiving Liuyi's answers to the initial questions (`Questions_LiuyiAnswer.docx`). This is the "read me first" narrative; technical details are in `01_PIPELINE_DESIGN.md`, the plan is in `02_ROADMAP.md`, and the meeting one-pager is `03_MEETING_BRIEF.md`.*
 
+> **🆕 2026-07 update — supersedes some wording below.** Two decisions from the latest meeting (full context in [`PLAIN_ENGLISH_SUMMARY.md`](../PLAIN_ENGLISH_SUMMARY.md)):
+> 1. **Focus on our own TSFM approach — drop the head-to-head vs Mack's hand-crafted features.** Mack's 43 features stay in the code only as an optional sanity-check. (The "signal is likely weak, don't oversell" caveat still stands.)
+> 2. **Task 1 (lab-server env) is DONE** — built + GPU-validated on `cpsl-mds` (`docs/05_SERVER_SETUP.md`).
+> Also: the real data arrives after labmate **Phil** finishes his correlation analysis of the 20 patients. Where text below frames the goal as "beat Mack," read it as "develop and honestly evaluate our own approach."
+
 ---
 
 ## 1. What the project is (one paragraph)
@@ -51,7 +56,7 @@ My original notes (`PROGRESS_NOTES.md`, 2026-07-01) assumed we'd get two CGM CSV
 **What this means for our TSFM arm — set expectations honestly:**
 - A frozen, general-purpose TSFM will **not manufacture signal that isn't there.** We should not promise big R² gains.
 - The scientifically valuable questions the TSFM arm *can* answer are:
-  1. **Does raw-representation learning beat hand-crafted features** on this hard target, under the *identical* grouped-CV protocol? (This is the K01's planned comparison, now with a fair head-to-head.)
+  1. **Does raw-representation learning find any honest glucose→cognition signal** on this hard target, under leakage-free grouped CV? *(2026-07: we evaluate our TSFM approach on its own merits — no longer as a head-to-head vs Mack's features.)*
   2. Do learned embeddings capture **temporal structure** (trajectories, excursion timing) that 43 static summary features throw away?
   3. Is the subject-baseline effect so dominant that **within-subject modeling / normalization** is required before any glucose signal is visible?
 - Our pipeline is built to answer these cleanly, and it **reproduces the subject-baseline diagnostic on synthetic data** (group-CV R²≈0, session-CV R²>0), so we can tell "no signal" apart from "a pipeline bug."
@@ -70,4 +75,4 @@ A self-contained package, `cgm_tsfm/`, implementing both arms end-to-end, valida
 
 ## 6. Where to go next
 
-See `02_ROADMAP.md`. The immediate asks for Liuyi are in `03_MEETING_BRIEF.md` and `04_OPEN_QUESTIONS.md` — chiefly: access to the real merged CSVs, the definition of the pre-test window (and whether the *raw* CGM stream is available, not just the pre-clipped array), confirmation of the Prices inversion and what the three scores measure, and what "success" looks like given Mack's null results.
+See `02_ROADMAP.md`. Current status and decisions are in [`PLAIN_ENGLISH_SUMMARY.md`](../PLAIN_ENGLISH_SUMMARY.md) and `04_OPEN_QUESTIONS.md`. As of 2026-07 the big items are resolved: **focus on our own TSFM approach (no Mack head-to-head)**, and **Task 1 (lab server) is done** on `cpsl-mds`. The one remaining blocker for real results is the merged CSVs — coming after labmate Phil's correlation analysis of the 20 patients. (Minor, non-blocking: confirm the exact pre-test lookback and what the three scores — especially Prices — measure.)

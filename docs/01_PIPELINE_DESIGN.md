@@ -2,6 +2,8 @@
 
 *Technical reference for the `cgm_tsfm/` package. Cites the three reference codebases so every design choice is traceable. Absolute repo paths are in `README.md`.*
 
+> **Scope note (2026-07):** the `run_headtohead` "Chronos vs hand-crafted features" comparison described below still exists as a runnable tool, but per the latest meeting the **deliverable is our own TSFM approach** — Mack's 43 features are now just an optional internal sanity-check, not the point. The technical descriptions below are unchanged (they document the code accurately). Current status: [`PLAIN_ENGLISH_SUMMARY.md`](../PLAIN_ENGLISH_SUMMARY.md).
+
 ---
 
 ## 1. The prediction problem (data contract)

@@ -22,7 +22,7 @@ cgm_tsfm/
   config.py        paths, the 3 targets, windowing, encoder & CV settings
   data.py          real-schema loader (mirrors diabetes-fitbit) + synthetic generator
   encoders.py      frozen Chronos embedding extractor (Bolt/T5) + mock encoder + cache
-  handcrafted.py   Mack's 43 hand-crafted glycemic features (faithful port, for the head-to-head)
+  handcrafted.py   Mack's 43 hand-crafted glycemic features (faithful port; optional sanity-check baseline)
   regression.py    Arm A: nested GroupKFold regression (Ridge/SVR/…) + metrics
   run_demo.py      end-to-end Arm A demo (synthetic or real)
   run_headtohead.py  ONE COMMAND: Chronos vs the 43 features (+ optional Arm B), grouped CV; writes results/headtohead_*.md
@@ -36,7 +36,7 @@ requirements.txt
 
 ## Setup
 
-Migrating to the lab server? See **`docs/05_SERVER_SETUP.md`** (clone the private repo, GPU torch, data placement). One-time environment (laptop **or** server):
+On the lab server (`cpsl-mds`) the environment is **already set up and GPU-validated** — see **`docs/05_SERVER_SETUP.md`** (activate the prefix env and go; **Task 1 is done**). To build a fresh environment elsewhere (laptop **or** a new machine):
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
@@ -82,14 +82,17 @@ $PY -m cgm_tsfm.run_headtohead --encoder chronos --real --with-arm-b
 
 `run_demo` prints, per target, RMSE/MAE/R² for each model vs a mean-predictor
 baseline, under both subject-grouped CV and session-level CV (the subject-baseline
-diagnostic). `run_headtohead` prints the direct Chronos-vs-hand-crafted comparison
-(the K01's "raw-data vs feature-engineering" question) with a per-target verdict.
+diagnostic). `run_headtohead` runs our TSFM approach (Arm A, +Arm B with `--with-arm-b`)
+under grouped CV; it can also show Mack's 43 hand-crafted features alongside as an
+optional sanity-check. **Per the 2026-07 decision, the deliverable is our own TSFM
+approach — not a head-to-head vs Mack** (see `PLAIN_ENGLISH_SUMMARY.md`).
 
 ## Status
 
 Pipeline built and validated end-to-end on synthetic data (both arms), including a
-real `chronos-bolt-small` run. **Blocked only on access to the real CSVs** to produce
-the first Chronos-vs-hand-crafted-features comparison. See `docs/`.
+real `chronos-bolt-small` run **on GPU**. **Task 1 done** — environment built + GPU-validated
+on `cpsl-mds` (`docs/05_SERVER_SETUP.md`). **Blocked only on the real CSVs** (coming after
+labmate Phil's correlation analysis) to produce the first real TSFM results. See `docs/`.
 
 ## The three reference codebases (studied, not vendored here)
 
