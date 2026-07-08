@@ -33,14 +33,14 @@
 - [x] Real `chronos-bolt-small` run end-to-end on synthetic data.
 - [x] Mack's 43 hand-crafted features ported (`handcrafted.py`, verified numerically identical to his originals) + one-command **head-to-head** runner (`run_headtohead.py`, 2- or 3-way with `--with-arm-b`).
 
-### M1 — Run on the real data ⛔ (blocked ONLY on data access — tooling is built)
-- [ ] Obtain `Cohort1_scores_merged_with_glucose.csv` + `Cohort2_scores_with_glucose.csv` (or run where they live). → **Ask Liuyi (Q1).**
-- [ ] `python -m cgm_tsfm.run_headtohead --encoder chronos --real --with-arm-b` → the first **real TSFM results** (Arm A + Arm B) for all 3 targets under grouped CV. *(The runner can still show Mack's 43 features alongside as an optional internal sanity-check — no longer the deliverable.)*
-- [ ] Also run `--cv session` for the subject-baseline diagnostic, and `run_demo --real` for the full per-model breakdown.
-- [ ] Report R²/RMSE/MAE per target with the mean-baseline reference; interpret via the subject-baseline diagnostic.
+### M1 — Run on the real data ✅ (DONE 2026-07 — first real run complete)
+- [x] Obtained the merged CSVs from Phil: 14 (Cohort1) + 6 (Cohort2) = **20 patients**. Use **`Updated_Cohort2`** (backfills glucose so all 20 survive; the original dropped one subject → 19). Files live in `data/Merged_glucose_data/` (gitignored).
+- [x] `run_headtohead --encoder chronos --real --with-arm-b` → first real TSFM results (Arm A + Arm B), all 3 targets, grouped CV → `results/headtohead_real.md`.
+- [x] Diagnostics: `run_demo --encoder chronos --real` (group vs session), `run_headtohead --real --target-norm center` (within-subject), `run_sweep --kind pca --real`.
+- [x] **Finding — honest null result.** Every representation (Chronos Arm A, Chronos Arm B, hand-crafted) sits at/below the mean baseline (R² ≈ 0 to −0.28) for all 3 scores; within-subject centering ≈ 0 too; PCA helps only marginally. No generalizable — or within-subject — glucose→cognition signal in these 20 patients. Full writeup: `results/README.md`.
 
 ### M2 — Strengthen the raw-data arm (only if M1 shows life, or to characterize the ceiling)
-- [x] **Dimensionality reduction wired** (PCA before Ridge/SVR, fit per-fold in the pipeline — leakage-safe). Exposed as a sweep axis (`--kind pca`) and a head-to-head flag (`run_headtohead --pca N`). On synthetic data PCA≈16–32 improves grouped-CV R² over full 512-d and removes the ill-conditioning (`LinAlgWarning`). Real-data value TBD.
+- [x] **Dimensionality reduction wired** (PCA before Ridge/SVR, fit per-fold in the pipeline — leakage-safe). Exposed as a sweep axis (`--kind pca`) and a head-to-head flag (`run_headtohead --pca N`). On synthetic data PCA≈16–32 improves grouped-CV R² over full 512-d and removes the ill-conditioning (`LinAlgWarning`). **On real data (2026-07): PCA≈8–32 improves mean grouped-CV R² only marginally (−0.052 → −0.045) and stays negative — cleans up the ill-conditioning, doesn't create signal.**
 - [x] **Sweep harness built + validated** (`run_sweep.py`): checkpoint (bolt tiny/mini/small/base — Bolt has no "large" — + a T5 variant), window (2 h / 2.5 h / 3 h / full), pooling (mean/last), and **PCA** (none/8/16/32/64/128). Ran clean on synthetic data (numbers not meaningful there); ready for `--real`.
 - [ ] Tune Arm B (head width/depth, dropout, epochs); the grouped-CV training harness is built — this is now a hyperparameter sweep, not new plumbing.
 - [x] **Within-subject target normalization** wired as a toggle (`--target-norm center|zscore`) across Arm A, Arm B, the head-to-head, and the sweep (`--kind targetnorm`). Directly tests the subject-baseline hypothesis: on synthetic data raw R²=−0.38 → centered ≈0 (baseline removed), matching diabetes-fitbit. Validated that it *detects* a within-subject signal when one is injected (synthetic `within_subject_signal` knob → centered R²≈0.93). Uses oracle per-subject centering (documented) — a characterization tool, not a new-subject predictor.

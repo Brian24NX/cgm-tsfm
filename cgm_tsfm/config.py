@@ -42,7 +42,12 @@ INNER_CV_SPLITS = 3
 DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "Merged_glucose_data"
 COHORT_FILES = [
     "Cohort1_scores_merged_with_glucose.csv",
-    "Cohort2_scores_with_glucose.csv",
+    # Phil's corrected Cohort2 (2026-07). The original Cohort2_scores_with_glucose.csv
+    # had 44/240 empty-glucose rows, which dropped one Cohort2 subject entirely →
+    # only 19 usable subjects. This "Updated_" file backfills the missing glucose
+    # (1/240 empty) so all 6 Cohort2 subjects survive → the full 20 patients.
+    # Original file kept on disk (data/Merged_glucose_data/) for provenance.
+    "Updated_Cohort2_scores_with_glucose.csv",
 ]
 
 # Cache directory for extracted embeddings (Chronos forward pass is the

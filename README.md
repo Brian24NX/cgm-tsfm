@@ -30,7 +30,7 @@ cgm_tsfm/
   ben_adapter/     Arm B: single-channel regressor + Lightning module (adapted from Ben)
     model.py, lightning_module.py, datamodule.py, train.py (grouped-CV training),
     smoke_test.py, README.md (change-mapping vs Ben)
-docs/              overview, design, roadmap, meeting brief, open questions
+docs/              overview, design, roadmap, meeting brief, open questions, server setup (05), Chronos dimensions (06)
 requirements.txt
 ```
 

@@ -2,12 +2,18 @@
 
 Narrative index stitching together the two auto-generated results files in this folder:
 
+**Real (20 patients — the actual findings):**
+- [`headtohead_real.md`](headtohead_real.md) — Arm A + Arm B on the real data, grouped CV.
+- [`headtohead_real_centered.md`](headtohead_real_centered.md) — the within-subject (personal-baseline-removed) test.
+- [`sweep_real.md`](sweep_real.md) — PCA sweep on the real embeddings.
+
+**Synthetic (pipeline harness check only):**
 - [`sweep_synthetic.md`](sweep_synthetic.md) — Arm A hyperparameter **sweeps** (encoder checkpoint / window / pooling / PCA / within-subject target-norm).
 - [`headtohead_synthetic.md`](headtohead_synthetic.md) — the **3-way representation comparison** (Chronos+classical vs hand-crafted+classical vs Chronos+trainable-head).
 
 Full project context is in [`../docs/00_PROJECT_OVERVIEW.md`](../docs/00_PROJECT_OVERVIEW.md); the pipeline design (and how these map to the reference repos) is in [`../docs/01_PIPELINE_DESIGN.md`](../docs/01_PIPELINE_DESIGN.md).
 
-> ⚠️ **Everything below is SYNTHETIC.** These runs validate the pipeline end-to-end and exercise every knob; the numbers are **not** scientific findings (the synthetic signal is summary-stat-based and baseline-dominated by construction). The `_synthetic` files are placeholders — the meaningful `_real` versions are one command each (see [§Regenerating](#regenerating-on-real-data)). When real results land, update this narrative accordingly.
+> ✅ **Real results (20 patients, 956 sessions) are now in — see the "Real results" section just below.** Per the 2026-07 decision the deliverable is **our own TSFM approach**; hand-crafted features appear only as a sanity check. The `_synthetic` files (Sections 1–2, further down) remain as the pipeline **harness check** — their numbers are not scientific findings (the synthetic signal is summary-stat-based).
 
 ---
 
@@ -26,7 +32,38 @@ This folder holds the **raw-data / TSFM arm**: frozen Amazon **Chronos** embeddi
 
 ---
 
-## 1. Head-to-head — do learned representations beat hand-crafted features?
+## ✅ Real results (20 patients, 956 sessions) — the headline
+
+*First real run, 2026-07, on `cpsl-mds` (GPU). Metric = R² vs the mean-predictor under subject-grouped CV; **0 = no better than guessing the average**, higher = better. Files: `headtohead_real.md`, `headtohead_real_centered.md`, `sweep_real.md`.*
+
+**Head-to-head — grouped CV ("predict a NEW kid"):**
+
+| target | Chronos + Ridge/SVR (Arm A) | Chronos + MLP (Arm B) | hand-crafted (sanity) |
+|---|--:|--:|--:|
+| grids   | −0.089 | −0.218 | −0.065 |
+| symbols | −0.056 | −0.281 | −0.038 |
+| prices  | −0.012 | −0.168 | −0.009 |
+
+**Within-subject centered — grouped CV ("predict a kid's deviation from their OWN mean"):**
+
+| target | Chronos + Ridge/SVR | hand-crafted |
+|---|--:|--:|
+| grids   | −0.018 | −0.004 |
+| symbols | −0.022 | −0.004 |
+| prices  | −0.002 | −0.002 |
+
+**Conclusion (honest).** Across all three cognitive scores, **no representation beats the mean baseline** — not frozen Chronos embeddings (Arm A), not the trainable head (Arm B), not the 43 hand-crafted features (all R² ≈ 0 to −0.28). Removing each subject's personal baseline (centering) does **not** surface a within-subject effect either (all ≈ 0). This is a rigorous, leakage-free **null result** — *no generalizable, or even within-subject, short-term glucose→cognition signal is detectable in these 20 patients* — corroborating the earlier feature-based attempt with a stronger method. It is an honest scientific answer, not a pipeline failure.
+
+**Supporting diagnostics.**
+- *Group vs session* (`run_demo --real`): session-CV is only marginally less negative than group-CV, and even the mean-baseline is slightly negative under group CV — both signatures of **between-subject variance dominating**.
+- *Linear blow-up*: plain `LinearRegression` on raw 512-d embeddings → R² ≈ −3 (both schemes) → regularization / dimensionality reduction is mandatory (as designed).
+- *PCA sweep* (`sweep_real.md`): reducing 512→8–32 improves mean R² only marginally (−0.052 → −0.045) and stays negative — it cleans up the math, it doesn't create signal.
+
+> ⚠️ **N = 20 subjects is small.** This is an honest characterization on the data we have, not proof that no effect exists anywhere. A different pre-test window, more subjects, or subgroup analyses (e.g. hypoglycemia windows) could change it — see `../docs/02_ROADMAP.md` and `../docs/04_OPEN_QUESTIONS.md`.
+
+---
+
+## 1. Head-to-head (synthetic harness check) — do learned representations beat hand-crafted features?
 
 Full table: [`headtohead_synthetic.md`](headtohead_synthetic.md). Distilled (best model per representation, R²):
 
