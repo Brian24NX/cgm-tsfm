@@ -2,7 +2,7 @@
 
 This is the direct adaptation of Ben's `FoundationModelClassifier`
 (mod-actigraphy-advanced/src/models/pretrained_models.py:270-704) requested by
-Liuyi: "adapt/generalize Ben's code to accept one channel of CGM."
+The advisor: "adapt/generalize Ben's code to accept one channel of CGM."
 
 What changed vs Ben's model (full mapping in README.md):
   * num_channels 2 (activity+light) -> 1 (glucose). The hardcoded
@@ -13,7 +13,7 @@ What changed vs Ben's model (full mapping in README.md):
     pre-test window -> ONE score (D=1), so there is no day sequence to attend
     over. We keep Ben's frozen-encoder + MLP-head structure (his `classifier`
     Sequential, pretrained_models.py:384-390) and set the output width to the
-    number of regression targets (1, per Liuyi's single-target decision).
+    number of regression targets (1, per the advisor's single-target decision).
   * Ben's `ChronosEncoder` (Bolt `.encode()`) is replaced by the higher-level,
     version-robust `BaseChronosPipeline.embed()` + mean-pool recipe (see
     cgm_tsfm/encoders.py). The encoder stays frozen (no gradients).
@@ -132,7 +132,7 @@ class FoundationModelRegressor(nn.Module):
     def __init__(
         self,
         encoder: nn.Module,
-        num_targets: int = 1,           # single-target per Liuyi (was num_classes)
+        num_targets: int = 1,           # single-target per the advisor (was num_classes)
         head_hidden_dim: int = 256,
         head_dropout: float = 0.1,
     ):

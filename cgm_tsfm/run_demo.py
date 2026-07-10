@@ -12,7 +12,7 @@ Runs today with no real data and no model download:
     python -m cgm_tsfm.run_demo --encoder chronos --real
 
 It also prints the group-CV vs session-CV diagnostic, reproducing the check that
-told Liuyi's team the glucose->cognition signal is largely subject-baseline.
+told the advisor's team the glucose->cognition signal is largely subject-baseline.
 """
 
 from __future__ import annotations

@@ -1,9 +1,9 @@
 """Data loading + windowing, and a synthetic generator with the real schema.
 
-The real dataset (Liuyi's `data/Merged_glucose_data/`) is one row per cognitive-
+The real dataset (the advisor's `data/Merged_glucose_data/`) is one row per cognitive-
 test session, with a pre-clipped, variable-length array of CGM readings
 (`Glucose_Before_Test`) and three cognitive scores. The files are gitignored and
-live only on Liuyi's machine, so `load_real_data` mirrors diabetes-fitbit's own
+live only on the advisor's machine, so `load_real_data` mirrors diabetes-fitbit's own
 loader (it will run unchanged once the CSVs are present), and
 `generate_synthetic_data` produces the *identical schema* so the whole pipeline
 is runnable today.
@@ -188,7 +188,7 @@ def load_real_data(
         if not fpath.exists():
             raise FileNotFoundError(
                 f"Missing {fpath}. The merged cohort CSVs are gitignored and live "
-                "on Liuyi's machine — request them, or use generate_synthetic_data()."
+                "on the advisor's machine — request them, or use generate_synthetic_data()."
             )
         d = pd.read_csv(fpath)
         # Harmonize cohort-specific column names (diabetes-fitbit data.py:42-43)

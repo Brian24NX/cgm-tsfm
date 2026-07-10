@@ -1,6 +1,6 @@
 """Configuration: paths, targets, windowing, encoder, and CV settings.
 
-The target names and CV protocol deliberately MIRROR Liuyi's existing
+The target names and CV protocol deliberately MIRROR the advisor's existing
 `diabetes-fitbit/analysis/glucose_cognitive_ml/config.py` so that the TSFM arm's
 results are directly comparable to Mack's hand-crafted-feature arm.
 """

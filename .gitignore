@@ -17,7 +17,7 @@ __pycache__/
 .idea/
 
 # Reference & sensitive documents — intentionally NOT pushed to GitHub (privacy/size).
-# Grant proposal, reference papers, Liuyi's answers, task screenshot.
+# Grant proposal, reference papers, the advisor's answers, task screenshot.
 # Transfer to the server separately if ever needed; not required to run any code.
 *.pdf
 *.docx

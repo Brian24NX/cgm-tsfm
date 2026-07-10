@@ -2,7 +2,7 @@
 
 Given the (N, d_model) Chronos embeddings and per-session cognitive scores, fit
 classical regressors (Ridge / SVR / Linear) and report RMSE / MAE / R² under the
-SAME evaluation protocol as Liuyi's hand-crafted-feature pipeline
+SAME evaluation protocol as the advisor's hand-crafted-feature pipeline
 (diabetes-fitbit): nested cross-validation with an outer 5-fold GroupKFold on
 `subid` for unbiased estimation and an inner 3-fold GroupKFold GridSearchCV for
 tuning, StandardScaler fit on train folds only.
@@ -12,7 +12,7 @@ the only thing that changes is the feature set (512-ish-dim Chronos embedding vs
 43 hand-crafted glycemic features).
 
 `cv_scheme="session"` swaps the grouping for a plain KFold that ignores subject
-boundaries. Comparing "group" vs "session" R² is the diagnostic that told Liuyi's
+boundaries. Comparing "group" vs "session" R² is the diagnostic that told the advisor's
 team the signal is mostly subject-baseline rather than generalizable — we run the
 same diagnostic here so the TSFM arm's conclusion is apples-to-apples.
 """
@@ -151,7 +151,7 @@ def run_arm_a(
 ) -> dict[str, dict]:
     """Run Arm A for every target. Returns {target: {"n","n_subjects","rows"}}.
 
-    One model/pipeline per target (single-target regression, per Liuyi).
+    One model/pipeline per target (single-target regression, per the advisor).
     A DummyRegressor(mean) baseline is always included: R² is measured relative
     to it, so a model only "works" if its R² is clearly > 0.
 
