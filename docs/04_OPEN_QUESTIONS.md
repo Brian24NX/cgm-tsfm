@@ -1,12 +1,12 @@
 # Open Questions for Liuyi (v2 — post-answers)
 
-*Supersedes the pre-answer `QUESTIONS_FOR_LIUYI.md` (kept for history). These are the questions raised by actually building the pipeline and reading `diabetes-fitbit`. Ordered by how much they block progress.*
+*The open questions raised by actually building the pipeline and reading `diabetes-fitbit`, ordered by how much they block progress.*
 
 ---
 
 ## Current questions — after the first real run (sent to Liuyi 2026-07-08)
 
-*Mirror of `QUESTIONS_FOR_LIUYI_2026-07.docx` (gitignored). These extend the earlier round (Q1–Q7 below), now that the env is up, the 20-patient data is in, and the first real run is done — an **honest null** (no representation beats the mean baseline; no within-subject effect). Each notes our current default so Liuyi can confirm or redirect. Most-needed steer: **A, B, D.***
+*These extend the earlier round (Q1–Q7 below), now that the env is up, the 20-patient data is in, and the first real run is done — an **honest null** (no representation beats the mean baseline; no within-subject effect). Each notes our current default so Liuyi can confirm or redirect. Most-needed steer: **A, B, D.***
 
 ### A — Direction, given the null result  🔴
 - **A1.** Is a rigorous **null + characterization** the intended deliverable, or should we actively hunt for signal (hypoglycemia/hyperglycemia windows, subgroups)? *Default: treat the null as a real finding + a few targeted follow-ups — not force a positive.*

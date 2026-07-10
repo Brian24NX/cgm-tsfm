@@ -30,7 +30,6 @@ Studies how short-term blood glucose fluctuations affect real-time cognitive per
 - `liuyi_task_assignment.png` — the task list Liuyi assigned (task 1, compute2 env setup, is currently deferred).
 - `Questions_LiuyiAnswer.docx` — **Liuyi's answers** to the initial questions (drove the 2026-07-03 pivot below).
 - `PROGRESS_NOTES.md` — working notes (pre-answer framing partly superseded; carries a banner pointing to `docs/`). Ben's-code analysis still valid.
-- `QUESTIONS_FOR_LIUYI.md` — the *original* (pre-answer) questions log. Superseded by `docs/04_OPEN_QUESTIONS.md`.
 - `README.md` — top-level entry point (project state + how to run).
 - `docs/` — authoritative writeups: `00_PROJECT_OVERVIEW.md` (the pivot), `01_PIPELINE_DESIGN.md`, `02_ROADMAP.md`, `03_MEETING_BRIEF.md`, `04_OPEN_QUESTIONS.md`.
 - `cgm_tsfm/` — the runnable pipeline package (Arm A frozen-embeddings regression; `ben_adapter/` = Arm B single-channel regression adapted from Ben). Validated end-to-end on synthetic data incl. a real Chronos-Bolt run.
