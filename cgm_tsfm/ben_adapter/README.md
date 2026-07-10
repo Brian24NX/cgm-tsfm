@@ -1,6 +1,6 @@
 # Arm B — adapting Ben's code to single-channel CGM regression (Task 4)
 
-This directory is the literal answer to Liuyi's Task 4 ("adapt Ben's code for
+This directory is the literal answer to the advisor's Task 4 ("adapt Ben's code for
 regression output") + his channel answer ("adapt/generalize Ben's code to accept
 one channel of CGM"). It is a faithful, minimal adaptation of two files in
 `~/Desktop/mod-actigraphy-advanced`:
@@ -21,7 +21,7 @@ relevant pieces here, with the changes below.
 | `_combine_channels` concat/add (401-422) | removed | nothing to combine |
 | `(B, D, T)` days + causal transformer across days (509-593) | removed | each sample = ONE pre-test window → ONE score (D=1); no day sequence |
 | `assert activity.ndim == 3` (620) | accepts `(B, T)` | window, not patient-days |
-| head `LayerNorm→Linear→GELU→Dropout→Linear(hidden, num_classes)` (384-390) | same head, `num_targets=1` | regression scalar (single-target per Liuyi) |
+| head `LayerNorm→Linear→GELU→Dropout→Linear(hidden, num_classes)` (384-390) | same head, `num_targets=1` | regression scalar (single-target per the advisor) |
 | `ChronosEncoder` via Bolt `.encode()` (39-113) | `ChronosTorchEmbedder` via `BaseChronosPipeline.embed()` + mean-pool | version-robust; identical recipe to Arm A; supports Bolt **and** T5 |
 | encoder frozen inside model | encoder frozen; `requires_grad=False` enforced in `__init__` | zero-shot embeddings |
 

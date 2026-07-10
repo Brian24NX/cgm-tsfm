@@ -1,6 +1,6 @@
 # Roadmap & Status
 
-*Living plan. Statuses reflect work completed after Liuyi's answers. The four numbered tasks are Liuyi's original assignment (`liuyi_task_assignment.png`), reinterpreted per his clarifications.*
+*Living plan. Statuses reflect work completed after the advisor's answers. The four numbered tasks are the advisor's original assignment (the task-assignment screenshot), reinterpreted per his clarifications.*
 
 > **🆕 2026-07 update — supersedes some wording below.** Two decisions from the latest meeting (full context in [`PLAIN_ENGLISH_SUMMARY.md`](../PLAIN_ENGLISH_SUMMARY.md)):
 > 1. **Focus on our own TSFM approach — drop the head-to-head vs Mack's hand-crafted features.** Mack's 43 features stay in the code only as an optional sanity-check. (The "signal is likely weak, don't oversell" caveat still stands.)
@@ -15,7 +15,7 @@
 |---|---|---|---|
 | 1 | Dev environment (lab server / **compute2**) | ✅ **Done (2026-07)** | Built + GPU-validated on `cpsl-mds` — Miniforge prefix env on the SSD, CUDA torch on an RTX 6000 Ada, real Chronos on GPU. See `docs/05_SERVER_SETUP.md`. *(Confirm whether "compute2" is a different machine.)* |
 | 2 | Understand Ben's codebase + TSFM input formats | ✅ **Done** | `PROGRESS_NOTES.md` + `01_PIPELINE_DESIGN.md §3,§5`. Confirmed Ben's `ChronosEncoder` is channel-agnostic and the 2-channel hardcode lives only in `FoundationModelClassifier`. |
-| 3 | Understand the TSFM raw input format & how to convert to it | ✅ **Done** (via the ICML repo, per Liuyi) | Studied `representations-in-tsfms`; distilled the exact `(B,1,L)→embed→mean-pool→(B,d)` recipe and **implemented + ran it** (`encoders.py`, real `chronos-bolt-small`, 512-d embeddings). |
+| 3 | Understand the TSFM raw input format & how to convert to it | ✅ **Done** (via the ICML repo, per the advisor) | Studied `representations-in-tsfms`; distilled the exact `(B,1,L)→embed→mean-pool→(B,d)` recipe and **implemented + ran it** (`encoders.py`, real `chronos-bolt-small`, 512-d embeddings). |
 | 4 | Adapt Ben's code for regression output (single channel) | ✅ **Prototype done** | `ben_adapter/` — single-channel `FoundationModelRegressor` + regression `CGMRegressionModule`, smoke-tested. Full training pending real data. |
 
 **Beyond the four tasks**, I also built the whole runnable pipeline (both arms, synthetic-data harness, grouped-CV evaluation, embedding cache) so it's drop-in for the real CSVs.
@@ -52,7 +52,7 @@
 
 ---
 
-## Key decision points (need Liuyi's input — details in `04_OPEN_QUESTIONS.md`)
+## Key decision points (need the advisor's input — details in `04_OPEN_QUESTIONS.md`)
 
 1. **Data access & the window.** Get the merged CSVs; define the pre-test lookback; is the *raw* CGM stream available (not just the pre-clipped array)?
 2. **Prices inversion + score semantics.** Confirm negation; what do Grids/Symbols/Prices actually measure (units)?

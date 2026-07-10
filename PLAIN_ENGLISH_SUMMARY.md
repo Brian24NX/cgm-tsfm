@@ -8,9 +8,9 @@
 
 > ### 🆕 What changed at last week's meeting (2026-07) — read this first
 > Three updates that override older wording elsewhere in the repo:
-> 1. **Forget the comparison with Mack's approach.** Liuyi confirmed: **focus only on our own AI (TSFM) approach.** We do *not* need to frame the project as "beat Mack's hand-crafted features." (We keep his features in the code only as an optional internal sanity-check, not as the headline. See [Q12](#q12).)
+> 1. **Forget the comparison with Mack's approach.** The advisor confirmed: **focus only on our own AI (TSFM) approach.** We do *not* need to frame the project as "beat Mack's hand-crafted features." (We keep his features in the code only as an optional internal sanity-check, not as the headline. See [Q12](#q12).)
 > 2. **The lab-server environment is set up and GPU-validated** on `cpsl-mds`. That effectively completes **Task 1**. (See [Q14](#q14) + `docs/05_SERVER_SETUP.md`.)
-> 3. **The real data is on the way.** Another student, **Phil**, is finishing the statistics/correlation analysis for the 20 patients; once he's done, Liuyi sends us the merged glucose file. So the "get the data" ask is no longer really an open question — it's just in progress. (See [Q8](#q8), [Q14](#q14).)
+> 3. **The real data is on the way.** Another student, **Phil**, is finishing the statistics/correlation analysis for the 20 patients; once he's done, the advisor sends us the merged glucose file. So the "get the data" ask is no longer really an open question — it's just in progress. (See [Q8](#q8), [Q14](#q14).)
 
 ---
 ---
@@ -54,7 +54,7 @@ That's it. **Glucose readings in → predicted thinking-test score out.** (The f
 An earlier careful attempt on this exact problem found the glucose→thinking signal is **weak**, and that most of the difference between test scores is just *"some kids score higher than others in general"* (their personal baseline) — **not** *"their blood sugar in the last hour changed their score."*
 
 Why this matters even though we're not comparing to that attempt anymore:
-- **A fancy AI cannot invent a signal that isn't there.** So we shouldn't *promise* Liuyi our approach will suddenly work great.
+- **A fancy AI cannot invent a signal that isn't there.** So we shouldn't *promise* the advisor our approach will suddenly work great.
 - What our approach *can* honestly do: **test the modern method fairly**, and **directly check the "it's just baseline" theory** (via the within-subject knob — see [Q13](#q13)). That's a legitimate, publishable result *even if the honest answer is "the signal is weak."*
 
 Saying this out loud shows maturity — you understand the science, not just the code.
@@ -70,20 +70,20 @@ An assembly line for "glucose window → predicted score." We built the whole li
 5. **"Knobs"** to test settings that each answer a real question (model size, history length, PCA, within-subject test). → [Q13](#q13)
 6. **Auto-generated result tables** in `results/`, with a plain-English `results/README.md`.
 
-**Bottom line:** the machine is fully built, tested, and GPU-validated. It's parked, waiting for the real fuel (the data from Phil/Liuyi).
+**Bottom line:** the machine is fully built, tested, and GPU-validated. It's parked, waiting for the real fuel (the data from Phil/the advisor).
 
-## 5. How this maps to the 4 tasks Liuyi gave you
+## 5. How this maps to the 4 tasks the advisor gave you
 
 | Task | Plain meaning | Status |
 |---|---|---|
 | 1. compute/server environment | Set up the lab computer (GPU) | ✅ **Done** — built & GPU-validated on `cpsl-mds` (`docs/05`). *(If "compute2" is a different specific machine, that's a quick follow-up — see [Q14](#q14).)* |
 | 2. Understand the code + how the AI takes input | Learn the tools | ✅ Done |
-| 3. Understand the AI's input format | Exactly how to feed data to Chronos | ✅ Done — studied the ICML paper's code Liuyi pointed to **and implemented it** |
+| 3. Understand the AI's input format | Exactly how to feed data to Chronos | ✅ Done — studied the ICML paper's code the advisor pointed to **and implemented it** |
 | 4. Adapt Ben's code for our case | 1 glucose input, predict a number, 3 scores | ✅ Done (and tested) |
 
 Plus extra: the full pipeline, the analysis knobs, and the auto-reports.
 
-## 6. What to TELL Liuyi (almost word-for-word)
+## 6. What to TELL the advisor (almost word-for-word)
 
 1. "I re-scoped to your answers: **one input channel (just glucose), one score at a time (three separate models), the raw-data/AI approach only** — and per last meeting I'm **not** framing it against Mack's features anymore."
 2. "I learned how Chronos takes input from the ICML paper's code — and **implemented that recipe** (Task 3, done in practice)."
@@ -120,7 +120,7 @@ Each section is self-contained. Jump to whichever confuses you.
 | 11 | Arm A vs Arm B (+diagram) | [Q11](#q11) |
 | 12 | Mack's old approach + why we now ignore it | [Q12](#q12) |
 | 13 | The "knobs" — the real question each one answers | [Q13](#q13) |
-| 14 | What to ask Liuyi — updated with your answers + my decisions | [Q14](#q14) |
+| 14 | What to ask the advisor — updated with your answers + my decisions | [Q14](#q14) |
 
 ---
 
@@ -142,14 +142,14 @@ Because it saw so many time series in training, it already "knows" the general s
 | Model | Who | Style (1 line) | Why we didn't start here |
 |---|---|---|---|
 | **Chronos / Chronos-Bolt** ✅ | Amazon | "language model for time series"; Bolt = fast patch-based | **This is our pick** (reasons below) |
-| **MOMENT** | CMU | pre-trained to *produce embeddings* for many tasks (not just forecasting) | The most natural **Plan B** if Chronos embeddings underwhelm — it's *designed* for representations. The ICML paper Liuyi pointed us to already covers it, so it's a clean next experiment. |
+| **MOMENT** | CMU | pre-trained to *produce embeddings* for many tasks (not just forecasting) | The most natural **Plan B** if Chronos embeddings underwhelm — it's *designed* for representations. The ICML paper the advisor pointed us to already covers it, so it's a clean next experiment. |
 | **TimesFM** | Google | decoder-only, patch-based forecaster | Solid; Ben used it too. Reasonable alternative, but Chronos had the cleaner embedding recipe for us. |
 | **Moirai** | Salesforce | handles *many channels at once* (multivariate) | Overkill — we have **one** channel (glucose only). |
 | **Lag-Llama** | open-source | forecaster using "lags" | Smaller ecosystem / less convenient embeddings. |
 | **TinyTimeMixer (TTM)** | IBM | tiny, ultra-fast MLP model | An option if we ever need something featherweight. |
 
 **Why Chronos specifically:**
-1. **Continuity + a validated recipe.** The research paper Liuyi told us to study (the ICML `representations-in-tsfms` repo) uses Chronos, and labmate Ben used Chronos-Bolt. We're standing on a recipe that's already been shown to work, not inventing one.
+1. **Continuity + a validated recipe.** The research paper the advisor told us to study (the ICML `representations-in-tsfms` repo) uses Chronos, and labmate Ben used Chronos-Bolt. We're standing on a recipe that's already been shown to work, not inventing one.
 2. **It fits raw CGM perfectly.** Real CGM data is **gappy** (missing readings) and **variable-length**. Chronos is **NaN-tolerant** (missing readings become a "mask" token — no gap-filling needed) and takes **any length** natively, and it **scales each series internally** (so we don't have to normalize). That's a lot of messy preprocessing we simply don't have to do.
 3. **Fast + free + easy.** Bolt runs on CPU and flies on our GPU; weights are free on HuggingFace; the API is a couple of lines.
 
@@ -170,11 +170,11 @@ Each game targets a different **cognitive domain** (a type of mental skill). Bes
 | **Symbols** | Quickly match symbols against a key | **Processing speed** (how fast you think) | small numeric score |
 | **Prices** | A grocery-prices task | a memory/speed measure — **in our data it's stored inverted (higher = worse) and on a bigger scale**, which is consistent with a *latency/error-type* score (like reaction time) rather than an accuracy score | larger numeric score |
 
-⚠️ **Honesty flag:** the code (and Mack's original) never document *exactly* what each score is (accuracy? reaction time? a composite?) or its units. Grids≈working memory and Symbols≈processing speed are safe (they match the grant's stated focus). **Prices is the uncertain one** — its inverted, larger-scale nature is my inference, not a confirmed fact. This is worth one question to Liuyi / Dr. Hassenstab ([Q14](#q14) item 3).
+⚠️ **Honesty flag:** the code (and Mack's original) never document *exactly* what each score is (accuracy? reaction time? a composite?) or its units. Grids≈working memory and Symbols≈processing speed are safe (they match the grant's stated focus). **Prices is the uncertain one** — its inverted, larger-scale nature is my inference, not a confirmed fact. This is worth one question to the advisor / Dr. Hassenstab ([Q14](#q14) item 3).
 
 **"Prices is backwards."** For Grids and Symbols, higher score = better. For Prices, higher = *worse*. To keep life simple, our code **flips the sign of Prices** (negates it) so that for all three targets **"higher = better."** (Toggle: `config.PRICES_IS_INVERTED`.)
 
-**Why "three separate models"?** Liuyi was explicit: predict **one score at a time** — a Grids model, a Symbols model, a Prices model — not one model juggling all three. They measure different skills and may relate to glucose differently, so we keep them separate.
+**Why "three separate models"?** The advisor was explicit: predict **one score at a time** — a Grids model, a Symbols model, a Prices model — not one model juggling all three. They measure different skills and may relate to glucose differently, so we keep them separate.
 
 **What do the results look like?** One number per game per session. As a *scale illustration* (from our synthetic stand-in data — real numbers will differ): Grids ≈ 0.3 ± 0.35, Symbols ≈ 1.8 ± 0.6, Prices (raw, pre-flip) ≈ 40 ± 16. The point isn't the exact values — it's that they're **continuous numbers** (hence "regression"), on different scales (which is why we standardize each one before modeling).
 
@@ -352,7 +352,7 @@ If **session-CV R² is clearly higher than grouped-CV R²**, that's a fingerprin
 <a name="q8"></a>
 ## Q8 — Synthetic data: what is it? Why use it? Is it "mock runs on fake glucose data before the real data"?
 
-**Yes — you've got it exactly.** Synthetic data is **fake data we generate that has the *identical shape and format* as the real merged glucose file**, so we can build, run, and debug the entire pipeline **today**, before Phil/Liuyi send the real CSV. It's a "mock fuel" that lets us test-drive the whole machine.
+**Yes — you've got it exactly.** Synthetic data is **fake data we generate that has the *identical shape and format* as the real merged glucose file**, so we can build, run, and debug the entire pipeline **today**, before Phil/the advisor send the real CSV. It's a "mock fuel" that lets us test-drive the whole machine.
 
 **What "same format" means concretely.** Our generator (`data.generate_synthetic_data`) produces the *same columns and structure* the real file will have:
 - ~20 fake "subjects," each with ~32–67 fake "sessions,"
@@ -438,7 +438,7 @@ This zooms into **Step 1** of [Q9](#q9). "Fingerprint" is just our friendly word
       |            e.g. (13, 512) — one 512-length row per patch, +1 summary token
       |
       | 3) we MEAN-POOL: average down the patch axis (collapse the grid to one row)
-      |    (this is the exact recipe from the ICML paper Liuyi pointed us to)
+      |    (this is the exact recipe from the ICML paper the advisor pointed us to)
       v
   fingerprint:  a single row of 512 numbers        <-- one per session
 ```
@@ -490,7 +490,7 @@ They're **two versions of the "predict the score from the fingerprint" step** ([
 
 **Arm B — frozen fingerprint + a small trainable neural network.**
 - Instead of a fixed formula, a little neural-network "head" (an MLP — a few layers) **learns** the fingerprint→score mapping on our data, using early-stopping so it doesn't overfit.
-- This is **the literal task Liuyi gave you as Task 4: "adapt Ben's code."** Ben (another student) had code that fed a foundation model into a trainable head for *his* project (2 sensors, predict a category). We **rewired it** to: **1 channel (glucose), predict a number, and stripped out the parts specific to his multi-day/2-sensor setup.** It's trained fold-by-fold under the *same* grouped CV as Arm A, so its R² is directly comparable.
+- This is **the literal task the advisor gave you as Task 4: "adapt Ben's code."** Ben (another student) had code that fed a foundation model into a trainable head for *his* project (2 sensors, predict a category). We **rewired it** to: **1 channel (glucose), predict a number, and stripped out the parts specific to his multi-day/2-sensor setup.** It's trained fold-by-fold under the *same* grouped CV as Arm A, so its R² is directly comparable.
 
 **Why keep both?** Arm A is the quick, robust, directly-interpretable baseline of *our* approach. Arm B is the flexible version and the explicit Ben-adaptation deliverable — and it's the door to fancier future ideas (e.g. actually fine-tuning Chronos with LoRA, or feeding multiple windows). Same backbone, two heads.
 
@@ -505,7 +505,7 @@ They're **two versions of the "predict the score from the fingerprint" step** ([
 
 **How we *used to* relate to it:** the earlier plan framed our project as a **fair head-to-head — "do learned Chronos representations beat Mack's hand-crafted features under identical rules?"** To make that fair, we even copied his exact 43 features into our code (verified numerically identical) so both arms ran through the *same* evaluation.
 
-**How we relate to it NOW (last meeting's decision):** 🚫 **We ignore Mack's approach.** Liuyi was clear: **don't worry about comparing to his feature approach — focus only on our own AI/TSFM approach.** So:
+**How we relate to it NOW (last meeting's decision):** 🚫 **We ignore Mack's approach.** The advisor was clear: **don't worry about comparing to his feature approach — focus only on our own AI/TSFM approach.** So:
 - The **headline deliverable is our raw-data approach on its own**: does feeding raw CGM through Chronos (Arm A / Arm B) find any honest glucose→cognition signal, and does the within-subject test reveal a within-kid effect?
 - The 43 hand-crafted features stay in the code **only as an optional internal sanity-check** (a familiar reference point to confirm our numbers are in a sane range) — **not** as the point of the project, and **not** something to write up as "we beat Mack."
 - We **keep the honest expectation** from his result (the signal is likely weak — [Q3](#q3) intro), because that's just true and keeps us from overselling. We're dropping the *comparison*, not the *scientific humility*.
@@ -534,21 +534,21 @@ You asked about "the 4 questions" — those are knobs **1–4** above (the summa
 ---
 
 <a name="q14"></a>
-## Q14 — What to ask Liuyi (the decisions) — updated with your answers + the calls I'm making
+## Q14 — What to ask the advisor (the decisions) — updated with your answers + the calls I'm making
 
 Here's each original open question, its **current status** given what you told me, and — where you delegated it — **the decision I'm making and why.** (The detailed versions live in `docs/04_OPEN_QUESTIONS.md`.)
 
-**1. The real data file** — ✅ *Resolved / in progress.* Not really an open question anymore: **Phil is finishing the statistics + correlation analysis for the 20 patients, and Liuyi will send the merged glucose file after that.** Nothing for us to do but wait and be ready (we are). *Only thing worth doing:* a light check-in on timing so we can plan. **This is the sole remaining blocker to real scientific numbers.**
+**1. The real data file** — ✅ *Resolved / in progress.* Not really an open question anymore: **Phil is finishing the statistics + correlation analysis for the 20 patients, and the advisor will send the merged glucose file after that.** Nothing for us to do but wait and be ready (we are). *Only thing worth doing:* a light check-in on timing so we can plan. **This is the sole remaining blocker to real scientific numbers.**
 
 **2. The pre-test window (how much glucose history counts, and do we have the raw stream?)** — 🟡 *You told me to use my judgment. My decision:* treat the **full pre-clipped `Glucose_Before_Test` window as the primary input**, and also run a **2.5-hour cap (30 readings) as a sensitivity check**, since the grant's hypothesis is about ~2h before the test. I'll document whatever lookback the real arrays turn out to have. *(If, once the data arrives, we discover we need a specific/uniform lookback, the only thing we'd have to ask for is the upstream raw Dexcom stream or the merge script — I'll flag it then, not now.)*
 
-**3. What the three scores measure + the Prices inversion** — 🟠 *You told me to decide.* My decision: **keep negating Prices** so all three read "higher = better" (it's reversible with one flag), and proceed treating **Grids ≈ working memory, Symbols ≈ processing speed, Prices ≈ a latency/error-type score** ([Q2](#q2)). *These don't block anything.* The **one low-cost question worth asking Dr. Hassenstab/Liuyi eventually** (not urgent): the exact definition + units of each score, especially **Prices** — purely to sanity-check predictions and pick sensible scaling. I'll proceed on my assumptions until told otherwise.
+**3. What the three scores measure + the Prices inversion** — 🟠 *You told me to decide.* My decision: **keep negating Prices** so all three read "higher = better" (it's reversible with one flag), and proceed treating **Grids ≈ working memory, Symbols ≈ processing speed, Prices ≈ a latency/error-type score** ([Q2](#q2)). *These don't block anything.* The **one low-cost question worth asking Dr. Hassenstab/the advisor eventually** (not urgent): the exact definition + units of each score, especially **Prices** — purely to sanity-check predictions and pick sensible scaling. I'll proceed on my assumptions until told otherwise.
 
-**4. What does "success" look like?** — ✅ *Resolved by Liuyi.* **Ignore Mack's feature approach; focus on our own TSFM approach** ([Q12](#q12)). So success = *an honest, leakage-free evaluation of the raw-CGM→Chronos approach for all three scores, plus the within-subject test of the baseline theory* — reported on its own merits, whatever the answer. We are **not** promising a big accuracy win.
+**4. What does "success" look like?** — ✅ *Resolved by the advisor.* **Ignore Mack's feature approach; focus on our own TSFM approach** ([Q12](#q12)). So success = *an honest, leakage-free evaluation of the raw-CGM→Chronos approach for all three scores, plus the within-subject test of the baseline theory* — reported on its own merits, whatever the answer. We are **not** promising a big accuracy win.
 
 **5. Which Chronos version?** — 🟡 *You told me to decide (and no, "latest = best" isn't automatic).* **My decision: standardize on `amazon/chronos-bolt-small` as the primary model, frozen, and also run `amazon/chronos-bolt-base` as a sensitivity check on the GPU.** Reasoning: Bolt is the fast, accurate, CPU/GPU-friendly line; **small** is plenty for ~900 sessions with a baseline-dominated signal (bigger embeddings mainly add overfitting risk — see PCA, [Q13](#q13)); Bolt has no "large," and T5-large would be slower for little expected gain. Our code is version-agnostic, so this is trivial to revisit. The checkpoint **sweep** ([Q13](#q13) knob 1) will confirm empirically that bigger doesn't help here.
 
-**6. The compute/server environment (Task 1)** — ✅ *Effectively done.* The env is **built and GPU-validated on `cpsl-mds`** (Miniforge + prefix env on the SSD, torch+CUDA on an RTX 6000 Ada, real Chronos runs on GPU — see `docs/05_SERVER_SETUP.md`). **So yes, check Task 1 off**, with one small confirmation for Liuyi: *the task originally said "compute2" — if that's a specific different machine than `cpsl-mds`, tell me and I'll replicate the same setup there (it's ~20 min, fully scripted now).* Otherwise Task 1 is complete.
+**6. The compute/server environment (Task 1)** — ✅ *Effectively done.* The env is **built and GPU-validated on `cpsl-mds`** (Miniforge + prefix env on the SSD, torch+CUDA on an RTX 6000 Ada, real Chronos runs on GPU — see `docs/05_SERVER_SETUP.md`). **So yes, check Task 1 off**, with one small confirmation for the advisor: *the task originally said "compute2" — if that's a specific different machine than `cpsl-mds`, tell me and I'll replicate the same setup there (it's ~20 min, fully scripted now).* Otherwise Task 1 is complete.
 
 **7. (Later) Frozen vs fine-tuned encoder** — 🟢 *No action.* We stay **frozen** for now; only worth trying LoRA fine-tuning if the frozen approach shows promise on real data.
 

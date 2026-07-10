@@ -63,7 +63,7 @@ Design facts baked into `encoders.ChronosEncoder`:
 - **Models:** Ridge (α grid), SVR (RBF, C/γ grid), Linear — plus **XGBoost if installed** — and always a **`DummyRegressor(mean)` baseline** (R² is measured relative to it).
 - **Evaluation:** **nested CV** — outer 5-fold `GroupKFold` on `subid` (unbiased estimate), inner 3-fold `GroupKFold` `GridSearchCV` (tuning, `neg_mean_squared_error`). `StandardScaler` fit on train folds only. A hard `assert` guards against subject leakage on every fold (mirrors `diabetes-fitbit/regression.py:33-35`).
 - **Metrics:** RMSE, MAE, R² (mean ± std across outer folds) — same as `diabetes-fitbit`.
-- **Built-in diagnostic:** `cv_scheme="group"` vs `"session"`. If group-CV R²≈0 but session-CV R²>0, the signal is subject-baseline, not generalizable — the exact check Liuyi's team used.
+- **Built-in diagnostic:** `cv_scheme="group"` vs `"session"`. If group-CV R²≈0 but session-CV R²>0, the signal is subject-baseline, not generalizable — the exact check the advisor's team used.
 - **Optional PCA** (`pca_components`, fit *per fold* inside the pipeline → leakage-safe) reduces the high-dim embeddings that make linear models ill-conditioned. Sweepable (`run_sweep --kind pca`) and usable in the head-to-head (`run_headtohead --pca N`). On synthetic data PCA≈16–32 improves grouped-CV R² over the full 512-d and eliminates the `LinAlgWarning`.
 - **Optional within-subject target normalization** (`target_norm="center"|"zscore"`, via `data.within_subject_normalize`) subtracts each subject's own mean score, so the model predicts *deviation from personal baseline* — a direct test of the "signal is subject-baseline" hypothesis. Toggle: `run_headtohead --target-norm center`, `run_sweep --kind targetnorm`. ⚠️ Oracle centering (uses a subject's own sessions): answers "is there a within-subject signal?", not "can we predict a new subject" — same framing as diabetes-fitbit's `next_steps`. On synthetic data raw R²=−0.38 → centered ≈0 (baseline stripped); with an injected within-subject signal, centered R² rises to ≈0.93, confirming the pipeline detects within-subject effects when present.
 
@@ -81,7 +81,7 @@ Design facts baked into `encoders.ChronosEncoder`:
 
 | Ben's classifier | Our regressor | Why |
 |---|---|---|
-| `num_channels = 2` (activity+light), hardcoded (`:340`) | **1 channel** (glucose) | Liuyi: single-channel CGM |
+| `num_channels = 2` (activity+light), hardcoded (`:340`) | **1 channel** (glucose) | the advisor: single-channel CGM |
 | `forward(activity, light, activity_mask, light_mask, day_mask)` (`:595`) | **`forward(glucose, glucose_mask)`** | one signal, one mask |
 | across-days **causal transformer** over `(B, D, T)` (`:509-593`) | **dropped** | each sample is ONE pre-test window (D=1) → no day sequence to attend over |
 | channel-combine (`concat_project`/`add`, `:401-422`) | **dropped** | only one channel |

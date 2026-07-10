@@ -1,16 +1,16 @@
 # CGM → Cognition via Time-Series Foundation Models
 
-> 🟢 **New here / want the plain-English version?** Read **[`PLAIN_ENGLISH_SUMMARY.md`](PLAIN_ENGLISH_SUMMARY.md)** — a no-jargon catch-up on what we built and what to tell Liuyi. Start there; come back here for the technical details/commands.
+> 🟢 **New here / want the plain-English version?** Read **[`PLAIN_ENGLISH_SUMMARY.md`](PLAIN_ENGLISH_SUMMARY.md)** — a no-jargon catch-up on what we built and what to tell the advisor. Start there; come back here for the technical details/commands.
 
 Predict a youth-with-T1D's cognitive-test score (Grids / Symbols / Prices) from the
 continuous-glucose-monitor (CGM) window recorded before the test, using a **frozen
 Amazon Chronos** foundation model as the feature encoder. This is the **raw-data /
-TSFM arm** of Brian Zhou's research project (supervised by Liuyi).
+TSFM arm** of Brian Zhou's research project (supervised by the advisor).
 
-**Start here:** `docs/00_PROJECT_OVERVIEW.md` (what & why, and how Liuyi's answers
+**Start here:** `docs/00_PROJECT_OVERVIEW.md` (what & why, and how the advisor's answers
 reshaped the plan) →
 `docs/01_PIPELINE_DESIGN.md` (technical design) → `docs/02_ROADMAP.md` (plan) →
-`docs/04_OPEN_QUESTIONS.md` (decisions needed from Liuyi).
+`docs/04_OPEN_QUESTIONS.md` (decisions needed from the advisor).
 
 **Results:** `results/README.md` stitches the auto-generated sweep + head-to-head
 tables into one narrative (currently synthetic placeholders; regenerate with `--real`).
@@ -98,4 +98,4 @@ labmate Phil's correlation analysis) to produce the first real TSFM results. See
 
 - `~/Desktop/mod-actigraphy-advanced` — Ben's actigraphy TSFM code (architecture template for Arm B).
 - `representations-in-tsfms` (ICML'25) — the Chronos input-format reference (Task 3).
-- `diabetes-fitbit` (Liuyi) — the real study: data schema, the 3 targets, the grouped-CV protocol, Mack's feature-engineering arm.
+- `diabetes-fitbit` (the advisor) — the real study: data schema, the 3 targets, the grouped-CV protocol, Mack's feature-engineering arm.

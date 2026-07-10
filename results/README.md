@@ -19,7 +19,7 @@ Full project context is in [`../docs/00_PROJECT_OVERVIEW.md`](../docs/00_PROJECT
 
 ## The question these results answer
 
-The K01's Aim-1 exploratory plan compares **"raw-data learning" vs "feature engineering"** for predicting three ARC/PARC cognitive scores (**Grids, Symbols, Prices**) from the CGM window before each test. Liuyi's collaborator Mack already built the feature-engineering arm and found **no predictive power** (negative R², chance AUROC), with diagnostics pointing to the signal being **subject-baseline** rather than a generalizable glucose→cognition effect.
+The K01's Aim-1 exploratory plan compares **"raw-data learning" vs "feature engineering"** for predicting three ARC/PARC cognitive scores (**Grids, Symbols, Prices**) from the CGM window before each test. The advisor's collaborator Mack already built the feature-engineering arm and found **no predictive power** (negative R², chance AUROC), with diagnostics pointing to the signal being **subject-baseline** rather than a generalizable glucose→cognition effect.
 
 This folder holds the **raw-data / TSFM arm**: frozen Amazon **Chronos** embeddings of the glucose window fed to a regressor, evaluated under the **same subject-grouped nested CV** as Mack's arm so the comparison is fair — the only thing that differs is the *representation*.
 

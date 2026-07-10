@@ -1,6 +1,6 @@
 # Project Overview & Guidebook — CGM → Cognition via Time-Series Foundation Models
 
-*Brian Zhou, supervised by Liuyi. Written after receiving Liuyi's answers to the initial questions (`Questions_LiuyiAnswer.docx`). This is the "read me first" narrative; technical details are in `01_PIPELINE_DESIGN.md`, the plan is in `02_ROADMAP.md`.*
+*Brian Zhou, supervised by the advisor. Written after receiving the advisor's written answers to the initial questions. This is the "read me first" narrative; technical details are in `01_PIPELINE_DESIGN.md`, the plan is in `02_ROADMAP.md`.*
 
 > **🆕 2026-07 update — supersedes some wording below.** Two decisions from the latest meeting (full context in [`PLAIN_ENGLISH_SUMMARY.md`](../PLAIN_ENGLISH_SUMMARY.md)):
 > 1. **Focus on our own TSFM approach — drop the head-to-head vs Mack's hand-crafted features.** Mack's 43 features stay in the code only as an optional sanity-check. (The "signal is likely weak, don't oversell" caveat still stands.)
@@ -15,15 +15,15 @@ We want to predict a youth-with-T1D's **real-time cognitive performance** on a s
 
 ---
 
-## 2. The pivot — how Liuyi's answers changed the plan
+## 2. The pivot — how the advisor's answers changed the plan
 
-My original notes (`PROGRESS_NOTES.md`, 2026-07-01) assumed we'd get two CGM CSVs and port Ben's actigraphy model. **Liuyi's answers redirected this substantially.** The corrected understanding:
+My original notes (`PROGRESS_NOTES.md`, 2026-07-01) assumed we'd get two CGM CSVs and port Ben's actigraphy model. **The advisor's answers redirected this substantially.** The corrected understanding:
 
-| Topic | What I originally assumed | What Liuyi clarified |
+| Topic | What I originally assumed | What the advisor clarified |
 |---|---|---|
-| The "two CSV files" in the task | Our CGM + cognitive data | **Ben's watch data (sleep + light intensity)** — a *different* project (his early paper). We don't have them; Liuyi's IRB for Ben's data is pending. |
+| The "two CSV files" in the task | Our CGM + cognitive data | **Ben's watch data (sleep + light intensity)** — a *different* project (his early paper). We don't have them; the advisor's IRB for Ben's data is pending. |
 | Do I need that data for Task 3? | Yes, blocked without it | **No.** Task 3 = *understand the TSFM input format*. Data availability is not required. |
-| How to do Task 3 concretely | Wait for CGM files | **Study & run the ICML'25 paper's repo** (`representations-in-tsfms`) — it's Chronos-specific, ships runnable data, and Liuyi reproduced it. "If we understand its pipeline, we know how to apply TSFM to CGM." |
+| How to do Task 3 concretely | Wait for CGM files | **Study & run the ICML'25 paper's repo** (`representations-in-tsfms`) — it's Chronos-specific, ships runnable data, and the advisor reproduced it. "If we understand its pipeline, we know how to apply TSFM to CGM." |
 | Channels | 2 (glucose + Fitbit) | **1 channel only** — just CGM. "Forget Fitbit for now. Adapt/generalize Ben's code to accept one channel of CGM." |
 | Regression targets | Maybe joint multi-target | **Single-target. Three separate pipelines/models** — one each for Grids, Symbols, Prices. |
 | My scope | Maybe both ML arms | **Raw-data / TSFM arm only.** Mack owns the feature-engineering arm (and it didn't perform well — see §4). |
@@ -35,9 +35,9 @@ My original notes (`PROGRESS_NOTES.md`, 2026-07-01) assumed we'd get two CGM CSV
 
 ## 3. The three moving parts (codebases) and what each is for
 
-1. **`diabetes-fitbit`** (Liuyi's repo — the real study).
+1. **`diabetes-fitbit`** (the advisor's repo — the real study).
    `analysis/glucose_cognitive_ml/` is Mack's hand-crafted-feature + classical-ML pipeline. It defines the **real data schema and the three targets**, and its grouped-CV protocol is the yardstick our TSFM arm must match for a fair comparison. *This is where the real data (`data/Merged_glucose_data/`, gitignored) lives.*
-2. **`representations-in-tsfms`** (ICML'25 — the TSFM reference Liuyi pointed to).
+2. **`representations-in-tsfms`** (ICML'25 — the TSFM reference the advisor pointed to).
    Its `HookedChronos` + SVM-classification experiment is the **exact template for "raw window → Chronos embedding → downstream model."** We convert its classification to regression. (It ships no CGM data — its demo data is ECG5000 via the `momentfm` package.)
 3. **`mod-actigraphy-advanced`** (Ben's repo — the architecture template).
    Ben's `FoundationModelClassifier` + `FinetuneLightningModule` are the **code we adapt** for the trainable-head version (single channel, regression). Kept as reference only — not developed.

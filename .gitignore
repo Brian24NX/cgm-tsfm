@@ -21,4 +21,3 @@ __pycache__/
 # Transfer to the server separately if ever needed; not required to run any code.
 *.pdf
 *.docx
-/liuyi_task_assignment.png

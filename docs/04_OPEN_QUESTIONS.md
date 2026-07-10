@@ -1,12 +1,12 @@
-# Open Questions for Liuyi (v2 — post-answers)
+# Open Questions (v2 — post-answers)
 
 *The open questions raised by actually building the pipeline and reading `diabetes-fitbit`, ordered by how much they block progress.*
 
 ---
 
-## Current questions — after the first real run (sent to Liuyi 2026-07-08)
+## Current questions — after the first real run (2026-07-08)
 
-*These extend the earlier round (Q1–Q7 below), now that the env is up, the 20-patient data is in, and the first real run is done — an **honest null** (no representation beats the mean baseline; no within-subject effect). Each notes our current default so Liuyi can confirm or redirect. Most-needed steer: **A, B, D.***
+*These extend the earlier round (Q1–Q7 below), now that the env is up, the 20-patient data is in, and the first real run is done — an **honest null** (no representation beats the mean baseline; no within-subject effect). Each notes our current default so the advisor can confirm or redirect. Most-needed steer: **A, B, D.***
 
 ### A — Direction, given the null result  🔴
 - **A1.** Is a rigorous **null + characterization** the intended deliverable, or should we actively hunt for signal (hypoglycemia/hyperglycemia windows, subgroups)? *Default: treat the null as a real finding + a few targeted follow-ups — not force a positive.*
@@ -46,9 +46,9 @@ In `diabetes-fitbit`, `Glucose_Before_Test` is **already clipped to some lookbac
 Your `next_steps` notebook flags that **`prices_cognitive_score` is inverted (higher = worse)**. I currently **negate it** so all three targets read "higher = better" (toggle: `config.PRICES_IS_INVERTED`). Please confirm that's what you want. Also: the code never documents **what Grids / Symbols / Prices actually measure** (accuracy? reaction time? a composite?) or their units — knowing this helps me sanity-check predictions and choose sensible normalization. (Dr. Hassenstab's PARC/ARC docs, maybe?)
 
 ### Q4 — What does "success" look like?  ✅ *RESOLVED (2026-07)*
-> **Resolved:** Liuyi said to **focus on our own TSFM approach and drop the comparison with Mack's feature-engineering arm.** So success = an honest, leakage-free evaluation of the raw-CGM→Chronos approach (Arm A + Arm B) for all three scores, plus the within-subject test of the baseline theory — reported on its own merits, whatever the answer. Mack's 43 features stay in the code only as an optional internal sanity-check. (We keep the "signal is likely weak, don't oversell" caveat — that's just honest.)
+> **Resolved:** The advisor said to **focus on our own TSFM approach and drop the comparison with Mack's feature-engineering arm.** So success = an honest, leakage-free evaluation of the raw-CGM→Chronos approach (Arm A + Arm B) for all three scores, plus the within-subject test of the baseline theory — reported on its own merits, whatever the answer. Mack's 43 features stay in the code only as an optional internal sanity-check. (We keep the "signal is likely weak, don't oversell" caveat — that's just honest.)
 
-*(Original question, kept for history:)* Mack's 43-feature arm has negative R²/chance AUROC everywhere, and session-CV > LOPO says the signal is mostly subject-baseline. The open choice was between (a) a fair confirm/refute vs hand-crafted features, or (b) chasing a specific hypothesis (hypoglycemia windows / within-subject effects). Liuyi's answer: neither as a *comparison* — just develop and honestly evaluate our own approach (the within-subject test in (b) is still a valuable analysis to run).
+*(Original question, kept for history:)* Mack's 43-feature arm has negative R²/chance AUROC everywhere, and session-CV > LOPO says the signal is mostly subject-baseline. The open choice was between (a) a fair confirm/refute vs hand-crafted features, or (b) chasing a specific hypothesis (hypoglycemia windows / within-subject effects). The advisor's answer: neither as a *comparison* — just develop and honestly evaluate our own approach (the within-subject test in (b) is still a valuable analysis to run).
 
 ### Q5 — Chronos family & checkpoint size  ✅ *DECIDED by us (2026-07), open to your override*
 > **Decision:** standardize on **`amazon/chronos-bolt-small`** (frozen) as primary, + **`amazon/chronos-bolt-base`** as a GPU sensitivity check. Rationale: not "biggest = best" — on ~900 sessions with a baseline-dominated signal, larger embeddings mainly add overfitting risk (the checkpoint sweep will confirm empirically); Bolt over T5 for speed. Easy to change if you prefer otherwise.
@@ -56,7 +56,7 @@ Your `next_steps` notebook flags that **`prices_cognitive_score` is inverted (hi
 *(Original question:)* The ICML paper studied Chronos-**T5**; Ben used Chronos-**Bolt**. My code supports both via `BaseChronosPipeline`. Larger = richer embeddings but more compute.
 
 ### Q6 — compute2 / lab-server environment (Task 1)  ✅ *RESOLVED (2026-07)*
-> **Resolved:** The environment is **built and GPU-validated on `cpsl-mds`** — Miniforge + a prefix env on the SSD, a CUDA build of torch on an RTX 6000 Ada, and real Chronos running on the GPU (see `docs/05_SERVER_SETUP.md`). Task 1 is effectively done. *One thing to confirm with Liuyi:* if "compute2" in the original task list is a **different specific machine** than `cpsl-mds`, say so and I'll replicate the (now fully scripted) setup there.
+> **Resolved:** The environment is **built and GPU-validated on `cpsl-mds`** — Miniforge + a prefix env on the SSD, a CUDA build of torch on an RTX 6000 Ada, and real Chronos running on the GPU (see `docs/05_SERVER_SETUP.md`). Task 1 is effectively done. *One thing to confirm with the advisor:* if "compute2" in the original task list is a **different specific machine** than `cpsl-mds`, say so and I'll replicate the (now fully scripted) setup there.
 
 ### Q7 — Frozen vs fine-tuned encoder  🟢 *later*
 Currently the encoder is **frozen** (zero-shot embeddings — the ICML approach). Worth trying **LoRA fine-tuning** later, or keep it frozen for the first comparison? (I'd only invest here if the frozen arm shows promise.)

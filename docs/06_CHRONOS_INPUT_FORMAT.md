@@ -1,7 +1,7 @@
 # Chronos Input/Output **Dimensions** + How a CGM Sample Becomes a Score
 
 *Meeting-prep deep-dive for Brian. Covers two of the four tasks:*
-- **Task 3 — the input dimension format of Chronos** (Part A). This is the one Liuyi will quiz you on.
+- **Task 3 — the input dimension format of Chronos** (Part A). This is the one the advisor will quiz you on.
 - **Task 4 — how a CGM sample input becomes a predicted cognitive score** (Part B).
 
 *Every shape below is **real** — measured on `cpsl-mds` with `chronos-bolt-small` and `chronos-t5-small` (the exact script is in the Appendix; you can re-run it live in the meeting). Plain-English versions of the surrounding concepts are in [`../PLAIN_ENGLISH_SUMMARY.md`](../PLAIN_ENGLISH_SUMMARY.md) (Q4, Q9, Q10).*
@@ -122,7 +122,7 @@ Both models are univariate and both end at a 512-vector. They differ in **how th
 
 For the longest real window (288 readings): **T5 → 289 tokens, Bolt → 19 patch-tokens.** One line to remember: **T5 reads glucose value-by-value; Bolt reads it in 80-minute chunks.**
 
-> Why this matters for the meeting: the ICML paper Liuyi cited studied Chronos-**T5**; Ben and we use Chronos-**Bolt**. You can now speak to both: *"same univariate `(B, L)` input, same `(B, 512)` embedding after pooling — Bolt just patches the series so the transformer sees ~16× fewer tokens."*
+> Why this matters for the meeting: the ICML paper the advisor cited studied Chronos-**T5**; Ben and we use Chronos-**Bolt**. You can now speak to both: *"same univariate `(B, L)` input, same `(B, 512)` embedding after pooling — Bolt just patches the series so the transformer sees ~16× fewer tokens."*
 
 <a name="a5"></a>
 ## A5. Five details people get wrong (know these cold)

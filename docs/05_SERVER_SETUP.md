@@ -15,7 +15,7 @@ Repo: **`Brian24NX/cgm-tsfm`** (private). You're on the `cpsl-mds` lab server so
 > **Validated (2026-07-06):** both `run_demo --encoder mock` (offline) **and** `run_headtohead --encoder chronos --with-arm-b --device cuda` pass end-to-end — the latter loads real Chronos-Bolt on the GPU (512-d embeddings) and trains Arm B over grouped folds. (Synthetic numbers are a plumbing check, not evidence.)
 > Redo the numbered steps below only to rebuild from scratch or provision a different machine.
 
-## ⚠️ STORAGE POLICY (Liuyi) — read first
+## ⚠️ STORAGE POLICY (the advisor) — read first
 On `cpsl-mds`, put **everything heavy** — the repo, the conda env, model/HuggingFace downloads, the data, and caches — under:
 
 ```
@@ -83,7 +83,7 @@ python -c "import torch; print('CUDA available:', torch.cuda.is_available())"   
 > - If a wheel download dies with `SSL: SSLV3_ALERT_HANDSHAKE_FAILURE` to `download-r2.pytorch.org`, it's a transient Cloudflare/CDN blip — just re-run the `pip install` (add `--retries 10`). The env's TLS stack is fine (system `curl` and the env's Python both handshake with that host).
 > - `pip install -r requirements.txt` sees `torch>=2.4` already satisfied and leaves the GPU build in place — re-run the CUDA check above afterwards to confirm it wasn't swapped for a CPU wheel.
 
-## 5. Data (when you get it from Liuyi)
+## 5. Data (when you get it from the advisor)
 Real CSVs are **not** in git (patient data). Copy them **directly to the server** (scp / lab share) — **not** through GitHub — into the repo's data folder (which is on the SSD because the repo is):
 ```
 $WS/cgm-tsfm/data/Merged_glucose_data/
@@ -103,6 +103,6 @@ python -m cgm_tsfm.run_headtohead --encoder chronos --real --with-arm-b --pca 32
 Add `--device cuda` to any command to use the GPU (default is `cpu`). The pipeline's embedding cache (`.cache/` inside the repo) sits on the SSD too. Results land in `results/*.md`.
 
 ## Notes
-- Optional laptop-only files (grant PDF, papers, Liuyi's `.docx`) were intentionally kept out of git; copy them over separately only if you actually want them on the server.
-- For long training jobs use the lab's scheduler (SLURM `sbatch`/`srun`) rather than a login node — ask Liuyi for the convention.
+- Optional laptop-only files (grant PDF, papers, the advisor's `.docx`) were intentionally kept out of git; copy them over separately only if you actually want them on the server.
+- For long training jobs use the lab's scheduler (SLURM `sbatch`/`srun`) rather than a login node — ask the advisor for the convention.
 - Caches already point at the SSD (`HF_HOME`, `PIP_CACHE_DIR`, `CONDA_PKGS_DIRS`), so first-run Chronos downloads and pip installs won't touch `/home`.
