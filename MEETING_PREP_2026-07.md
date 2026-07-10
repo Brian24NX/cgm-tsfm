@@ -115,3 +115,42 @@ Ordered by expected impact. Frame as "here's how I'd strengthen this."
 - Best real R² anywhere ≈ **−0.01** (Prices, Chronos) → **null**; within-subject ≈ **0**; PCA best mean **−0.045**.
 - Chronos-Bolt fingerprint = **512 numbers**; input **(batch, length)**, univariate.
 - Server: env on the SSD, torch+CUDA on an **RTX 6000 Ada**.
+
+---
+
+## 8. Run it yourself (live demo commands)
+
+*Verified to work from a fresh terminal on `cpsl-mds`. Liuyi wants to see **you** run it — this is copy-paste.*
+
+### Each time you open a terminal
+A fresh terminal already loads your setup (`WS`, caches, conda). Then just:
+```bash
+conda activate "$WS/envs/cgm"     # turn on the project env — your prompt shows (cgm)
+cd "$WS/cgm-tsfm"                 # the pipeline runs from the repo folder
+```
+If `conda` isn't found (e.g. an old terminal), run `source ~/.bashrc` first. Fallback without activating: prefix commands with the full path — `"$WS/envs/cgm/bin/python" -m cgm_tsfm...`.
+
+### The commands — what each does, and how fast
+
+| # | Command | What it does | Speed |
+|---|---|---|---|
+| 1 | `python -m cgm_tsfm.run_demo --encoder mock` | Whole Arm-A pipeline on **fake** data with a stand-in encoder — no GPU, no download. Proves the machine works. **Best opener.** | instant |
+| 2 | `python -m cgm_tsfm.run_demo --encoder chronos --real --device cuda` | The **real** Arm-A run: 20-patient data → Chronos on GPU → per-target R² under **group vs session** CV (the subject-baseline diagnostic). | fast (embeddings cached) |
+| 3 | `python -m cgm_tsfm.run_headtohead --encoder chronos --real --device cuda` | The **main result**: Chronos vs hand-crafted, all 3 scores, grouped CV → writes `results/headtohead_real.md`. | fast |
+| 3b | `python -m cgm_tsfm.run_headtohead --encoder chronos --real --with-arm-b --device cuda` | Same, **plus Arm B** (trains the neural-net head, 5 folds × 3 scores). | ~2–4 min |
+| 4 | `python -m cgm_tsfm.run_headtohead --encoder chronos --real --target-norm center --device cuda --out results/headtohead_real_centered.md` | The **within-subject** test (removes each kid's personal baseline). | fast |
+| 5 | `python -m cgm_tsfm.run_sweep --kind pca --real --device cuda` | Sweeps PCA sizes (does shrinking the 512-fingerprint help?) → `results/sweep_real.md`. | fast |
+| 5b | `python -m cgm_tsfm.run_sweep --kind all --real --device cuda` | Sweeps model size / window / pooling / PCA. **Not for the live demo** — downloads several extra Chronos checkpoints the first time. | slow (first run) |
+
+### Suggested live-demo order (snappy)
+1. **#1** (mock) — instant, shows the pipeline end-to-end.
+2. **#2** (real Arm A) — real numbers + the group-vs-session diagnostic, live.
+3. Optionally **#3** (the head-to-head table). Run **3b** only if you have 2–4 min.
+4. Then show the saved table: `cat results/headtohead_real.md` (or open it).
+
+### Don't be thrown off by
+- Yellow **warnings** (`LinAlgWarning`, `RuntimeWarning: skew/kurtosis`) — harmless and expected (high-dim embeddings + a few very short windows). The run still ends with `exit 0`.
+- `--device cuda` uses the GPU (fast); drop it or use `--device cpu` if the GPU is busy — still works, just slower.
+- The Chronos model is **already downloaded/cached**, so there's no waiting during the demo.
+
+**What to say while it runs:** *"This loads the 20 patients, turns each pre-test glucose window into a 512-number fingerprint with Chronos on the GPU, then scores it under leakage-free cross-validation — and here's the result."* Then point at the R² column.
