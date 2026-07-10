@@ -8,7 +8,7 @@ Amazon Chronos** foundation model as the feature encoder. This is the **raw-data
 TSFM arm** of Brian Zhou's research project (supervised by Liuyi).
 
 **Start here:** `docs/00_PROJECT_OVERVIEW.md` (what & why, and how Liuyi's answers
-reshaped the plan) → `docs/03_MEETING_BRIEF.md` (current status one-pager) →
+reshaped the plan) →
 `docs/01_PIPELINE_DESIGN.md` (technical design) → `docs/02_ROADMAP.md` (plan) →
 `docs/04_OPEN_QUESTIONS.md` (decisions needed from Liuyi).
 

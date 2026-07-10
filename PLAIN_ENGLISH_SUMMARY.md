@@ -576,6 +576,6 @@ Here's each original open question, its **current status** given what you told m
 ## Where things live (so you can find stuff)
 - **`PLAIN_ENGLISH_SUMMARY.md`** ← you are here (plain-English + the 14-question deep-dive).
 - **`README.md`** — technical front page + all the commands.
-- **`docs/`** — detailed writeups: `00_PROJECT_OVERVIEW.md` (story), `01_PIPELINE_DESIGN.md` (technical), `02_ROADMAP.md` (checklist), `03_MEETING_BRIEF.md` (one-pager), `04_OPEN_QUESTIONS.md` (questions), **`05_SERVER_SETUP.md` (the lab-server setup — Task 1)**, **`06_CHRONOS_INPUT_FORMAT.md` (Chronos dimensions + sample→score — Tasks 3 & 4)**.
+- **`docs/`** — detailed writeups: `00_PROJECT_OVERVIEW.md` (story), `01_PIPELINE_DESIGN.md` (technical), `02_ROADMAP.md` (checklist), `04_OPEN_QUESTIONS.md` (questions), **`05_SERVER_SETUP.md` (the lab-server setup — Task 1)**, **`06_CHRONOS_INPUT_FORMAT.md` (Chronos dimensions + sample→score — Tasks 3 & 4)**.
 - **`cgm_tsfm/`** — the actual code (the assembly line).
 - **`results/`** — output tables + a `results/README.md` that explains them.

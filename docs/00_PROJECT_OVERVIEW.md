@@ -1,6 +1,6 @@
 # Project Overview & Guidebook — CGM → Cognition via Time-Series Foundation Models
 
-*Brian Zhou, supervised by Liuyi. Written after receiving Liuyi's answers to the initial questions (`Questions_LiuyiAnswer.docx`). This is the "read me first" narrative; technical details are in `01_PIPELINE_DESIGN.md`, the plan is in `02_ROADMAP.md`, and the meeting one-pager is `03_MEETING_BRIEF.md`.*
+*Brian Zhou, supervised by Liuyi. Written after receiving Liuyi's answers to the initial questions (`Questions_LiuyiAnswer.docx`). This is the "read me first" narrative; technical details are in `01_PIPELINE_DESIGN.md`, the plan is in `02_ROADMAP.md`.*
 
 > **🆕 2026-07 update — supersedes some wording below.** Two decisions from the latest meeting (full context in [`PLAIN_ENGLISH_SUMMARY.md`](../PLAIN_ENGLISH_SUMMARY.md)):
 > 1. **Focus on our own TSFM approach — drop the head-to-head vs Mack's hand-crafted features.** Mack's 43 features stay in the code only as an optional sanity-check. (The "signal is likely weak, don't oversell" caveat still stands.)

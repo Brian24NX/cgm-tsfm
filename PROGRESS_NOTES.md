@@ -3,7 +3,7 @@
 > **⚠️ STATUS UPDATE (after Liuyi's answers — see `Questions_LiuyiAnswer.docx`).**
 > The notes below were written *before* Liuyi answered, and some framing is now
 > superseded. For the current, authoritative picture read **`docs/00_PROJECT_OVERVIEW.md`**
-> (the pivot), `docs/01_PIPELINE_DESIGN.md`, and `docs/03_MEETING_BRIEF.md`.
+> (the pivot) and `docs/01_PIPELINE_DESIGN.md`.
 > Corrections in brief:
 > - The "two CSVs" were **Ben's watch data (sleep + light)** — a different project, not our CGM. We don't need them; Task 3 (understand TSFM input format) is done against the **ICML `representations-in-tsfms` repo**, which Liuyi reproduced.
 > - Scope is now **1 channel (CGM only), single-target, 3 separate models (Grids/Symbols/Prices), raw-data/TSFM arm only.**

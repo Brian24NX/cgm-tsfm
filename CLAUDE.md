@@ -31,7 +31,7 @@ Studies how short-term blood glucose fluctuations affect real-time cognitive per
 - `Questions_LiuyiAnswer.docx` — **Liuyi's answers** to the initial questions (drove the 2026-07-03 pivot below).
 - `PROGRESS_NOTES.md` — working notes (pre-answer framing partly superseded; carries a banner pointing to `docs/`). Ben's-code analysis still valid.
 - `README.md` — top-level entry point (project state + how to run).
-- `docs/` — authoritative writeups: `00_PROJECT_OVERVIEW.md` (the pivot), `01_PIPELINE_DESIGN.md`, `02_ROADMAP.md`, `03_MEETING_BRIEF.md`, `04_OPEN_QUESTIONS.md`.
+- `docs/` — authoritative writeups: `00_PROJECT_OVERVIEW.md` (the pivot), `01_PIPELINE_DESIGN.md`, `02_ROADMAP.md`, `04_OPEN_QUESTIONS.md`.
 - `cgm_tsfm/` — the runnable pipeline package (Arm A frozen-embeddings regression; `ben_adapter/` = Arm B single-channel regression adapted from Ben). Validated end-to-end on synthetic data incl. a real Chronos-Bolt run.
 - `requirements.txt` — deps (also satisfied by `mod-actigraphy-advanced/.venv`).
 
