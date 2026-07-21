@@ -168,11 +168,11 @@ Each game targets a different **cognitive domain** (a type of mental skill). Bes
 |---|---|---|---|
 | **Grids** | Remember where items were placed on a grid, then reproduce it | **Visuospatial working memory** (holding a picture "in mind") | small numeric score |
 | **Symbols** | Quickly match symbols against a key | **Processing speed** (how fast you think) | small numeric score |
-| **Prices** | A grocery-prices task | a memory/speed measure — **in our data it's stored inverted (higher = worse) and on a bigger scale**, which is consistent with a *latency/error-type* score (like reaction time) rather than an accuracy score | larger numeric score |
+| **Prices** | A grocery-prices task | a latency/error-type measure on a larger numeric scale (**lower = better**, same direction as the other two) | larger numeric score |
 
-⚠️ **Honesty flag:** the code (and Mack's original) never document *exactly* what each score is (accuracy? reaction time? a composite?) or its units. Grids≈working memory and Symbols≈processing speed are safe (they match the grant's stated focus). **Prices is the uncertain one** — its inverted, larger-scale nature is my inference, not a confirmed fact. This is worth one question to the advisor / Dr. Hassenstab ([Q14](#q14) item 3).
+✅ **Confirmed (2026-07):** the advisor clarified that **all three scores are "lower = better"** — they're error / response-time-type measures, not accuracy. Grids ≈ working memory, Symbols ≈ processing speed, Prices ≈ a latency/error-type score. (Details: the ARC app, ctrlab.org.)
 
-**"Prices is backwards."** For Grids and Symbols, higher score = better. For Prices, higher = *worse*. To keep life simple, our code **flips the sign of Prices** (negates it) so that for all three targets **"higher = better."** (Toggle: `config.PRICES_IS_INVERTED`.)
+**Score direction (all three the same).** For **all three** scores, **lower = better** (error/latency-type measures). We keep them in that raw orientation — no sign-flipping (`config.PRICES_IS_INVERTED=False`). Note: the sign choice doesn't change R²/RMSE (those are invariant to negating the target); it only affects how you *read* the number.
 
 **Why "three separate models"?** The advisor was explicit: predict **one score at a time** — a Grids model, a Symbols model, a Prices model — not one model juggling all three. They measure different skills and may relate to glucose differently, so we keep them separate.
 
@@ -542,7 +542,7 @@ Here's each original open question, its **current status** given what you told m
 
 **2. The pre-test window (how much glucose history counts, and do we have the raw stream?)** — 🟡 *You told me to use my judgment. My decision:* treat the **full pre-clipped `Glucose_Before_Test` window as the primary input**, and also run a **2.5-hour cap (30 readings) as a sensitivity check**, since the grant's hypothesis is about ~2h before the test. I'll document whatever lookback the real arrays turn out to have. *(If, once the data arrives, we discover we need a specific/uniform lookback, the only thing we'd have to ask for is the upstream raw Dexcom stream or the merge script — I'll flag it then, not now.)*
 
-**3. What the three scores measure + the Prices inversion** — 🟠 *You told me to decide.* My decision: **keep negating Prices** so all three read "higher = better" (it's reversible with one flag), and proceed treating **Grids ≈ working memory, Symbols ≈ processing speed, Prices ≈ a latency/error-type score** ([Q2](#q2)). *These don't block anything.* The **one low-cost question worth asking Dr. Hassenstab/the advisor eventually** (not urgent): the exact definition + units of each score, especially **Prices** — purely to sanity-check predictions and pick sensible scaling. I'll proceed on my assumptions until told otherwise.
+**3. What the three scores measure** — ✅ *Answered (2026-07):* the advisor confirmed **all three are "lower = better"** (error/response-time-type; see the ARC app). We now keep all three in raw orientation (no negation, `PRICES_IS_INVERTED=False`) — this does not change any R²/RMSE. Grids ≈ working memory, Symbols ≈ processing speed, Prices ≈ a latency/error-type score ([Q2](#q2)).
 
 **4. What does "success" look like?** — ✅ *Resolved by the advisor.* **Ignore Mack's feature approach; focus on our own TSFM approach** ([Q12](#q12)). So success = *an honest, leakage-free evaluation of the raw-CGM→Chronos approach for all three scores, plus the within-subject test of the baseline theory* — reported on its own merits, whatever the answer. We are **not** promising a big accuracy win.
 

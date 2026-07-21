@@ -10,7 +10,7 @@
 
 - **One sample = one cognitive-test session.** Each session has a variable-length array of CGM readings taken *before* the test (`Glucose_Before_Test`), at **5-minute cadence** (Dexcom G6), and up to three continuous cognitive scores.
 - **Targets (3, modeled separately):** `grids_cognitive_score`, `symbols_cognitive_score`, `prices_cognitive_score` — the ARC/PARC **Grids / Symbols / Prices** subtests. (`diabetes-fitbit/analysis/glucose_cognitive_ml/config.py:13-17`.)
-  - ⚠️ **Prices is inverted in the raw data (higher = worse).** We negate it so "higher = better" for all three (`config.py: PRICES_IS_INVERTED`). Flagged for confirmation in `04_OPEN_QUESTIONS.md`.
+  - ✅ **All three scores are "lower = better"** (error / response-time-type measures; confirmed by the advisor, 2026-07). We keep every target in its raw orientation — no negation (`config.py: PRICES_IS_INVERTED=False`). The sign choice does not affect R²/RMSE (invariant to negating the target).
 - **Grouping key = `subid`.** A subject contributes ~32–67 sessions. All CV must group by subject to avoid leakage.
 - **Real dataset size:** 980 sessions / 20 subjects → 913 / 19 after dropping empty-glucose sessions (from the `diabetes-fitbit` notebook outputs). Files (`Cohort{1,2}_...glucose.csv`) are gitignored and not yet in hand — see open questions.
 

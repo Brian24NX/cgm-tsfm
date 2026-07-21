@@ -13,8 +13,11 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 # Targets — the three ARC/PARC cognitive subtests (Grids, Symbols, Prices).
 # Names match diabetes-fitbit config.py:13-17 exactly.
-# NOTE: `prices_cognitive_score` is INVERTED in the raw data (higher = worse
-# performance). See PRICES_IS_INVERTED below and docs/01_PIPELINE_DESIGN.md.
+# NOTE (confirmed by the advisor, 2026-07): for ALL THREE scores, LOWER = better
+# — they are error / response-time-type measures (per the ARC app), not accuracy.
+# So we keep every target in its RAW orientation (no negation) and read all three
+# consistently as "lower = better". Sign choice does NOT change R²/RMSE/MAE (those
+# are invariant to negating the target); it only affects interpretation.
 # ---------------------------------------------------------------------------
 COGNITIVE_TARGETS: list[str] = [
     "grids_cognitive_score",
@@ -22,7 +25,7 @@ COGNITIVE_TARGETS: list[str] = [
     "prices_cognitive_score",
 ]
 
-PRICES_IS_INVERTED = True  # negate prices before modeling so higher = better
+PRICES_IS_INVERTED = False  # advisor: all three are lower=better; keep raw orientation (no negation)
 
 # Column names in the merged CSVs (see diabetes-fitbit/analysis/.../data.py).
 SUBJECT_COL = "subid"      # participant id — the CV grouping key

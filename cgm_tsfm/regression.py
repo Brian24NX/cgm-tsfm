@@ -148,6 +148,8 @@ def run_arm_a(
     include_baseline: bool = True,
     pca_components: int | None = None,
     target_norm: str = "none",
+    outer_splits: int = C.OUTER_CV_SPLITS,
+    inner_splits: int = C.INNER_CV_SPLITS,
 ) -> dict[str, dict]:
     """Run Arm A for every target. Returns {target: {"n","n_subjects","rows"}}.
 
@@ -188,14 +190,15 @@ def run_arm_a(
         if include_baseline:
             base = nested_group_cv(
                 X, y, g, DummyRegressor(strategy="mean"), {},
-                cv_scheme=cv_scheme,  # PCA irrelevant for a mean predictor
-            )
+                cv_scheme=cv_scheme, outer_splits=outer_splits, inner_splits=inner_splits,
+            )  # PCA irrelevant for a mean predictor
             base.name = "Baseline(mean)"
             rows.append(base.summary_row())
 
         for name, (est, grid) in models.items():
             est._cgm_name = name
-            res = nested_group_cv(X, y, g, est, grid, cv_scheme=cv_scheme, pca_components=eff_pca)
+            res = nested_group_cv(X, y, g, est, grid, cv_scheme=cv_scheme, pca_components=eff_pca,
+                                  outer_splits=outer_splits, inner_splits=inner_splits)
             rows.append(res.summary_row())
 
         all_results[target] = {"n": int(mask.sum()), "n_subjects": int(len(np.unique(g))), "rows": rows}

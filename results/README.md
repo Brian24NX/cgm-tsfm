@@ -5,7 +5,8 @@ Narrative index stitching together the two auto-generated results files in this 
 **Real (20 patients — the actual findings):**
 - [`headtohead_real.md`](headtohead_real.md) — Arm A + Arm B on the real data, grouped CV.
 - [`headtohead_real_centered.md`](headtohead_real_centered.md) — the within-subject (personal-baseline-removed) test.
-- [`sweep_real.md`](sweep_real.md) — PCA sweep on the real embeddings.
+- [`sweep_real.md`](sweep_real.md) — full sweep: encoder size / window length / pooling / PCA / within-subject target-norm.
+- [`subgroups_real.md`](subgroups_real.md) — signal search by glucose regime (hypo / hyper / in-range).
 
 **Synthetic (pipeline harness check only):**
 - [`sweep_synthetic.md`](sweep_synthetic.md) — Arm A hyperparameter **sweeps** (encoder checkpoint / window / pooling / PCA / within-subject target-norm).
@@ -52,14 +53,18 @@ This folder holds the **raw-data / TSFM arm**: frozen Amazon **Chronos** embeddi
 | symbols | −0.022 | −0.004 |
 | prices  | −0.002 | −0.002 |
 
-**Conclusion (honest).** Across all three cognitive scores, **no representation beats the mean baseline** — not frozen Chronos embeddings (Arm A), not the trainable head (Arm B), not the 43 hand-crafted features (all R² ≈ 0 to −0.28). Removing each subject's personal baseline (centering) does **not** surface a within-subject effect either (all ≈ 0). This is a rigorous, leakage-free **null result** — *no generalizable, or even within-subject, short-term glucose→cognition signal is detectable in these 20 patients* — corroborating the earlier feature-based attempt with a stronger method. It is an honest scientific answer, not a pipeline failure.
+**Conclusion (honest, plain terms).** Across all three cognitive scores, the TSFM approach **does not predict the score more accurately than a trivial "guess the average" baseline** (R² ≈ 0 to −0.28) — and neither does the trainable head (Arm B) or the 43 hand-crafted features. Removing each subject's personal baseline (centering) doesn't surface a within-subject effect either. In short: **low prediction accuracy, and it holds up robustly.** This corroborates the earlier feature-based attempt with a stronger method — an honest scientific answer, not a pipeline failure.
 
-**Supporting diagnostics.**
-- *Group vs session* (`run_demo --real`): session-CV is only marginally less negative than group-CV, and even the mean-baseline is slightly negative under group CV — both signatures of **between-subject variance dominating**.
-- *Linear blow-up*: plain `LinearRegression` on raw 512-d embeddings → R² ≈ −3 (both schemes) → regularization / dimensionality reduction is mandatory (as designed).
-- *PCA sweep* (`sweep_real.md`): reducing 512→8–32 improves mean R² only marginally (−0.052 → −0.045) and stays negative — it cleans up the math, it doesn't create signal.
+**We searched hard for signal (per the advisor's steer) — it's absent everywhere:**
+- *Glucose-regime subgroups* ([`subgroups_real.md`](subgroups_real.md)): restricting to **hypoglycemia** (min<70; **19 subjects**) or **hyperglycemia** (max>250; **20 subjects**) sessions — where an effect is most physiologically plausible — still gives R² ≈ 0 to −0.19. These subgroups are **well-powered**, so "no signal in the excursion regimes" is a real finding, not a tiny-N artifact.
+- *Encoder size* ([`sweep_real.md`](sweep_real.md)): bolt tiny→base and t5-small are all flat (mean R² −0.05 to −0.06; **`base` is *worse***) → a bigger model won't rescue it.
+- *Window length*: capping to the most-recent 2 h / 2.5 h / 3 h is **worse** than the full window (itself still ≈0) → shortening the lookback doesn't reveal signal.
+- *Pooling / PCA*: mean ≥ last; PCA 8–32 improves mean R² only marginally (−0.052 → −0.045) and stays negative.
+- *Group-vs-session CV* + *plain-Linear blow-up (R²≈−3)*: confirm between-subject variance dominates and that regularization is mandatory (both as designed).
 
-> ⚠️ **N = 20 subjects is small.** This is an honest characterization on the data we have, not proof that no effect exists anywhere. A different pre-test window, more subjects, or subgroup analyses (e.g. hypoglycemia windows) could change it — see `../docs/02_ROADMAP.md` and `../docs/04_OPEN_QUESTIONS.md`.
+**Score direction:** all three scores are "lower = better" (error / response-time-type). We keep them in raw orientation — this does **not** change any R²/RMSE above (invariant to the target's sign).
+
+> ⚠️ **N = 20 (likely all we get).** An honest characterization on the available data, not proof that no effect exists anywhere. **The one lever not yet pulled:** a *principled uniform* pre-test window (e.g. exactly 2 h) cut from the **raw continuous CGM stream** — capping the pre-clipped arrays (above) can't emulate that. Obtaining the raw stream is the open question for Phil. See `../docs/02_ROADMAP.md` and `../docs/04_OPEN_QUESTIONS.md`.
 
 ---
 

@@ -4,6 +4,25 @@
 
 ---
 
+## ✅ The advisor's answers + our updated direction (2026-07-21)
+
+The advisor answered the questions below (their written answers, gitignored). Net direction:
+
+- **Our lane = DL/TSFM prediction.** Work is split three ways: **association/mixed-effects = Phil**, **classical ML = Mack**, **DL/TSFM prediction = us**. We develop/evaluate the TSFM approach on its own — we do *not* build Phil's association analysis or Mack's hand-crafted-feature arm. ("Drop the head-to-head" = don't frame our work as beating Mack; we're a complementary arm.)
+- **Actively hunt for signal — don't declare "no signal" yet.** Prioritize restricting to **hypo/hyperglycemia windows and subgroups**; it's too early to claim "no signal," and if we end up there we must back it with **concrete, convincing evidence.** → *First responses already run:* a glucose-regime **subgroup search** (`run_subgroups.py` → `results/subgroups_real.md`) and a **window-length sweep** (`run_sweep --kind window`).
+- **Language:** say **"low prediction accuracy,"** not "null." Explain the **baseline** (a trivial predictor that ignores glucose and always guesses the average score; R² is measured against it).
+- **The pre-test window matters (advisor agreed).** Idea: **group a patient's sessions by similar daily test-time / similar lookback length** and analyze within comparable groups. Open item: do we have the **raw continuous CGM stream** (to cut uniform windows ourselves) or only the pre-clipped per-session arrays? → confirm with Phil.
+- **Scores: ALL THREE are lower = better** (error/RT-type). Fixed in code (`PRICES_IS_INVERTED=False`, no negation) — does **not** change any R²/RMSE (invariant to the target's sign). ARC details: https://ctrlab.org/projects/arc-smartphone-app/
+- **N=20 is likely all we get** (more data not guaranteed) → rigor matters.
+- **Glucose-only for now**; add insulin/meals/activity only after (1) the advisor fully understands our TSFM pipeline and (2) we've exhausted TSFM on glucose-only.
+- **Data provenance:** the advisor worked with **19** patients before; confirm the **20th** (from Phil's `Updated_Cohort2`) with Phil. CGM is continuous → likely no imputation.
+- **Deliverables:** short term (~2–3 weeks) a **40-min presentation** rigorously justifying what we did (whatever the results); long term (end of summer) a **journal draft** (npj Digital Medicine-style).
+- **TSFM input format:** documented in `docs/06_CHRONOS_INPUT_FORMAT.md` — ready to walk through.
+
+The A–F items below are now **answered**; kept for the record.
+
+---
+
 ## Current questions — after the first real run (2026-07-08)
 
 *These extend the earlier round (Q1–Q7 below), now that the env is up, the 20-patient data is in, and the first real run is done — an **honest null** (no representation beats the mean baseline; no within-subject effect). Each notes our current default so the advisor can confirm or redirect. Most-needed steer: **A, B, D.***
