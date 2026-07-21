@@ -7,6 +7,7 @@ Narrative index stitching together the two auto-generated results files in this 
 - [`headtohead_real_centered.md`](headtohead_real_centered.md) — the within-subject (personal-baseline-removed) test.
 - [`sweep_real.md`](sweep_real.md) — full sweep: encoder size / window length / pooling / PCA / within-subject target-norm.
 - [`subgroups_real.md`](subgroups_real.md) — signal search by glucose regime (hypo / hyper / in-range).
+- [`rigor_real.md`](rigor_real.md) — permutation test (is the R² above chance?) + positive control (can the pipeline predict a glucose property?).
 
 **Synthetic (pipeline harness check only):**
 - [`sweep_synthetic.md`](sweep_synthetic.md) — Arm A hyperparameter **sweeps** (encoder checkpoint / window / pooling / PCA / within-subject target-norm).
@@ -65,6 +66,21 @@ This folder holds the **raw-data / TSFM arm**: frozen Amazon **Chronos** embeddi
 **Score direction:** all three scores are "lower = better" (error / response-time-type). We keep them in raw orientation — this does **not** change any R²/RMSE above (invariant to the target's sign).
 
 > ⚠️ **N = 20 (likely all we get).** An honest characterization on the available data, not proof that no effect exists anywhere. **The one lever not yet pulled:** a *principled uniform* pre-test window (e.g. exactly 2 h) cut from the **raw continuous CGM stream** — capping the pre-clipped arrays (above) can't emulate that. Obtaining the raw stream is the open question for Phil. See `../docs/02_ROADMAP.md` and `../docs/04_OPEN_QUESTIONS.md`.
+
+---
+
+## Rigor checks — is the low accuracy *real*? ([`rigor_real.md`](rigor_real.md))
+
+Two checks (same embeddings, same grouped CV) to make the "low prediction accuracy" conclusion convincing — the concrete evidence the advisor asked for.
+
+**Permutation test (200 label shuffles).** For every score the real grouped-CV R² sits *inside* the shuffled-label chance range — **p ≈ 1.0 for all three** (real −0.09 to −0.13 vs chance ≈ −0.05 ± 0.015). So the model's accuracy is **not above chance** → no signal beyond chance, stated statistically.
+
+**Positive control (predict a glucose property from the same embeddings).** The pipeline **does** extract real signal when it's there: it predicts glucose **variability (SD)** at **R² ≈ 0.46** — far above the ~0 it gets for cognition — so the embeddings are informative and the pipeline is not broken. *But* it predicts **absolute mean glucose** only weakly (**R² ≈ 0.07**) — expected, because **Chronos mean-scales each series internally, discarding absolute amplitude.**
+
+**What this means (important + honest):**
+- The cognition result is a **real null**, not a broken pipeline: the control finds variability signal readily, and the permutation test rules out chance.
+- But the frozen Chronos embedding is **partly blind to absolute glucose level** — so our Chronos-based null speaks to glucose *shape / variability*. Reassuringly, the **hand-crafted-feature arm — which *does* encode absolute level** (mean, %time-in-range) — was *also* null, so "no glucose→cognition signal" holds for level-aware representations too.
+- **Concrete next step it motivates:** augment the Chronos embedding with a few **absolute-level features** (or a level-preserving representation), so the model isn't blind to "how high/low was the glucose."
 
 ---
 
