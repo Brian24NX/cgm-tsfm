@@ -231,6 +231,65 @@ Give the **same machinery** a question you already know the answer to. If it ans
 
 It's a fair test because **you can compute it directly from the input in one line** (`np.std(w)`). The information is unquestionably in there. A pipeline that cannot recover something derivable from its own input is broken.
 
+### First: what "glucose variability" actually is
+
+One number per session: **how much the readings bounce around**. Formally the standard deviation — the typical distance of a reading from that session's own average.
+
+Two real sessions from our data:
+
+| | Steady session (25 readings) | Swingy session (211 readings) |
+|---|---|---|
+| First readings | 241, 234, 225, 224, 219, 219, 217… | 232, 244, 253, 246, 231, 224, 230, 251, 277, 305, 319, 328… |
+| Average | 226.3 mg/dL | 205.9 mg/dL |
+| **Variability (SD)** | **8.7** | **83.0** |
+
+The first child's glucose sat nearly flat; the second's roamed from 224 up to 328. That difference is what variability captures.
+
+*(SD on three numbers, by hand: `[10, 12, 14]`. Average 12. Distances −2, 0, +2. Squared: 4, 0, 4. Mean of those: 2.67. Square root: **1.63**.)*
+
+### The number is measured, not assumed
+
+Nobody picked 0.46 or expected it. It is the output of running the pipeline and comparing its guesses to the truth. Here is the whole calculation.
+
+**Setup.** Train on 767 sessions from 16 participants. Predict the 189 sessions belonging to the **4 participants it has never seen**. Input: the 512 Chronos numbers. Target: that session's variability.
+
+**Ten real held-out sessions from fold 1:**
+
+| Session | TRUE variability | Model guessed | Error |
+|--:|--:|--:|--:|
+| 1 | 43.5 | 58.0 | +14.5 |
+| 2 | 11.6 | 24.7 | +13.1 |
+| 3 | 97.1 | 69.0 | −28.2 |
+| 4 | 52.1 | 52.8 | +0.7 |
+| 5 | 51.8 | 41.8 | −10.0 |
+| 6 | 121.6 | 67.1 | −54.4 |
+
+Not perfect — it badly undershoots session 6 — but clearly tracking: high for the high ones, low for the low ones.
+
+**Now turn those errors into R².** Compare against the dumb predictor that ignores everything and always guesses this fold's average, 36.8:
+
+```
+Model's total squared error       = sum (true − model)²   =  55,972
+"Always guess 36.8" squared error = sum (true − 36.8)²    = 113,588
+
+R² = 1 − 55,972 / 113,588 = 1 − 0.493 = +0.507      ← fold 1
+```
+
+**That is what R² is: the fraction of the dumb predictor's error that the model got rid of.** Here it removed 50.7% of it.
+
+**Repeat for all five folds and average:**
+
+| Fold | 1 | 2 | 3 | 4 | 5 | **average** |
+|---|--:|--:|--:|--:|--:|--:|
+| R² | +0.507 | +0.419 | +0.404 | +0.444 | +0.441 | **+0.443** |
+
+That average **is** the number — 0.443 with Ridge, 0.462 with SVR.
+
+And the same arithmetic on the cognitive scores gives **−0.107**: negative means the model's total error came out *bigger* than the dumb predictor's, by about 11%.
+
+- Predict glucose variability → removes ~44% of the error. **Works.**
+- Predict the test score → error gets ~11% **worse**. Doesn't work.
+
 ### The result
 
 Identical 512 numbers, identical 5 participant-grouped folds, identical Ridge model. The only thing that changes is what we ask it to predict:
