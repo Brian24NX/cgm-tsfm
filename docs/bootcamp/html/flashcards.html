@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flashcards &middot; CGM + Chronos bootcamp</title>
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#f6f6f4; --surface:#ffffff; --surface-2:#efefec;
+    --ink:#1b1b1a; --ink-soft:#3b3b39; --muted:#63635f;
+    --line:#e0dfdb; --line-strong:#c9c8c3;
+    --accent:#0f6f68; --accent-soft:#e2f0ee; --accent-ink:#0a4b46;
+    --shadow:0 1px 2px rgba(20,20,18,.05), 0 8px 24px rgba(20,20,18,.06);
+    --radius:14px;
+    --mono:ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#141413; --surface:#1d1d1c; --surface-2:#262624;
+      --ink:#edecea; --ink-soft:#d9d8d5; --muted:#a3a29e;
+      --line:#333331; --line-strong:#4a4a47;
+      --accent:#63cec1; --accent-soft:#12332f; --accent-ink:#9fe3da;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#141413; --surface:#1d1d1c; --surface-2:#262624;
+    --ink:#edecea; --ink-soft:#d9d8d5; --muted:#a3a29e;
+    --line:#333331; --line-strong:#4a4a47;
+    --accent:#63cec1; --accent-soft:#12332f; --accent-ink:#9fe3da;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--sans);
+    font-size:17px; line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent-ink); text-underline-offset:3px}
+  code{font-family:var(--mono); font-size:.92em; background:var(--surface-2); padding:.08em .34em; border-radius:5px}
+  .wrap{max-width:56rem; margin:0 auto; padding:0 1.1rem}
+  header.topbar{
+    border-bottom:1px solid var(--line); background:var(--surface);
+    position:sticky; top:0; z-index:20;
+  }
+  .topbar-inner{display:flex; flex-wrap:wrap; gap:.75rem 1.2rem; align-items:baseline; padding:.85rem 1.1rem; max-width:56rem; margin:0 auto}
+  .brand{font-weight:650; letter-spacing:-.01em; font-size:1.06rem; margin:0}
+  .brand span{color:var(--muted); font-weight:450}
+  .topnav{margin-left:auto; display:flex; gap:.9rem; align-items:center; font-size:.86rem; flex-wrap:wrap}
+  .chapters{font-size:.82rem; color:var(--muted); padding:0 1.1rem .8rem; max-width:56rem; margin:0 auto}
+  .chapters code{background:transparent; padding:0; color:var(--muted)}
+  button, select{font:inherit; color:inherit}
+  .btn{
+    background:var(--surface); border:1px solid var(--line-strong); color:var(--ink);
+    padding:.45rem .8rem; border-radius:9px; cursor:pointer; font-size:.9rem; line-height:1.3;
+  }
+  .btn:hover{border-color:var(--accent); }
+  .btn:focus-visible, select:focus-visible, .card:focus-visible{outline:2.5px solid var(--accent); outline-offset:2px}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600}
+  :root[data-theme="dark"] .btn.primary{color:#08211f}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.primary{color:#08211f}}
+  .btn.on{background:var(--accent-soft); border-color:var(--accent); color:var(--accent-ink)}
+  .btn.ghost{background:transparent; border-color:transparent; color:var(--muted); padding:.35rem .5rem}
+  .btn.ghost:hover{color:var(--ink)}
+  select{background:var(--surface); border:1px solid var(--line-strong); border-radius:9px; padding:.45rem .55rem; font-size:.9rem}
+  .controls{display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; margin:1.3rem 0 .8rem}
+  .controls .field{display:flex; align-items:center; gap:.4rem; font-size:.86rem; color:var(--muted)}
+  .spacer{flex:1 1 auto}
+  .pills{display:flex; flex-wrap:wrap; gap:.45rem; margin:.2rem 0 1rem; font-size:.84rem}
+  .pill{border:1px solid var(--line); background:var(--surface); border-radius:999px; padding:.2rem .7rem; color:var(--muted)}
+  .pill b{color:var(--ink); font-weight:650}
+  .pill.known b{color:var(--accent-ink)}
+  .bar{height:5px; background:var(--surface-2); border-radius:999px; overflow:hidden; margin:0 0 1.2rem}
+  .bar > i{display:block; height:100%; background:var(--accent); width:0%; transition:width .2s ease}
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:2.1rem 2rem 1.7rem; min-height:19rem;
+    display:flex; flex-direction:column; gap:1rem; cursor:pointer; transition:transform .12s ease;
+  }
+  .card:active{transform:scale(.996)}
+  .card-meta{display:flex; gap:.6rem; align-items:center; font-size:.76rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em}
+  .card-meta .deck{color:var(--accent-ink); font-weight:650}
+  .card-meta .state{margin-left:auto; text-transform:none; letter-spacing:0; font-size:.8rem}
+  .front{font-size:1.42rem; line-height:1.42; font-weight:600; letter-spacing:-.01em; margin:0}
+  .card.flipped .front{font-size:1.02rem; font-weight:600; color:var(--muted); border-bottom:1px solid var(--line); padding-bottom:.9rem}
+  .back{font-size:1.1rem; color:var(--ink-soft); margin:0}
+  .back ul{margin:.5rem 0 0; padding-left:1.2rem}
+  .back li{margin:.25rem 0}
+  .back .num{font-family:var(--mono); font-size:.95em; color:var(--ink); font-weight:650; white-space:nowrap}
+  .back .say{display:block; margin-top:.7rem; padding:.7rem .9rem; background:var(--accent-soft); color:var(--accent-ink); border-radius:10px; font-size:1.02rem}
+  .hint{margin-top:auto; font-size:.85rem; color:var(--muted)}
+  .rowbtns{display:flex; flex-wrap:wrap; gap:.55rem; margin:1.1rem 0 .3rem; align-items:center}
+  kbd{
+    font-family:var(--mono); font-size:.78rem; border:1px solid var(--line-strong); border-bottom-width:2px;
+    background:var(--surface); border-radius:6px; padding:.05rem .35rem; color:var(--ink)
+  }
+  .legend{margin:1.6rem 0 3rem; padding-top:1rem; border-top:1px solid var(--line); font-size:.86rem; color:var(--muted)}
+  .legend ul{list-style:none; margin:.5rem 0 0; padding:0; display:flex; flex-wrap:wrap; gap:.45rem 1.3rem}
+  .legend li{display:flex; gap:.4rem; align-items:center}
+  .overlay{position:fixed; inset:0; background:rgba(12,12,11,.55); display:none; align-items:flex-start; justify-content:center; padding:2.5rem 1rem; z-index:50; overflow:auto}
+  .overlay.open{display:flex}
+  .modal{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); max-width:40rem; width:100%; padding:1.6rem 1.7rem}
+  .modal h2{margin:.1rem 0 .3rem; font-size:1.2rem}
+  .modal h3{margin:1.2rem 0 .3rem; font-size:.95rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
+  .modal table{width:100%; border-collapse:collapse; font-size:.92rem; margin-top:.3rem}
+  .modal td{padding:.28rem 0; border-bottom:1px solid var(--line)}
+  .modal td:last-child{text-align:right; font-family:var(--mono); font-weight:650}
+  .modal ul{padding-left:1.15rem; font-size:.92rem}
+  .visually-hidden{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+  @media (max-width:640px){
+    body{font-size:16px}
+    .front{font-size:1.24rem}
+    .card{padding:1.5rem 1.25rem; min-height:17rem}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <h1 class="brand">Bootcamp flashcards <span>&middot; glucose to cognition, with Chronos</span></h1>
+    <nav class="topnav" aria-label="Bootcamp navigation">
+      <a href="../README.md">&larr; Bootcamp README</a>
+      <a href="../01_FACT_SHEET.md">01 Fact sheet</a>
+      <a href="../02_ML_FROM_ZERO.md">02 ML from zero</a>
+      <button class="btn ghost" id="themeBtn" type="button" title="Switch light / dark / auto">Theme: auto</button>
+    </nav>
+  </div>
+  <p class="chapters">Sibling chapters in <code>docs/bootcamp/</code>: <code>01_FACT_SHEET.md</code> &middot; <code>02_ML_FROM_ZERO.md</code> &middot; <code>03_PREPROCESSING.md</code> &middot; <code>04_LINEAR_MODELS.md</code> &middot; <code>05_EVALUATION.md</code> &middot; <code>06_DEEP_LEARNING_CORE.md</code> &middot; <code>07_TRANSFORMERS.md</code> &middot; <code>08_CHRONOS.md</code> &middot; <code>10_RIGOR_AND_STATS.md</code> &middot; <code>11_WHAT_THE_SCORES_ARE.md</code> &middot; <code>12_EXAM_DRILL.md</code>. Companion page: <a href="quiz.html">quiz.html</a>.</p>
+</header>
+
+<main class="wrap">
+
+  <div class="controls">
+    <label class="field" for="deckSel">Deck
+      <select id="deckSel" aria-label="Choose deck"></select>
+    </label>
+    <label class="field" for="statusSel">Show
+      <select id="statusSel" aria-label="Filter by status">
+        <option value="all">All cards</option>
+        <option value="work">Needs work only</option>
+        <option value="known">Know it only</option>
+        <option value="unmarked">Unmarked only</option>
+      </select>
+    </label>
+    <button class="btn" id="shuffleBtn" type="button" aria-pressed="false">Shuffle</button>
+    <span class="spacer"></span>
+    <button class="btn" id="summaryBtn" type="button">Session summary</button>
+    <button class="btn ghost" id="resetBtn" type="button">Reset progress</button>
+  </div>
+
+  <div class="pills" id="pills" aria-live="polite">
+    <span class="pill" id="posPill">Card <b>0</b> of <b>0</b></span>
+    <span class="pill known">Know it <b id="cKnown">0</b></span>
+    <span class="pill">Needs work <b id="cWork">0</b></span>
+    <span class="pill">Unmarked <b id="cUnmarked">0</b></span>
+  </div>
+
+  <div class="bar"><i id="barFill"></i></div>
+
+  <section class="card" id="card" role="button" tabindex="0" aria-expanded="false" aria-label="Flashcard. Press space or enter to flip.">
+    <div class="card-meta">
+      <span class="deck" id="cardDeck">Deck</span>
+      <span id="cardId">id</span>
+      <span class="state" id="cardState"></span>
+    </div>
+    <p class="front" id="front">Loading cards&hellip;</p>
+    <div class="back" id="back" hidden></div>
+    <p class="hint" id="hint">Click the card, or press <kbd>space</kbd>, to see the answer.</p>
+  </section>
+
+  <div class="rowbtns">
+    <button class="btn" id="prevBtn" type="button">&larr; Previous</button>
+    <button class="btn primary" id="flipBtn" type="button">Flip</button>
+    <button class="btn" id="nextBtn" type="button">Next &rarr;</button>
+    <span class="spacer"></span>
+    <button class="btn" id="knownBtn" type="button" aria-pressed="false">Know it</button>
+    <button class="btn" id="workBtn" type="button" aria-pressed="false">Needs work</button>
+  </div>
+
+  <section class="legend" aria-label="Keyboard shortcuts">
+    <strong>Keyboard shortcuts</strong>
+    <ul>
+      <li><kbd>space</kbd> / <kbd>enter</kbd> flip</li>
+      <li><kbd>&rarr;</kbd> next</li>
+      <li><kbd>&larr;</kbd> previous</li>
+      <li><kbd>k</kbd> know it</li>
+      <li><kbd>n</kbd> needs work</li>
+      <li><kbd>s</kbd> shuffle</li>
+      <li><kbd>u</kbd> unmark</li>
+      <li><kbd>t</kbd> theme</li>
+      <li><kbd>?</kbd> session summary</li>
+      <li><kbd>esc</kbd> close panel</li>
+    </ul>
+    <p style="margin-top:1rem">Progress is stored in this browser only (<code>localStorage</code>). Nothing leaves the page and nothing is loaded from the network, so the file works offline by double-clicking it.</p>
+  </section>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" id="modal">
+    <h2 id="modalTitle">Session summary</h2>
+    <div id="modalBody"></div>
+    <div class="rowbtns"><button class="btn primary" id="closeModal" type="button">Close</button></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------
+   Decks. `chapter` is the markdown chapter to reread for that deck.
+------------------------------------------------------------------ */
+const DECKS = [
+  {key:"data",    name:"Data & Numbers",              chapter:"01_FACT_SHEET.md"},
+  {key:"ml",      name:"ML Basics",                   chapter:"02_ML_FROM_ZERO.md"},
+  {key:"prep",    name:"Preprocessing & Normalization",chapter:"03_PREPROCESSING.md"},
+  {key:"eval",    name:"Evaluation & R2",             chapter:"05_EVALUATION.md"},
+  {key:"dl",      name:"Deep Learning Core",          chapter:"06_DEEP_LEARNING_CORE.md"},
+  {key:"tf",      name:"Transformers & Attention",    chapter:"07_TRANSFORMERS.md"},
+  {key:"chronos", name:"Chronos Internals",           chapter:"08_CHRONOS.md"},
+  {key:"arms",    name:"Arm A vs Arm B",              chapter:"04_LINEAR_MODELS.md + 06_DEEP_LEARNING_CORE.md"},
+  {key:"rigor",   name:"Rigor & Statistics",          chapter:"10_RIGOR_AND_STATS.md"},
+  {key:"plain",   name:"Say It In Plain Words",       chapter:"12_EXAM_DRILL.md"}
+];
+
+/* ------------------------------------------------------------------
+   Cards. d = deck key, f = front, b = back (trusted inline HTML).
+   Every number here is from docs/bootcamp/01_FACT_SHEET.md.
+------------------------------------------------------------------ */
+const CARDS = [
+
+/* ============ DATA & NUMBERS ============ */
+{d:"data", f:"How many participants are in the analysis, and where do they come from?",
+ b:"<span class='num'>20</span> participants: <span class='num'>14</span> from Cohort 1 plus <span class='num'>6</span> from Cohort 2. The grant plans for N = 92 eventually; we have 20 today."},
+{d:"data", f:"How many sessions do we analyse, and how do you derive that number?",
+ b:"<span class='num'>956</span> sessions. 740 Cohort 1 rows + 240 Updated Cohort 2 rows = <span class='num'>980</span> raw rows, minus <span class='num'>24</span> rows whose glucose cell was empty (23 + 1) = 956. No row was lost to the 3-reading minimum."},
+{d:"data", f:"What is one row of our data?",
+ b:"One <strong>cognitive-test session</strong> &mdash; one child taking one test on one occasion. Not one child. 956 sessions come from 20 participants, so each child contributes many rows."},
+{d:"data", f:"How many individual glucose readings are in the dataset?",
+ b:"<span class='num'>68,206</span> readings across the 956 sessions."},
+{d:"data", f:"How often does the CGM record a value?",
+ b:"One reading every <span class='num'>5 minutes</span> (Dexcom G6). That is 12 readings per hour and <span class='num'>288</span> per 24 hours."},
+{d:"data", f:"Glucose mean, standard deviation and median?",
+ b:"Mean <span class='num'>177.24</span> mg/dL, sd <span class='num'>80.17</span>, median <span class='num'>157</span>. The mean sits above the median, so the distribution leans high."},
+{d:"data", f:"What are the smallest and largest glucose values, and why exactly those?",
+ b:"<span class='num'>40</span> and <span class='num'>400</span> mg/dL &mdash; the Dexcom G6 reporting limits, not biology. <span class='num'>2.16%</span> of readings sit exactly at 400, meaning &ldquo;400 or higher&rdquo;."},
+{d:"data", f:"Are there outliers in the glucose data?",
+ b:"No &mdash; nothing falls outside [40, 400] by construction. The real issue is the opposite: values are <strong>cut off</strong> at both ends. 2.16% pinned at 400 hides how high those excursions really went, which blunts any model trying to read the shape of a high excursion."},
+{d:"data", f:"Time in range: what share of readings is low, in range, and high?",
+ b:"<span class='num'>2.31%</span> below 70 mg/dL, <span class='num'>58.14%</span> in 70&ndash;180, <span class='num'>39.54%</span> above 180, and <span class='num'>17.66%</span> above 250. Clinical guidance aims for more than 70% in range, so this group runs high a lot."},
+{d:"data", f:"Why does &ldquo;only 2.31% of readings are below 70&rdquo; matter for our question?",
+ b:"Low glucose is where a short-term effect on thinking is most expected, and we barely have any of it. Even if low glucose does slow a child down, there is very little of that state in this dataset for a model to learn from."},
+{d:"data", f:"How long is the glucose window that goes into the model?",
+ b:"It varies: <span class='num'>3</span> to <span class='num'>288</span> readings, median <span class='num'>36</span> (= 3.0 hours), mean <span class='num'>71.4</span>. The longest input is 96 times the shortest."},
+{d:"data", f:"Why is the window length so uneven across sessions?",
+ b:"The stored array looks like <strong>all glucose since that child&rsquo;s previous test</strong>, not a fixed lookback. Two tests an hour apart give 12 readings; a test after a night&rsquo;s sleep gives roughly 288."},
+{d:"data", f:"How should you describe the uneven window without calling it a confound?",
+ b:"Say: &ldquo;the amount of glucose history differs from session to session.&rdquo; A confound involves <strong>two</strong> variables getting tangled; this is one variable taking different values. (Time of day versus the glucose series <em>is</em> a fair use of &ldquo;confound&rdquo; &mdash; two different variables.)"},
+{d:"data", f:"Convert the median window to hours, out loud.",
+ b:"36 readings &times; 5 minutes = 180 minutes = <span class='num'>3.0 hours</span>. Handy reverse: readings &divide; 12 = hours."},
+{d:"data", f:"How many sessions does each participant contribute?",
+ b:"Between <span class='num'>32</span> and <span class='num'>67</span>, median <span class='num'>47.5</span>. No child is a tiny-sample outlier, so no single child dominates a fold."},
+{d:"data", f:"Name the three cognitive tests and the score direction.",
+ b:"<strong>Grids, Symbols, Prices</strong>. For all three, <strong>lower = better</strong>. Memorise the direction &mdash; it flips the meaning of every result you quote."},
+{d:"data", f:"Grids: how many scored sessions, mean, sd, and the odd feature?",
+ b:"n = <span class='num'>951</span>, mean <span class='num'>0.478</span>, sd <span class='num'>0.500</span>. The odd feature: <span class='num'>31.0%</span> of sessions score exactly 0, a pile-up at the best possible answer."},
+{d:"data", f:"Symbols: how many scored sessions, mean, sd, and what the number is?",
+ b:"n = <span class='num'>920</span>, mean <span class='num'>1.846</span>, sd <span class='num'>0.560</span>. It is a response time in seconds, so lower is faster and better."},
+{d:"data", f:"Prices: how many scored sessions, mean, sd, and how many distinct values?",
+ b:"n = <span class='num'>936</span>, mean <span class='num'>41.59</span>, sd <span class='num'>17.17</span>, and only <span class='num'>10</span> distinct values: 0, 10, 20, &hellip; 90. It is a percentage in steps of 10."},
+{d:"data", f:"Why do the three targets have different sample sizes when there are 956 sessions?",
+ b:"Some sessions are missing that particular score: grids 951, symbols 920, prices 936. Each target is modelled on its own available rows, so the three models are not fitted on identical sets."},
+{d:"data", f:"What does &ldquo;only 10 distinct values&rdquo; mean for the Prices model?",
+ b:"The target is coarse &mdash; the truth can only be 0, 10, &hellip; 90. A model cannot be finely right on a variable that only moves in steps of 10, and the coarseness itself adds spread that glucose cannot explain."},
+{d:"data", f:"Between-participant share of variance for each score?",
+ b:"Grids <span class='num'>0.153</span>, Symbols <span class='num'>0.376</span>, Prices <span class='num'>0.077</span>. So 62% to 92% of the spread is <em>within</em> the same child, session to session."},
+{d:"data", f:"What does the between-participant share correct in our older story?",
+ b:"We used to say differences between children dominate. They do not. Most variation is session-level. So predicting a new child is hard mainly because session-to-session movement is noise that glucose does not explain &mdash; not because children differ wildly."},
+{d:"data", f:"What is the strongest raw relationship between any glucose statistic and any score?",
+ b:"r = <span class='num'>&minus;0.092</span> (fraction of readings below 70 versus Symbols), so r&sup2; = <span class='num'>0.0085</span> &mdash; <strong>0.85% of the variation</strong>. Before any model exists, the raw link is essentially flat."},
+{d:"data", f:"Why is the 0.85% ceiling the most useful number you own?",
+ b:"It makes the low accuracy unsurprising rather than suspicious. No model can manufacture a relationship that is not in the numbers, so a fancy model returning nothing is the expected outcome, not a bug."},
+{d:"data", f:"The grant plans N = 92. Why do we have 20, and what do we say about more data?",
+ b:"20 participants are what has been collected and merged so far (14 + 6). More is not guaranteed, so the honest framing is: this is what these 20 children and 956 sessions can support."},
+
+/* ============ ML BASICS ============ */
+{d:"ml", f:"What is supervised learning, in plain words?",
+ b:"You hand the program examples of input paired with the right answer, and a fitting procedure searches for a rule that reproduces those answers. Ours: 512 numbers describing a glucose window in, one predicted test score out."},
+{d:"ml", f:"What are X and y in this project, with shapes?",
+ b:"X is the feature matrix: <span class='num'>(956, 512)</span> for Chronos features, or <span class='num'>(956, 43)</span> for the hand-crafted comparison. y is one column of scores &mdash; grids, symbols or prices, one model each."},
+{d:"ml", f:"Is this regression or classification, and how do you know?",
+ b:"Regression. The targets are numbers on a scale where being close counts (grids 0&ndash;2.39, symbols in seconds, prices 0&ndash;90). Classification would mean predicting a category."},
+{d:"ml", f:"Why can you not score a model on the data it was trained on?",
+ b:"A flexible model can reproduce training answers without learning anything that carries over. Concretely: plain <code>LinearRegression</code> on our 512 features fits its training folds closely and scores <span class='num'>R&sup2; &asymp; &minus;3</span> on held-out children."},
+{d:"ml", f:"Three data splits, three jobs. What are they?",
+ b:"<ul><li><strong>Training</strong> data sets the model&rsquo;s internal numbers.</li><li><strong>Validation</strong> data picks settings (Ridge&rsquo;s alpha, when to stop training).</li><li><strong>Test</strong> data is reported and used for nothing else.</li></ul>Touching the test data to choose anything destroys the honesty of the number."},
+{d:"ml", f:"Parameter versus hyperparameter, with our examples.",
+ b:"<strong>Parameters</strong> are learned from training data: Ridge&rsquo;s 512 coefficients plus 1 intercept; the head&rsquo;s 132,609 weights and biases. <strong>Hyperparameters</strong> are dials set before or around fitting: alpha, C, gamma, learning rate 1e-3, weight decay 0.01, dropout 0.1, patience 8, batch size 64."},
+{d:"ml", f:"Overfitting and underfitting &mdash; and where do our results sit?",
+ b:"Overfitting = fits its own training rows, fails on new ones (our LinearRegression at <span class='num'>&minus;3</span>). Underfitting = too restrained to say anything (Ridge at alpha 1000 collapses toward predicting the average). Our tuned results sit near the restrained end, just below the average-guesser."},
+{d:"ml", f:"Why are 512 features a problem with 956 sessions?",
+ b:"Each fold trains on roughly <span class='num'>765</span> rows for <span class='num'>512</span> columns &mdash; about <span class='num'>1.5</span> rows per feature. With that little data per direction, a model can fit noise in almost any direction it likes, so restraint is mandatory."},
+{d:"ml", f:"What is regularization, and which of our settings are examples of it?",
+ b:"Anything you deliberately add that removes model freedom in exchange for a better shot on new data. Ours: Ridge&rsquo;s alpha, weight decay 0.01, dropout 0.1, early stopping (patience 8), PCA to 8/16/32 components, and choosing a smaller checkpoint."},
+{d:"ml", f:"What does Ridge regression do, and what is alpha?",
+ b:"Linear regression plus a penalty on the size of the coefficients. Alpha sets the strength: bigger alpha shrinks coefficients toward zero, and in the limit the model just predicts the average. Grid: <span class='num'>{0.1, 1, 10, 100, 1000}</span>."},
+{d:"ml", f:"What is SVR with an RBF kernel, and what did we search?",
+ b:"Support vector regression: it fits a curved rather than straight relationship, and only penalises errors bigger than a tolerance band. We searched C in <span class='num'>{0.1, 1, 10}</span> and gamma in <span class='num'>{scale, auto}</span> &mdash; 6 settings. C controls how hard it tries to fit; gamma controls how wiggly the curve is."},
+{d:"ml", f:"What is DummyRegressor(mean), and why is it in every table?",
+ b:"It ignores the input and predicts the training-set average score for every session. It is the yardstick: R&sup2; = 0 <em>is</em> that model. Beating it is the whole point, and nothing did."},
+{d:"ml", f:"Loss versus metric &mdash; and why is the search metric negative?",
+ b:"Loss is what fitting minimises (MSE for us). A metric is what you report (R&sup2;, RMSE, MAE). scikit-learn&rsquo;s search always <em>maximises</em> its score, so mean squared error is fed in as <code>neg_mean_squared_error</code>; the minus sign is bookkeeping, not a result."},
+{d:"ml", f:"What is an inductive bias, and how does it explain our ranking?",
+ b:"The assumptions a model brings before seeing data. A model only wins when its assumptions suit the problem. With about 612 training rows the flexible neural head (&minus;0.168 to &minus;0.281) lost to plain Ridge (&minus;0.012 to &minus;0.089): more freedom, less help."},
+{d:"ml", f:"What can a model never do?",
+ b:"Invent a relationship that is not in the inputs. If the features carry almost no information about the target, no architecture, tuning or compute will fix it &mdash; it will just produce confident wrong predictions."},
+{d:"ml", f:"What does it mean that the Chronos encoder is frozen?",
+ b:"We run it under <code>torch.no_grad()</code>, compute no gradients for it, and never change its weights. It is used purely as a fixed converter from a glucose window into 512 numbers. Only Arm B&rsquo;s small head learns anything."},
+{d:"ml", f:"What is cross-validation, in one sentence?",
+ b:"Split the data into k parts; train on k&minus;1 and test on the held-out one; rotate until every part has been the test set once; report the pooled result. Ours is k = 5, split by whole participant."},
+{d:"ml", f:"What is a baseline, and why insist on one?",
+ b:"The simplest thing you could have done instead &mdash; here, always predicting the average score. Without it, &ldquo;the error is 0.5 grid cells&rdquo; means nothing. With it you can say the model is not better than the simplest thing."},
+
+/* ============ PREPROCESSING & NORMALIZATION ============ */
+{d:"prep", f:"How does Chronos-Bolt normalize a series before the transformer sees it?",
+ b:"<strong>Instance normalization</strong>: for each series on its own, <code>loc</code> = NaN-aware mean over time, <code>scale</code> = population standard deviation (<code>ddof=0</code>), then every value becomes (x &minus; loc) / scale. Each window is judged against itself."},
+{d:"prep", f:"What does ddof = 0 mean, and why note it?",
+ b:"Divide the squared deviations by N, not N&minus;1 &mdash; the <strong>population</strong> standard deviation. It matters because it is exactly what Bolt does, and because a picky reader may expect the sample version (ddof = 1)."},
+{d:"prep", f:"What happens to loc and scale in our pipeline?",
+ b:"<code>embed()</code> returns them, and <strong>our code discards them</strong>. So the absolute height of the glucose curve is thrown away and only its shape reaches the regressor. Keeping them would be a one-line change and an obvious thing to try."},
+{d:"prep", f:"What does discarding loc and scale cost us? Give the number.",
+ b:"Our Chronos result speaks to glucose <em>shape</em>, not <em>level</em>. Evidence: from the same embeddings, glucose variability is recovered at R&sup2; <span class='num'>0.462</span> but mean glucose only <span class='num'>0.070</span>. The 43 hand-crafted features <em>do</em> encode level, and they were flat too, so the conclusion survives."},
+{d:"prep", f:"How does Chronos-T5 normalize, and how is that different from Bolt?",
+ b:"Chronos-T5 uses <strong>mean absolute scaling with no centering</strong>: divide by the mean of the absolute values, leave the middle where it is. Bolt centres (subtracts a mean) and divides by a standard deviation. Different family, different recipe."},
+{d:"prep", f:"What does StandardScaler do, and what is it fitted on?",
+ b:"For each of the 512 columns: subtract that column&rsquo;s mean and divide by its standard deviation, so all features arrive on the same footing. It is fitted on the <strong>training fold only</strong>, then applied to the test fold."},
+{d:"prep", f:"Why must the scaler be fitted on training data only?",
+ b:"Fitting on everything lets facts about the test children (their means and spreads) seep into the training pipeline, so the reported score would be flattered by information the model would not have in real use."},
+{d:"prep", f:"What is a z-score, and can you compute one from our data?",
+ b:"z = (value &minus; mean) / sd &mdash; how many standard deviations from average. Grids value 1.478 with mean 0.478 and sd 0.500: (1.478 &minus; 0.478) / 0.500 = <span class='num'>2.0</span>. Symbols 2.406: (2.406 &minus; 1.846) / 0.560 = <span class='num'>1.0</span>."},
+{d:"prep", f:"Why does Arm B compute its loss on a z-scored target?",
+ b:"Prices runs 0&ndash;90 and grids 0&ndash;2.39. Standardising the target puts all three on the same scale, so one learning rate and one loss size work for every target and the reported losses are comparable."},
+{d:"prep", f:"How are missing glucose readings handled inside a window?",
+ b:"They are <strong>dropped</strong>, not filled. The window shortens by one reading. Nothing is interpolated by our loader, which is worth saying precisely because filling gaps would be an assumption we did not make."},
+{d:"prep", f:"What form is the glucose stored in, and what makes parsing awkward?",
+ b:"A text cell holding a Python-style list, e.g. <code>&quot;[142, 145, nan, 151]&quot;</code>. Cohort 2 embeds literal <code>nan</code> tokens, so a strict literal parser fails and the loader uses a restricted evaluation that maps <code>nan</code> to a missing value."},
+{d:"prep", f:"What is min_readings, and did it remove anything?",
+ b:"A session must have at least <span class='num'>3</span> valid readings to be used. In practice it removed nothing: all 24 dropped rows were dropped for an empty glucose cell, so 980 &minus; 24 = 956."},
+{d:"prep", f:"What is PCA, and what did it do here?",
+ b:"Principal component analysis compresses 512 correlated columns into a few directions that carry most of the variation. Keeping 8, 16 or 32 components helped slightly (mean R&sup2; &minus;0.052 to &minus;0.045); 128 components gave the gain back. It is regularization by another name."},
+{d:"prep", f:"How do we get from a sequence of token vectors to one row of X?",
+ b:"<strong>Mean pooling</strong>: average across the token axis, leaving a single 512-number vector per session. Mean pooling (&minus;0.052) beat taking the last token (&minus;0.060)."},
+{d:"prep", f:"What is the 43-feature hand-crafted alternative, and why keep it?",
+ b:"Named glucose statistics computed directly &mdash; mean, standard deviation, time below 70, time in range, and so on &mdash; giving a <span class='num'>(956, 43)</span> matrix. It is the fair comparison, and crucially it keeps absolute glucose level, which Chronos discards."},
+
+/* ============ EVALUATION & R2 ============ */
+{d:"eval", f:"What is R&sup2;, in words a clinician would accept?",
+ b:"The share of the score&rsquo;s spread the model explains, measured against always guessing the average. <span class='num'>0</span> means no better than guessing the average; <span class='num'>1</span> means perfect; <strong>negative means worse than guessing the average</strong>."},
+{d:"eval", f:"Write down R&sup2;.",
+ b:"R&sup2; = 1 &minus; SS<sub>res</sub> / SS<sub>tot</sub>, where SS<sub>res</sub> is the sum of squared prediction errors and SS<sub>tot</sub> is the sum of squared distances from the mean. If your errors are 8.9% larger than the mean-guesser&rsquo;s, R&sup2; = &minus;0.089."},
+{d:"eval", f:"Can R&sup2; be negative? Explain the trap.",
+ b:"Yes, on held-out data. The bound &ldquo;R&sup2; is between 0 and 1&rdquo; only holds when you evaluate a least-squares fit on the same rows it was fitted to. Predict new children and the model can easily do worse than their average &mdash; ours do."},
+{d:"eval", f:"What is GroupKFold, and how is it configured here?",
+ b:"A k-fold split where every row from one group stays on one side. Group = participant, 5 folds, so exactly <span class='num'>4</span> of the 20 participants are held out per fold and never appear in that fold&rsquo;s training data."},
+{d:"eval", f:"Give the fold sizes.",
+ b:"Test sessions per fold: <span class='num'>189 / 193 / 191 / 191 / 192</span>. Train sessions: <span class='num'>767 / 763 / 765 / 765 / 764</span>. Each pair sums to 956, and the five test sets sum to 956 as well."},
+{d:"eval", f:"Why group by participant instead of splitting rows at random?",
+ b:"With random rows the same child sits on both sides, so the model can recall that child&rsquo;s usual score instead of learning anything about glucose. Between-participant variance is 0.077 to 0.376, so that shortcut is real and would inflate the result."},
+{d:"eval", f:"What is the leakage guard, and why an assert rather than a comment?",
+ b:"Every fold asserts that the training and test participant sets are disjoint. It is a tripwire: if a future edit lets a child appear on both sides, the run crashes instead of quietly printing a flattering number."},
+{d:"eval", f:"How were Ridge&rsquo;s alpha and SVR&rsquo;s C chosen?",
+ b:"By an inner <span class='num'>3-fold</span> grouped <code>GridSearchCV</code> inside each outer training fold, scored on <code>neg_mean_squared_error</code>. The 4 test participants of that fold played no part in the choice."},
+{d:"eval", f:"Why nest the tuning inside the outer loop instead of tuning once?",
+ b:"If settings were chosen using the test folds, the reported R&sup2; would be the best of several attempts rather than an estimate for a new child. Nesting keeps the test fold untouched by every decision."},
+{d:"eval", f:"What is the random seed, and what does it buy?",
+ b:"<span class='num'>42</span>. It makes the splits and any random steps repeatable, so a rerun reproduces the same tables and a change in results can be attributed to the change you made."},
+{d:"eval", f:"RMSE, MAE, R&sup2; &mdash; when is each useful?",
+ b:"RMSE is typical error in the score&rsquo;s own units, punishing big misses. MAE is the average absolute miss, calmer about outliers. R&sup2; is unit-free and comes with the average-guesser built in as its zero &mdash; which is why it is the headline here."},
+{d:"eval", f:"Recite the Arm A results on real data.",
+ b:"Grouped cross-validation, Chronos features with Ridge/SVR: grids <span class='num'>&minus;0.089</span>, symbols <span class='num'>&minus;0.056</span>, prices <span class='num'>&minus;0.012</span>. All at or below zero: not better than guessing the average."},
+{d:"eval", f:"Recite the hand-crafted 43-feature results.",
+ b:"Grids <span class='num'>&minus;0.065</span>, symbols <span class='num'>&minus;0.038</span>, prices <span class='num'>&minus;0.009</span>. Slightly less bad than the Chronos features, still not better than guessing the average."},
+{d:"eval", f:"What does within-participant centering mean, and what did it give?",
+ b:"Subtract each child&rsquo;s own average score, so the question becomes &ldquo;which of this child&rsquo;s sessions were better than usual?&rdquo; Results: <span class='num'>&minus;0.018 / &minus;0.022 / &minus;0.002</span>. Closer to zero, still not above it."},
+{d:"eval", f:"Translate &ldquo;R&sup2; = &minus;0.089&rdquo; into a sentence you can say out loud.",
+ b:"&ldquo;Our squared prediction error was about 8.9% larger than if we had simply predicted the average score for every session.&rdquo;"},
+{d:"eval", f:"What result would have counted as a win?",
+ b:"An R&sup2; clearly above 0 on held-out children, reproduced across folds and not reachable by scrambled scores. Nothing in this project reached that; the best single number is prices at <span class='num'>&minus;0.012</span>."},
+{d:"eval", f:"How many model fits does one Arm A target take?",
+ b:"<span class='num'>185</span>. Ridge: 5 settings &times; 3 inner folds = 15, +1 refit = 16 per outer fold, &times;5 = 80. SVR: 6 &times; 3 = 18, +1 = 19, &times;5 = 95. Plus 5 baseline and 5 plain-linear fits. Three targets = <span class='num'>555</span> fits."},
+
+/* ============ DEEP LEARNING CORE ============ */
+{d:"dl", f:"What does one linear layer actually compute?",
+ b:"For each output unit: multiply every input by its own weight, add them up, add one bias. Written as a matrix multiply plus a bias vector. That is all a <code>Linear</code> layer is."},
+{d:"dl", f:"How many parameters are in Linear(512 &rarr; 256)?",
+ b:"Weights 256 &times; 512 = <span class='num'>131,072</span>, plus <span class='num'>256</span> biases = <span class='num'>131,328</span>. Rule: in &times; out weights, plus one bias per output."},
+{d:"dl", f:"What does LayerNorm(512) do, and how many parameters does it own?",
+ b:"For each row it standardises across that row&rsquo;s 512 values (subtract the row mean, divide by the row spread), then applies a learned scale and a learned shift: 512 + 512 = <span class='num'>1,024</span> parameters. It keeps the numbers entering the first layer in a stable range."},
+{d:"dl", f:"Why does a network need a nonlinear activation at all?",
+ b:"Because a stack of linear layers with nothing in between collapses algebraically into a single linear layer. The activation is what buys the extra layer any expressive power."},
+{d:"dl", f:"What is GELU?",
+ b:"An activation that passes large positive values through nearly unchanged, squashes negatives toward zero, and does so smoothly rather than with the hard corner of ReLU. It is what sits between our two linear layers."},
+{d:"dl", f:"What does Dropout(0.1) do, and when is it active?",
+ b:"During training it randomly zeroes about 10% of the 256 hidden values on every pass, so the head cannot lean on any one of them. At evaluation it is <strong>off</strong> and nothing is dropped &mdash; forgetting that difference is a classic bug."},
+{d:"dl", f:"What is the forward pass?",
+ b:"Push one batch of inputs through the layers to get predictions, then compare them to the true scores to get the loss. No learning yet &mdash; just measurement."},
+{d:"dl", f:"What loss does Arm B minimise?",
+ b:"Mean squared error on the z-scored target: average of (prediction &minus; truth)&sup2;. Squaring makes big misses hurt disproportionately and matches the R&sup2; we report."},
+{d:"dl", f:"What is backpropagation, in plain words?",
+ b:"After the loss is computed, work backwards through the layers applying the chain rule to get, for every one of the 132,609 parameters, the direction and size of change that would reduce the loss. It is bookkeeping of derivatives, not a separate learning algorithm."},
+{d:"dl", f:"What is gradient descent, and what does the optimizer add?",
+ b:"Gradient descent: nudge each parameter a little downhill in the loss. The optimizer decides how big that nudge is. Ours is <strong>AdamW</strong>, which keeps a running sense of each parameter&rsquo;s recent gradients so parameters with noisy gradients move more cautiously."},
+{d:"dl", f:"What is the learning rate, and what is ours?",
+ b:"The size of the step taken downhill. Ours is <span class='num'>1e-3</span> (0.001). Too large and training bounces or diverges; too small and it crawls and stops early for the wrong reason. Bigger is not automatically faster progress."},
+{d:"dl", f:"What is weight decay, and what is ours set to?",
+ b:"A pull of every weight toward zero at each step, so unused directions decay away. Ours is <span class='num'>0.01</span> in AdamW. It is the same idea as Ridge&rsquo;s alpha, applied inside a neural network."},
+{d:"dl", f:"Define an epoch.",
+ b:"One complete pass over the training rows. Our cap is <span class='num'>100</span> epochs, though early stopping usually ends it much sooner."},
+{d:"dl", f:"Define batch and batch size.",
+ b:"A batch is the group of rows processed together before one parameter update. Ours is <span class='num'>64</span>. Bigger batches give steadier gradients and fewer updates per epoch; smaller batches give noisier gradients and more updates."},
+{d:"dl", f:"Define a step, and do our step arithmetic.",
+ b:"A step is one parameter update = one batch. Roughly 612 training rows &divide; 64 = ceil(9.56) = <span class='num'>10</span> batches, so <strong>1 epoch = 10 optimizer steps</strong> and 100 epochs is at most <span class='num'>1,000</span> steps."},
+{d:"dl", f:"Where does &ldquo;about 612 training rows&rdquo; come from?",
+ b:"956 sessions, 5 grouped folds &rarr; test &asymp; 191, outer-train &asymp; 765. Then 20% of the training participants are held back for validation &rarr; validation &asymp; 153, training &asymp; <span class='num'>612</span>."},
+{d:"dl", f:"What is early stopping, and how is ours configured?",
+ b:"Watch the loss on held-out validation rows each epoch and stop when it stops improving. Ours monitors <code>val/loss</code> with <strong>patience 8</strong>: eight epochs without improvement ends training. It is regularization &mdash; it caps how much the model can adapt to its training rows."},
+{d:"dl", f:"Recite the Arm B head, layer by layer.",
+ b:"<code>LayerNorm(512) &rarr; Linear(512&rarr;256) &rarr; GELU &rarr; Dropout(0.1) &rarr; Linear(256&rarr;1)</code>. One hidden layer of width 256, one number out."},
+{d:"dl", f:"Total trainable parameters in the head, with the breakdown?",
+ b:"<span class='num'>132,609</span> = LayerNorm 512 + 512, Linear 1 131,072 + 256, Linear 2 256 + 1. Being able to add that up out loud is the point of the card."},
+{d:"dl", f:"What is the parameters-to-rows ratio, and why quote it?",
+ b:"132,609 parameters on about 612 training rows = <span class='num'>217&times;</span> more parameters than examples. It is the one-line explanation of why Arm B (&minus;0.168 to &minus;0.281) is the worst performer: far more freedom than the data can pin down."},
+{d:"dl", f:"Which three things hold Arm B back from memorizing outright?",
+ b:"Dropout 0.1, weight decay 0.01, and early stopping at patience 8. Without them the head would fit its 612 rows and do even worse on new children."},
+{d:"dl", f:"How is Arm B&rsquo;s validation set chosen?",
+ b:"<span class='num'>20%</span> of the outer-training <em>participants</em> are held out as a group, so validation children are absent from training too. It selects the stopping epoch, nothing else."},
+{d:"dl", f:"Does Arm B train Chronos?",
+ b:"No. The encoder stays frozen in both arms. Only the <span class='num'>132,609</span>-parameter head learns, on top of the same 512 numbers Arm A uses."},
+{d:"dl", f:"How many networks does one Arm B run train?",
+ b:"<span class='num'>15</span> &mdash; 5 folds &times; 3 targets, each an independent network with its own early-stopping point."},
+{d:"dl", f:"What is an MLP?",
+ b:"Multi-layer perceptron: a stack of linear layers with a nonlinearity between them, taking a fixed-length vector in and giving a number (or a few) out. Ours has one hidden layer of 256 units."},
+{d:"dl", f:"Training mode versus evaluation mode &mdash; what changes?",
+ b:"In training mode dropout randomly zeroes values and normalization layers may update running statistics. In evaluation mode dropout is off and behaviour is deterministic. Reporting a number in the wrong mode makes results noisy and non-reproducible."},
+
+/* ============ TRANSFORMERS & ATTENTION ============ */
+{d:"tf", f:"What does a transformer do, in one sentence?",
+ b:"It takes a sequence of tokens and returns one vector per token, where each vector has been rewritten in the light of the whole sequence &mdash; the rewriting mechanism is attention."},
+{d:"tf", f:"What is a token in our setup?",
+ b:"A <strong>patch of 16 consecutive glucose readings</strong> &mdash; 80 minutes of data &mdash; turned into one 512-number vector. Not a word, not a single reading."},
+{d:"tf", f:"What does self-attention compute?",
+ b:"For every token, a similarity score against every other token; the scores are turned into weights that sum to 1; the token&rsquo;s new vector is the weighted average of the others&rsquo; value vectors. That is how an early patch can influence a later one directly."},
+{d:"tf", f:"What are queries, keys and values?",
+ b:"Three different projections of the same token. The <strong>query</strong> is what this token is looking for, the <strong>key</strong> is what each token advertises, and the <strong>value</strong> is what gets passed along once query and key match. Query dotted with key gives the weight; the weights average the values."},
+{d:"tf", f:"How do the head numbers multiply out in chronos-bolt-small?",
+ b:"<span class='num'>8</span> heads &times; <code>d_kv</code> <span class='num'>64</span> = <span class='num'>512</span> = <code>d_model</code>. Each head does attention in a 64-dimensional slice and the results are concatenated back to 512."},
+{d:"tf", f:"Why use several attention heads instead of one big one?",
+ b:"Different heads can attend to different patterns at once &mdash; one to the immediately preceding patch, another to a distant one &mdash; instead of one averaging blur. The cost is the same because the width is split, not multiplied."},
+{d:"tf", f:"What is the feed-forward part of a block, and how wide is ours?",
+ b:"After attention mixes information across tokens, a small two-layer network is applied to each token on its own. Ours widens 512 to <code>d_ff</code> <span class='num'>2048</span> (4&times;) and back. Attention moves information between positions; the feed-forward transforms it in place."},
+{d:"tf", f:"Encoder versus decoder, and which does our code use?",
+ b:"chronos-bolt-small has <span class='num'>6</span> encoder layers and <span class='num'>6</span> decoder layers. The encoder reads the input series; the decoder produces forecasts. <code>embed()</code> uses the <strong>encoder only</strong> plus the input patch embedding."},
+{d:"tf", f:"Why is attention a good fit for time series?",
+ b:"It compares any two positions in one operation, so a pattern 200 readings back can reach the present directly, without being passed hand to hand as in a step-by-step recurrent model. It also parallelises across the sequence."},
+{d:"tf", f:"Attention has no sense of order by itself. How is order supplied?",
+ b:"Position information must be added explicitly. T5-family models &mdash; which Chronos-Bolt follows &mdash; add learned <strong>relative position biases</strong> to the attention scores, so &ldquo;three patches earlier&rdquo; is representable without an absolute position vector."},
+{d:"tf", f:"Why not feed every glucose reading as its own token?",
+ b:"Attention cost grows with the <em>square</em> of the token count, and long sequences of single readings are also mostly redundant. Patching 16 readings into one token cuts the count 16&times; and lets each token summarise a stretch of curve."},
+{d:"tf", f:"What are residual connections and where do they matter?",
+ b:"Each block adds its output to its input (output = input + change) instead of replacing it, which lets gradients reach early layers and lets a block learn a small correction. Standard in every transformer, including this one."},
+{d:"tf", f:"What is the [REG] token?",
+ b:"An extra learned token appended <strong>last</strong> to the patch sequence &mdash; a scratch slot the model can use to hold summary information. It is the source of the &ldquo;+1&rdquo; in the token count from <code>embed()</code>."},
+{d:"tf", f:"What is an embedding, said simply?",
+ b:"A list of numbers standing in for something complicated, arranged so that similar things get similar lists. Ours: <span class='num'>512</span> numbers summarising the shape of one child&rsquo;s glucose window before one test."},
+
+/* ============ CHRONOS INTERNALS ============ */
+{d:"chronos", f:"Which checkpoint do we use, and how wide is it?",
+ b:"<code>amazon/chronos-bolt-small</code>, with <code>d_model</code> = <span class='num'>512</span>. That 512 is exactly why our feature matrix has 512 columns."},
+{d:"chronos", f:"Recite the chronos-bolt-small architecture numbers.",
+ b:"<span class='num'>6</span> encoder layers + <span class='num'>6</span> decoder layers, <span class='num'>8</span> heads, <code>d_kv</code> <span class='num'>64</span>, <code>d_model</code> <span class='num'>512</span>, <code>d_ff</code> <span class='num'>2048</span>, dropout <span class='num'>0.1</span>."},
+{d:"chronos", f:"How many parameters does chronos-bolt-small have, and how many do we actually use?",
+ b:"<span class='num'>47,718,016</span> in total, but <code>embed()</code> only touches <span class='num'>20,015,872</span> of them &mdash; the encoder plus the input patch embedding. The decoder and forecasting head are never run."},
+{d:"chronos", f:"What are the patch size and stride, and what follows from them?",
+ b:"Patch size <span class='num'>16</span>, stride <span class='num'>16</span> &mdash; equal, so patches are <strong>non-overlapping</strong>: readings 1&ndash;16, 17&ndash;32, and so on. No reading is used twice, and the token count is about T/16."},
+{d:"chronos", f:"What is context_length, and do we ever hit it?",
+ b:"<span class='num'>2048</span> readings &mdash; the most the model will look at, with anything longer truncated. Our longest window is <span class='num'>288</span> readings, so we never come close. Quote 288 versus 2048 when asked whether we truncate anything."},
+{d:"chronos", f:"What are prediction_length and the 9 quantiles for?",
+ b:"Bolt&rsquo;s forecasting head predicts <span class='num'>64</span> future steps at <span class='num'>9</span> quantiles (0.1 through 0.9), i.e. a spread of plausible futures rather than one line. <strong>We never use it</strong> &mdash; we stop at the encoder and take embeddings."},
+{d:"chronos", f:"What is vocab_size in Chronos-Bolt, and what is the trap?",
+ b:"<span class='num'>2</span>. Bolt has <strong>no value vocabulary at all</strong> &mdash; it patches raw numbers. The 4096-bin vocabulary belongs to <strong>Chronos-T5</strong>. Saying &ldquo;Chronos turns glucose into 4096 bins&rdquo; about Bolt is wrong."},
+{d:"chronos", f:"Chronos-T5 versus Chronos-Bolt: the core difference?",
+ b:"T5 <em>discretises</em>: it scales each series, buckets values into <span class='num'>4096</span> bins, and treats them as words in a language model. Bolt keeps values continuous, cuts them into patches of 16, and embeds each patch directly &mdash; a much cheaper encoder-decoder over patches."},
+{d:"chronos", f:"Give the exact output shape of embed().",
+ b:"<code>(B, ceil(min(T, 2048) / 16) + 1, 512)</code> &mdash; batch, tokens, width. The <code>min</code> is the 2048 context cap, the 16 is the patch size, and the +1 is the [REG] token appended last."},
+{d:"chronos", f:"Token counts for T = 3, 36, 45 and 288?",
+ b:"T=3 &rarr; <span class='num'>2</span>; T=36 &rarr; <span class='num'>4</span>; T=45 &rarr; <span class='num'>4</span>; T=288 &rarr; <span class='num'>19</span>. Work it as ceil(T/16) then add 1. Note 36 and 45 both give 3 patches, because ceil(2.25) = ceil(2.8125) = 3."},
+{d:"chronos", f:"Our shortest window is 3 readings. What does the model see?",
+ b:"One partly-empty patch plus the [REG] token = <span class='num'>2</span> tokens. Three readings is 15 minutes of glucose being asked to explain a test score &mdash; a good example of how thin the shortest inputs are."},
+{d:"chronos", f:"Besides token vectors, what else does embed() return?",
+ b:"<code>loc</code> and <code>scale</code> &mdash; the mean and population standard deviation used for instance normalization. Our code takes the tokens and <strong>discards</strong> those two, which is exactly where absolute glucose level is lost."},
+{d:"chronos", f:"Name the other checkpoints and their sizes.",
+ b:"bolt-tiny d=256 (<span class='num'>8.65M</span> parameters), bolt-mini d=384 (<span class='num'>21.2M</span>), bolt-small d=512 (<span class='num'>47.7M</span>), bolt-base d=768 (<span class='num'>205.3M</span>), and chronos-t5-small d=512 (<span class='num'>46.2M</span>)."},
+{d:"chronos", f:"What did the model-size sweep show?",
+ b:"Mean R&sup2;: tiny <span class='num'>&minus;0.049</span>, mini <span class='num'>&minus;0.052</span>, small <span class='num'>&minus;0.052</span>, base <span class='num'>&minus;0.063</span> (worst), t5-small <span class='num'>&minus;0.057</span>. Bigger was not better; the biggest was the worst."},
+{d:"chronos", f:"Why would the biggest checkpoint be the worst here?",
+ b:"bolt-base gives 768 features instead of 512, so with the same roughly 765 training rows there is even more freedom to fit noise, and no extra real relationship to find. More capacity without more signal costs accuracy."},
+{d:"chronos", f:"What is a time-series foundation model, in plain words?",
+ b:"One model pretrained on an enormous, varied pile of time series, meant to be reused on a new series without retraining &mdash; either to forecast directly or, as we do, to hand over its internal summary of the series."},
+{d:"chronos", f:"Why keep Chronos frozen rather than fine-tune it?",
+ b:"47,718,016 parameters against 956 sessions from 20 children. Fine-tuning would fit those children rather than glucose in general, and grouped cross-validation would expose it immediately. Frozen also means the 512 features are identical for both arms, so the arms differ only in the head."},
+{d:"chronos", f:"What does &ldquo;zero-shot&rdquo; mean, and is our use of Chronos zero-shot?",
+ b:"Zero-shot means applying the pretrained model to a new dataset with no training on it. Our use of the <em>encoder</em> is zero-shot &mdash; but we never ask it to forecast; we only take embeddings and train a separate small model on top."},
+{d:"chronos", f:"State the Arm A feature matrix and how it is built.",
+ b:"<span class='num'>(956, 512)</span>. For each session: parse the glucose list, drop missing values, run the frozen encoder, mean-pool over the token axis, keep 512 numbers. One row per session."},
+
+/* ============ ARM A VS ARM B ============ */
+{d:"arms", f:"Describe Arm A end to end.",
+ b:"Glucose window &rarr; frozen chronos-bolt-small <code>embed()</code> &rarr; mean-pool to 512 numbers &rarr; <code>StandardScaler</code> fitted on the training fold &rarr; Ridge or SVR chosen by inner 3-fold grid search &rarr; predicted score. Compared against <code>DummyRegressor(mean)</code>."},
+{d:"arms", f:"Describe Arm B end to end.",
+ b:"The same frozen 512 numbers &rarr; a small trainable head <code>LayerNorm(512) &rarr; Linear(512&rarr;256) &rarr; GELU &rarr; Dropout(0.1) &rarr; Linear(256&rarr;1)</code>, trained with AdamW (lr 1e-3, weight decay 0.01) on MSE over the z-scored target, batch 64, up to 100 epochs, early stopping on <code>val/loss</code> with patience 8."},
+{d:"arms", f:"What is identical between the two arms?",
+ b:"The data, the folds, and the <strong>frozen embeddings</strong>. Only the thing sitting on top differs &mdash; a classical regressor versus a small trained network. That is what makes the comparison fair."},
+{d:"arms", f:"Put the two arms side by side, with numbers.",
+ b:"Arm A: grids <span class='num'>&minus;0.089</span>, symbols <span class='num'>&minus;0.056</span>, prices <span class='num'>&minus;0.012</span>. Arm B: <span class='num'>&minus;0.218</span>, <span class='num'>&minus;0.281</span>, <span class='num'>&minus;0.168</span>. Arm B is worse on all three."},
+{d:"arms", f:"Why did the neural head lose to Ridge?",
+ b:"<span class='num'>132,609</span> trainable parameters on about <span class='num'>612</span> training rows &mdash; 217 parameters per example &mdash; with essentially no relationship to find. Extra flexibility can only fit noise here, and Ridge&rsquo;s penalty is a better match to a near-flat problem."},
+{d:"arms", f:"Which models were in the Arm A search?",
+ b:"Ridge with alpha in {0.1, 1, 10, 100, 1000}; SVR (RBF) with C in {0.1, 1, 10} and gamma in {scale, auto}; plain LinearRegression; and DummyRegressor(mean) as the yardstick."},
+{d:"arms", f:"Did we try gradient boosting? Answer carefully.",
+ b:"<strong>No.</strong> XGBoost is written into the code behind a try/except import, but the package is not installed in this environment, so it was silently skipped in every result. The tables contain no boosting numbers. Do not let a code reading catch you claiming otherwise."},
+{d:"arms", f:"How many models are trained per target &mdash; one multi-output model or three?",
+ b:"Three separate models, one per target (grids, symbols, prices). Nothing is shared between them except the input features."},
+{d:"arms", f:"Why does the hand-crafted 43-feature arm matter to the argument?",
+ b:"Because Chronos discards absolute glucose level while the hand-crafted features keep it (mean, time in range). Those features were also at or below zero (<span class='num'>&minus;0.065 / &minus;0.038 / &minus;0.009</span>), so &ldquo;no usable relationship&rdquo; holds for level-aware features too, not just shape."},
+{d:"arms", f:"What is the single best number in the project, and how do you present it?",
+ b:"Prices, Arm A, <span class='num'>&minus;0.012</span>. Present it as the best of a set that is uniformly at or below zero: the closest anything came to matching the average-guesser, without beating it."},
+{d:"arms", f:"How expensive is one Arm B run compared with Arm A?",
+ b:"Arm B trains <span class='num'>15</span> networks (5 folds &times; 3 targets), each at most 1,000 optimizer steps. Arm A fits <span class='num'>555</span> models (185 per target) but each is tiny. Both are cheap; the embedding pass over 956 sessions is the slow part, and it is done once."},
+{d:"arms", f:"If someone says &ldquo;you did not try hard enough&rdquo;, what did you actually vary?",
+ b:"Checkpoint (5 sizes, tiny to base plus t5-small), window length (2.0 h, 2.5 h, 3.0 h, full), pooling (mean versus last), PCA (8/16/32/128), the target definition (raw versus within-child centered), glucose subgroups, and two model families plus a neural head. Every variation stayed at or below zero."},
+{d:"arms", f:"What is the most defensible next change to the pipeline?",
+ b:"Make the lookback a fixed length so every session gets the same amount of history &mdash; today it ranges from 3 to 288 readings. Keeping <code>loc</code> and <code>scale</code> instead of discarding them is the other cheap change, since it restores absolute glucose level."},
+
+/* ============ RIGOR & STATISTICS ============ */
+{d:"rigor", f:"What is the shuffle test, and how many shuffles?",
+ b:"Scramble which score belongs to which session <span class='num'>200</span> times, destroying any real link, and rerun the whole evaluation each time. That gives a pile of results produced by random pairing alone. Then see where the real result falls in that pile."},
+{d:"rigor", f:"Which pipeline was used for the shuffle test, and why does that matter?",
+ b:"A fixed <code>StandardScaler &rarr; PCA(32) &rarr; Ridge(alpha=10)</code>, with no tuning, so all 201 runs are comparable. That is why the real R&sup2; here is <span class='num'>&minus;0.106</span> for grids rather than the <span class='num'>&minus;0.089</span> in the main table, which tuned alpha per fold. Know that difference or it looks like an inconsistency."},
+{d:"rigor", f:"Give the shuffle-test numbers.",
+ b:"Real: <span class='num'>&minus;0.106 / &minus;0.127 / &minus;0.085</span> (grids / symbols / prices). Scrambled mean: <span class='num'>&minus;0.049 / &minus;0.052 / &minus;0.051</span>, sd about <span class='num'>0.015</span>. p = <span class='num'>1.000 / 1.000 / 0.995</span>."},
+{d:"rigor", f:"What do p = 1.000, 1.000, 0.995 mean, said plainly?",
+ b:"&ldquo;Essentially every one of the 200 scrambled runs did as well as or better than the real one.&rdquo; The real result is not merely inside the range produced by random pairing &mdash; it sits at the bad end of it."},
+{d:"rigor", f:"Trap: does p = 1.000 mean the finding is strong?",
+ b:"No &mdash; the opposite. A small p would mean the real result stands out from random pairing. p = 1.000 means it does not stand out at all. Anyone who hears &ldquo;p = 1&rdquo; as &ldquo;highly significant&rdquo; has it backwards, and you should say so."},
+{d:"rigor", f:"Why is the scrambled mean about &minus;0.05 instead of 0?",
+ b:"Two reasons. The model still fits noise in its training rows and carries that error to the test fold. And with whole children held out, the training average is not exactly the test children&rsquo;s average. Both push cross-validated R&sup2; slightly below zero even when nothing is there."},
+{d:"rigor", f:"Give the known-signal check numbers from the same embeddings.",
+ b:"Predicting glucose standard deviation: R&sup2; <span class='num'>0.462</span>. Mean glucose: <span class='num'>0.070</span>. Fraction of readings above 180: <span class='num'>0.075</span>. Same features, same folds, same code."},
+{d:"rigor", f:"What does R&sup2; = 0.462 prove, and what does it not prove?",
+ b:"It proves the embeddings carry real information about the glucose curve and that our pipeline can recover it &mdash; so the flat cognition result is about the data, not broken code. It does <strong>not</strong> say anything about cognition being predictable."},
+{d:"rigor", f:"Why is mean glucose recovered at only 0.070, and does it hurt the argument?",
+ b:"Because instance normalization recentres and rescales each window, so absolute height is largely discarded &mdash; expected, not a bug. It narrows the claim to glucose <em>shape</em>, but the 43 hand-crafted features do carry level and were also flat, so the overall conclusion holds."},
+{d:"rigor", f:"What must you never claim about the built-in check?",
+ b:"Never say it &ldquo;passed&rdquo;. The code prints a pass line only if all three known-signal targets exceed 0.5, and only one does (0.462, 0.070, 0.075) &mdash; so that line never printed. Say: variability is recovered well, level is not, and here is why."},
+{d:"rigor", f:"Say the plain-words version of &ldquo;positive control&rdquo;.",
+ b:"&ldquo;A check where we ask the same pipeline to predict something we already know is in the data &mdash; how much the glucose moved around &mdash; to prove the machinery works. It got R&sup2; 0.462.&rdquo;"},
+{d:"rigor", f:"How do you talk about the limits of 20 participants without saying &ldquo;statistical power&rdquo;?",
+ b:"&ldquo;With 20 children and 956 sessions, only a fairly strong relationship would show up at all. A weak one would be invisible either way, so we cannot rule one out &mdash; we can only say nothing large is there.&rdquo;"},
+{d:"rigor", f:"What happened when you looked only at sessions with extreme glucose?",
+ b:"Nothing improved. Sessions with any reading below 70 (<span class='num'>201</span> sessions, 19 participants): <span class='num'>&minus;0.187 / &minus;0.094 / &minus;0.090</span>. Sessions entirely inside 70&ndash;180 (<span class='num'>143</span> sessions, 19 participants): <span class='num'>&minus;0.175 / &minus;0.296 / &minus;0.111</span>. Narrowing the group also shrinks the data, which makes results noisier."},
+{d:"rigor", f:"What is the wording rule about sessions and participants?",
+ b:"Always distinguish them. &ldquo;201 sessions from 19 participants&rdquo;, never &ldquo;201 patients&rdquo;. Counts of tests are <strong>sessions</strong>; counts of children are <strong>participants</strong>. Getting this wrong is the fastest way to sound careless."},
+{d:"rigor", f:"Give the three pieces of evidence that the low accuracy is real.",
+ b:"1) The ceiling: the strongest raw correlation anywhere is r = &minus;0.092, r&sup2; = 0.0085. 2) The shuffle test: scrambled scores give the same kind of number, p = 1.000 / 1.000 / 0.995. 3) The known-signal check: the same features recover glucose variability at R&sup2; 0.462, so the machinery works."},
+
+/* ============ SAY IT IN PLAIN WORDS ============ */
+{d:"plain", f:"Say it without jargon: &ldquo;we obtained a null result&rdquo;.",
+ b:"<span class='say'>&ldquo;The model was no better than guessing the average score.&rdquo;</span>Or: &ldquo;we got lower accuracy than the simplest baseline.&rdquo; The phrase &ldquo;null result&rdquo; is banned &mdash; it sounds like a verdict on the study rather than a description of the numbers."},
+{d:"plain", f:"Say it without jargon: &ldquo;the positive control passed&rdquo;.",
+ b:"<span class='say'>&ldquo;We asked the same pipeline to predict something we know is in the data &mdash; how much the glucose moved around &mdash; and it did that well, R&sup2; 0.462. So the machinery works.&rdquo;</span>And add the honest half: absolute level was not recovered (0.070), and the code&rsquo;s own pass line never printed."},
+{d:"plain", f:"Say it without jargon: &ldquo;there is no signal beyond chance&rdquo;.",
+ b:"<span class='say'>&ldquo;We scrambled which score went with which session 200 times. The real result looked like the scrambled ones &mdash; in fact slightly worse.&rdquo;</span>Concrete, checkable, and it names the procedure instead of the label."},
+{d:"plain", f:"Say it without jargon: &ldquo;the study lacks statistical power&rdquo;.",
+ b:"<span class='say'>&ldquo;With 20 children and 956 sessions, only a fairly strong relationship would have been visible. A weak one would be invisible either way.&rdquo;</span>That states the limitation without hiding behind a term."},
+{d:"plain", f:"Say it without jargon: &ldquo;our analysis has limited sensitivity&rdquo;.",
+ b:"<span class='say'>&ldquo;How small a real relationship could this study have spotted? Not a small one &mdash; the strongest raw link in the data explains under 1% of the variation.&rdquo;</span>Turn the abstract noun into the question it answers."},
+{d:"plain", f:"Say it without jargon: &ldquo;the pre-test window&rdquo;.",
+ b:"<span class='say'>&ldquo;The glucose readings recorded before that test.&rdquo;</span>And add the honest detail: how much of it there is varies from 3 readings to 288, median 36 &mdash; about 3 hours."},
+{d:"plain", f:"Say it without jargon: &ldquo;we pulled every lever&rdquo;.",
+ b:"<span class='say'>&ldquo;We changed the things that could plausibly matter and named each one: model size, window length, how we pooled the tokens, PCA, and whether we removed each child&rsquo;s own average.&rdquo;</span>Name the setting; never leave it as &ldquo;a lever&rdquo;."},
+{d:"plain", f:"Say it without jargon: &ldquo;R&sup2; was negative&rdquo;.",
+ b:"<span class='say'>&ldquo;The predictions were worse than always predicting the average score.&rdquo;</span>For &minus;0.089: &ldquo;our squared error was about 8.9% larger than the average-guesser&rsquo;s.&rdquo;"},
+{d:"plain", f:"Say it without jargon: &ldquo;we used a frozen encoder&rdquo;.",
+ b:"<span class='say'>&ldquo;We never changed Amazon&rsquo;s model. We only fed each glucose window through it and kept the 512 numbers it produced.&rdquo;</span>Add the reason: 47.7 million parameters against 956 sessions is no basis for retraining it."},
+{d:"plain", f:"Say it without jargon: &ldquo;grouped cross-validation by subject&rdquo;.",
+ b:"<span class='say'>&ldquo;We test on children the model has never seen &mdash; four children held out at a time, five times over, so every child is tested once.&rdquo;</span>Then the reason: otherwise the model could just remember a child&rsquo;s usual score."},
+{d:"plain", f:"Say it without jargon: &ldquo;instance normalization&rdquo;.",
+ b:"<span class='say'>&ldquo;Before the model looks at a glucose window it recentres and rescales that window against itself, so what survives is the shape of the curve rather than how high it sat.&rdquo;</span>Then the consequence: our result is about shape, not level."},
+{d:"plain", f:"Say it without jargon: &ldquo;a 512-dimensional embedding&rdquo;.",
+ b:"<span class='say'>&ldquo;512 numbers that summarise one child&rsquo;s glucose window before one test.&rdquo;</span>Stack all 956 of them and you get the table we do the statistics on: 956 rows, 512 columns."},
+{d:"plain", f:"Say it without jargon: &ldquo;the model overfitted&rdquo;.",
+ b:"<span class='say'>&ldquo;It learned its own training examples instead of something that carries over to new children.&rdquo;</span>Our example: plain linear regression on 512 features scored about &minus;3 on held-out children."},
+{d:"plain", f:"Say it without jargon: &ldquo;we had 956 patients&rdquo;.",
+ b:"<span class='say'>&ldquo;20 participants and 956 test sessions.&rdquo;</span>Children are participants; tests are sessions. The supervisor has already corrected this once &mdash; do not repeat it."},
+{d:"plain", f:"Say it without jargon: &ldquo;the variable window is a confound&rdquo;.",
+ b:"<span class='say'>&ldquo;The amount of glucose history differs from session to session &mdash; 3 readings in some, 288 in others.&rdquo;</span>That is one variable taking different values, not two variables tangled together, so &ldquo;confound&rdquo; is the wrong word here."},
+{d:"plain", f:"Say it without jargon: &ldquo;the model failed&rdquo;.",
+ b:"<span class='say'>&ldquo;The model was about as accurate as guessing the average, and we ran the checks that show that is what this data supports.&rdquo;</span>The finding is about the data, not a failure of the code &mdash; and you have three checks to prove it."},
+{d:"plain", f:"Someone asks: &ldquo;so what did you actually find?&rdquo; Answer in three sentences.",
+ b:"<span class='say'>&ldquo;Glucose in the hours before a test did not predict how well a child did on it. Nothing we tried beat guessing the average score &mdash; the best was &minus;0.012 on Prices. And the raw numbers say why: the strongest link between any glucose statistic and any score explains under 1% of the variation.&rdquo;</span>"},
+{d:"plain", f:"Someone asks: &ldquo;why use a foundation model if simple features did just as well?&rdquo;",
+ b:"<span class='say'>&ldquo;To check that the simple features were not the limitation. The pretrained model sees the whole curve shape rather than a few summary numbers, and it still found nothing &mdash; which makes the flat result much harder to blame on our choice of features.&rdquo;</span>"}
+];
+
+/* ------------------------------------------------------------------
+   State + persistence
+------------------------------------------------------------------ */
+const LS_KEY = "cgm-bootcamp-flashcards-v1";
+const deckByKey = {};
+DECKS.forEach(function(d){ deckByKey[d.key] = d; });
+
+/* stable id per card: deckkey-n */
+(function assignIds(){
+  const counters = {};
+  CARDS.forEach(function(c){
+    counters[c.d] = (counters[c.d] || 0) + 1;
+    c.id = c.d + "-" + counters[c.d];
+  });
+})();
+
+let store = {status:{}, theme:"auto", deck:"all", filter:"all"};
+try{
+  const raw = localStorage.getItem(LS_KEY);
+  if(raw){
+    const parsed = JSON.parse(raw);
+    if(parsed && typeof parsed === "object"){
+      store.status = parsed.status && typeof parsed.status === "object" ? parsed.status : {};
+      store.theme  = parsed.theme  || "auto";
+      store.deck   = parsed.deck   || "all";
+      store.filter = parsed.filter || "all";
+    }
+  }
+}catch(e){ /* private mode or corrupt value: run with defaults */ }
+
+function save(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(store)); }catch(e){}
+}
+
+const session = {seen:new Set(), flipped:new Set(), markedKnown:0, markedWork:0, started:new Date()};
+
+let order = [];
+let pos = 0;
+let revealed = false;
+let shuffled = false;
+
+/* ------------------------------------------------------------------
+   Elements
+------------------------------------------------------------------ */
+const el = {
+  deckSel:document.getElementById("deckSel"),
+  statusSel:document.getElementById("statusSel"),
+  shuffleBtn:document.getElementById("shuffleBtn"),
+  summaryBtn:document.getElementById("summaryBtn"),
+  resetBtn:document.getElementById("resetBtn"),
+  posPill:document.getElementById("posPill"),
+  cKnown:document.getElementById("cKnown"),
+  cWork:document.getElementById("cWork"),
+  cUnmarked:document.getElementById("cUnmarked"),
+  barFill:document.getElementById("barFill"),
+  card:document.getElementById("card"),
+  cardDeck:document.getElementById("cardDeck"),
+  cardId:document.getElementById("cardId"),
+  cardState:document.getElementById("cardState"),
+  front:document.getElementById("front"),
+  back:document.getElementById("back"),
+  hint:document.getElementById("hint"),
+  prevBtn:document.getElementById("prevBtn"),
+  flipBtn:document.getElementById("flipBtn"),
+  nextBtn:document.getElementById("nextBtn"),
+  knownBtn:document.getElementById("knownBtn"),
+  workBtn:document.getElementById("workBtn"),
+  overlay:document.getElementById("overlay"),
+  modalBody:document.getElementById("modalBody"),
+  closeModal:document.getElementById("closeModal"),
+  themeBtn:document.getElementById("themeBtn")
+};
+
+/* deck dropdown */
+(function fillDecks(){
+  const counts = {};
+  CARDS.forEach(function(c){ counts[c.d] = (counts[c.d]||0)+1; });
+  const all = document.createElement("option");
+  all.value = "all";
+  all.textContent = "All decks (" + CARDS.length + ")";
+  el.deckSel.appendChild(all);
+  DECKS.forEach(function(d){
+    const o = document.createElement("option");
+    o.value = d.key;
+    o.textContent = d.name + " (" + (counts[d.key]||0) + ")";
+    el.deckSel.appendChild(o);
+  });
+  el.deckSel.value = store.deck;
+  if(el.deckSel.value !== store.deck){ el.deckSel.value = "all"; store.deck = "all"; }
+  el.statusSel.value = store.filter;
+})();
+
+/* ------------------------------------------------------------------
+   Theme
+------------------------------------------------------------------ */
+function applyTheme(){
+  document.documentElement.setAttribute("data-theme", store.theme);
+  el.themeBtn.textContent = "Theme: " + store.theme;
+}
+el.themeBtn.addEventListener("click", function(){
+  store.theme = store.theme === "auto" ? "light" : (store.theme === "light" ? "dark" : "auto");
+  applyTheme(); save();
+});
+applyTheme();
+
+/* ------------------------------------------------------------------
+   Order building
+------------------------------------------------------------------ */
+function inDeck(c){ return store.deck === "all" || c.d === store.deck; }
+function passesFilter(c){
+  const s = store.status[c.id];
+  if(store.filter === "all") return true;
+  if(store.filter === "work") return s === "work";
+  if(store.filter === "known") return s === "known";
+  if(store.filter === "unmarked") return !s;
+  return true;
+}
+
+function buildOrder(keepCurrent){
+  const currentId = order.length ? CARDS[order[pos]].id : null;
+  order = [];
+  CARDS.forEach(function(c, i){ if(inDeck(c) && passesFilter(c)) order.push(i); });
+  if(shuffled){
+    for(let i = order.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = order[i]; order[i] = order[j]; order[j] = t;
+    }
+  }
+  pos = 0;
+  if(keepCurrent && currentId){
+    const at = order.findIndex(function(i){ return CARDS[i].id === currentId; });
+    if(at >= 0) pos = at;
+  }
+  revealed = false;
+  render();
+}
+
+/* ------------------------------------------------------------------
+   Render
+------------------------------------------------------------------ */
+function deckScopeCards(){ return CARDS.filter(inDeck); }
+
+function render(){
+  const scope = deckScopeCards();
+  let known = 0, work = 0, unmarked = 0;
+  scope.forEach(function(c){
+    const s = store.status[c.id];
+    if(s === "known") known++; else if(s === "work") work++; else unmarked++;
+  });
+  el.cKnown.textContent = known;
+  el.cWork.textContent = work;
+  el.cUnmarked.textContent = unmarked;
+
+  if(!order.length){
+    el.posPill.innerHTML = "Card <b>0</b> of <b>0</b>";
+    el.cardDeck.textContent = "No cards";
+    el.cardId.textContent = "";
+    el.cardState.textContent = "";
+    el.front.textContent = "No cards match this deck and filter. Try Show: All cards.";
+    el.back.hidden = true;
+    el.card.classList.remove("flipped");
+    el.barFill.style.width = "0%";
+    el.knownBtn.setAttribute("aria-pressed","false");
+    el.workBtn.setAttribute("aria-pressed","false");
+    el.knownBtn.classList.remove("on");
+    el.workBtn.classList.remove("on");
+    el.hint.textContent = "";
+    return;
+  }
+
+  const card = CARDS[order[pos]];
+  session.seen.add(card.id);
+
+  el.posPill.innerHTML = "Card <b>" + (pos + 1) + "</b> of <b>" + order.length + "</b>";
+  el.cardDeck.textContent = deckByKey[card.d].name;
+  el.cardId.textContent = card.id;
+
+  const st = store.status[card.id];
+  el.cardState.textContent = st === "known" ? "marked: know it" : (st === "work" ? "marked: needs work" : "unmarked");
+  el.knownBtn.setAttribute("aria-pressed", st === "known" ? "true" : "false");
+  el.workBtn.setAttribute("aria-pressed", st === "work" ? "true" : "false");
+  el.knownBtn.classList.toggle("on", st === "known");
+  el.workBtn.classList.toggle("on", st === "work");
+
+  el.front.innerHTML = card.f;
+  el.back.innerHTML = card.b;
+  el.back.hidden = !revealed;
+  el.card.classList.toggle("flipped", revealed);
+  el.card.setAttribute("aria-expanded", revealed ? "true" : "false");
+  el.flipBtn.textContent = revealed ? "Hide answer" : "Flip";
+  el.hint.innerHTML = revealed
+    ? "Mark it: <kbd>k</kbd> know it &middot; <kbd>n</kbd> needs work &middot; <kbd>&rarr;</kbd> next card."
+    : "Answer it out loud first, then press <kbd>space</kbd> to check.";
+
+  el.barFill.style.width = (((pos + 1) / order.length) * 100).toFixed(1) + "%";
+}
+
+/* ------------------------------------------------------------------
+   Actions
+------------------------------------------------------------------ */
+function flip(){
+  if(!order.length) return;
+  revealed = !revealed;
+  if(revealed) session.flipped.add(CARDS[order[pos]].id);
+  render();
+}
+function next(){
+  if(!order.length) return;
+  pos = (pos + 1) % order.length;
+  revealed = false;
+  render();
+}
+function prev(){
+  if(!order.length) return;
+  pos = (pos - 1 + order.length) % order.length;
+  revealed = false;
+  render();
+}
+function mark(kind){
+  if(!order.length) return;
+  const card = CARDS[order[pos]];
+  const cur = store.status[card.id];
+  if(cur === kind){
+    delete store.status[card.id];
+  }else{
+    store.status[card.id] = kind;
+    if(kind === "known") session.markedKnown++; else session.markedWork++;
+  }
+  save();
+  render();
+}
+function unmark(){
+  if(!order.length) return;
+  delete store.status[CARDS[order[pos]].id];
+  save(); render();
+}
+
+el.card.addEventListener("click", flip);
+el.card.addEventListener("keydown", function(e){
+  if(e.key === "Enter" || e.key === " " || e.key === "Spacebar"){ e.preventDefault(); flip(); }
+});
+el.flipBtn.addEventListener("click", flip);
+el.nextBtn.addEventListener("click", next);
+el.prevBtn.addEventListener("click", prev);
+el.knownBtn.addEventListener("click", function(){ mark("known"); });
+el.workBtn.addEventListener("click", function(){ mark("work"); });
+
+el.deckSel.addEventListener("change", function(){
+  store.deck = el.deckSel.value; save(); buildOrder(false);
+});
+el.statusSel.addEventListener("change", function(){
+  store.filter = el.statusSel.value; save(); buildOrder(false);
+});
+el.shuffleBtn.addEventListener("click", function(){
+  shuffled = !shuffled;
+  el.shuffleBtn.setAttribute("aria-pressed", shuffled ? "true" : "false");
+  el.shuffleBtn.classList.toggle("on", shuffled);
+  el.shuffleBtn.textContent = shuffled ? "Shuffled" : "Shuffle";
+  buildOrder(false);
+});
+el.resetBtn.addEventListener("click", function(){
+  if(!window.confirm("Clear every know it / needs work mark for all " + CARDS.length + " cards?")) return;
+  store.status = {}; save(); buildOrder(true);
+});
+
+/* ------------------------------------------------------------------
+   Session summary
+------------------------------------------------------------------ */
+function openSummary(){
+  const perDeck = DECKS.map(function(d){
+    const cards = CARDS.filter(function(c){ return c.d === d.key; });
+    let known = 0, work = 0;
+    cards.forEach(function(c){
+      const s = store.status[c.id];
+      if(s === "known") known++; else if(s === "work") work++;
+    });
+    return {deck:d, total:cards.length, known:known, work:work};
+  });
+
+  const workCards = CARDS.filter(function(c){ return store.status[c.id] === "work"; });
+  const totalKnown = perDeck.reduce(function(a,b){ return a + b.known; }, 0);
+  const totalWork  = perDeck.reduce(function(a,b){ return a + b.work; }, 0);
+  const mins = Math.max(1, Math.round((new Date() - session.started) / 60000));
+
+  let html = "";
+  html += "<p>This session: <strong>" + session.seen.size + "</strong> cards viewed, <strong>" + session.flipped.size +
+          "</strong> answers checked, <strong>" + session.markedKnown + "</strong> marked know it, <strong>" +
+          session.markedWork + "</strong> marked needs work, over about <strong>" + mins + "</strong> minute" + (mins === 1 ? "" : "s") + ".</p>";
+  html += "<p>Overall: <strong>" + totalKnown + "</strong> known, <strong>" + totalWork + "</strong> needing work, out of <strong>" +
+          CARDS.length + "</strong> cards.</p>";
+
+  html += "<h3>By deck (needs work / known / total)</h3><table><tbody>";
+  perDeck.forEach(function(r){
+    html += "<tr><td>" + r.deck.name + "</td><td>" + r.work + " / " + r.known + " / " + r.total + "</td></tr>";
+  });
+  html += "</tbody></table>";
+
+  const weak = perDeck.filter(function(r){ return r.work > 0; }).sort(function(a,b){ return b.work - a.work; }).slice(0,4);
+  if(weak.length){
+    html += "<h3>Reread these chapters next</h3><ul>";
+    weak.forEach(function(r){
+      html += "<li><strong>" + r.deck.name + "</strong> (" + r.work + " marked needs work) &rarr; review <code>" + r.deck.chapter + "</code></li>";
+    });
+    html += "</ul>";
+  }else{
+    html += "<h3>Nothing marked needs work</h3><p>Either you are ready, or you have not used the <kbd>n</kbd> key yet. Be honest with the marks &mdash; they are the whole point.</p>";
+  }
+
+  if(workCards.length){
+    html += "<h3>Cards to redo (first 12)</h3><ul>";
+    workCards.slice(0,12).forEach(function(c){
+      const plain = c.f.replace(/<[^>]+>/g, "");
+      html += "<li><code>" + c.id + "</code> &mdash; " + plain + "</li>";
+    });
+    html += "</ul><p style='color:var(--muted); font-size:.9rem'>Tip: set <em>Show</em> to <em>Needs work only</em> and run through just these.</p>";
+  }
+
+  el.modalBody.innerHTML = html;
+  el.overlay.classList.add("open");
+  el.closeModal.focus();
+}
+function closeSummary(){
+  el.overlay.classList.remove("open");
+  el.card.focus();
+}
+el.summaryBtn.addEventListener("click", openSummary);
+el.closeModal.addEventListener("click", closeSummary);
+el.overlay.addEventListener("click", function(e){ if(e.target === el.overlay) closeSummary(); });
+
+/* ------------------------------------------------------------------
+   Global keyboard
+------------------------------------------------------------------ */
+document.addEventListener("keydown", function(e){
+  if(e.metaKey || e.ctrlKey || e.altKey) return;
+  const tag = (e.target && e.target.tagName || "").toLowerCase();
+  if(tag === "input" || tag === "textarea" || tag === "select") return;
+  /* let a focused button handle space / enter itself, so it does not fire twice */
+  const isActivate = (e.key === " " || e.key === "Spacebar" || e.key === "Enter");
+  if(tag === "button" && isActivate) return;
+
+  if(e.key === "Escape"){ if(el.overlay.classList.contains("open")) closeSummary(); return; }
+  if(el.overlay.classList.contains("open")) return;
+
+  switch(e.key){
+    case " ": case "Spacebar": case "Enter":
+      if(e.target === el.card) return; /* card handler already did it */
+      e.preventDefault(); flip(); break;
+    case "ArrowRight": e.preventDefault(); next(); break;
+    case "ArrowLeft":  e.preventDefault(); prev(); break;
+    case "k": case "K": mark("known"); break;
+    case "n": case "N": mark("work"); break;
+    case "u": case "U": unmark(); break;
+    case "s": case "S": el.shuffleBtn.click(); break;
+    case "t": case "T": el.themeBtn.click(); break;
+    case "?": openSummary(); break;
+  }
+});
+
+/* go */
+buildOrder(false);
+el.card.focus();
+</script>
+</body>
+</html>

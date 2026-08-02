@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self-test &middot; CGM + Chronos bootcamp</title>
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#f6f6f4; --surface:#ffffff; --surface-2:#efefec;
+    --ink:#1b1b1a; --ink-soft:#3b3b39; --muted:#63635f;
+    --line:#e0dfdb; --line-strong:#c9c8c3;
+    --accent:#0f6f68; --accent-soft:#e2f0ee; --accent-ink:#0a4b46;
+    --wrong:#a3402e; --wrong-soft:#f7e9e5;
+    --shadow:0 1px 2px rgba(20,20,18,.05), 0 8px 24px rgba(20,20,18,.06);
+    --radius:14px;
+    --mono:ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#141413; --surface:#1d1d1c; --surface-2:#262624;
+      --ink:#edecea; --ink-soft:#d9d8d5; --muted:#a3a29e;
+      --line:#333331; --line-strong:#4a4a47;
+      --accent:#63cec1; --accent-soft:#12332f; --accent-ink:#9fe3da;
+      --wrong:#e79b8b; --wrong-soft:#33201b;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#141413; --surface:#1d1d1c; --surface-2:#262624;
+    --ink:#edecea; --ink-soft:#d9d8d5; --muted:#a3a29e;
+    --line:#333331; --line-strong:#4a4a47;
+    --accent:#63cec1; --accent-soft:#12332f; --accent-ink:#9fe3da;
+    --wrong:#e79b8b; --wrong-soft:#33201b;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:17px; line-height:1.6; -webkit-font-smoothing:antialiased}
+  a{color:var(--accent-ink); text-underline-offset:3px}
+  code{font-family:var(--mono); font-size:.92em; background:var(--surface-2); padding:.08em .34em; border-radius:5px}
+  .wrap{max-width:52rem; margin:0 auto; padding:0 1.1rem 4rem}
+  header.topbar{border-bottom:1px solid var(--line); background:var(--surface); position:sticky; top:0; z-index:20}
+  .topbar-inner{display:flex; flex-wrap:wrap; gap:.75rem 1.2rem; align-items:baseline; padding:.85rem 1.1rem; max-width:52rem; margin:0 auto}
+  .brand{font-weight:650; letter-spacing:-.01em; font-size:1.06rem; margin:0}
+  .brand span{color:var(--muted); font-weight:450}
+  .topnav{margin-left:auto; display:flex; gap:.9rem; align-items:center; font-size:.86rem; flex-wrap:wrap}
+  .chapters{font-size:.82rem; color:var(--muted); padding:0 1.1rem .8rem; max-width:52rem; margin:0 auto}
+  .chapters code{background:transparent; padding:0; color:var(--muted)}
+  button, select, input{font:inherit; color:inherit}
+  .btn{background:var(--surface); border:1px solid var(--line-strong); color:var(--ink); padding:.5rem .85rem; border-radius:9px; cursor:pointer; font-size:.92rem; line-height:1.3}
+  .btn:hover{border-color:var(--accent)}
+  .btn:focus-visible, select:focus-visible, input:focus-visible, .opt:focus-visible{outline:2.5px solid var(--accent); outline-offset:2px}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600}
+  :root[data-theme="dark"] .btn.primary{color:#08211f}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.primary{color:#08211f}}
+  .btn.ghost{background:transparent; border-color:transparent; color:var(--muted); padding:.4rem .5rem}
+  .btn.ghost:hover{color:var(--ink)}
+  .btn:disabled{opacity:.45; cursor:not-allowed}
+  select, input[type=text]{background:var(--surface); border:1px solid var(--line-strong); border-radius:9px; padding:.5rem .6rem; font-size:.95rem}
+  .panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.7rem 1.7rem 1.5rem; margin:1.4rem 0}
+  h2{font-size:1.24rem; margin:.1rem 0 .6rem; letter-spacing:-.01em}
+  h3{font-size:.86rem; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin:1.5rem 0 .5rem}
+  .lede{color:var(--ink-soft); margin:.2rem 0 1rem}
+  .topicgrid{display:grid; grid-template-columns:repeat(auto-fill, minmax(15rem, 1fr)); gap:.35rem .9rem; margin:.4rem 0 1rem}
+  .topicgrid label{display:flex; gap:.5rem; align-items:baseline; font-size:.95rem; padding:.18rem 0}
+  .topicgrid .n{color:var(--muted); font-size:.85rem}
+  .setuprow{display:flex; flex-wrap:wrap; gap:.9rem; align-items:center; margin:.6rem 0}
+  .setuprow label{font-size:.92rem; color:var(--muted); display:flex; gap:.45rem; align-items:center}
+  .meta{display:flex; flex-wrap:wrap; gap:.45rem; font-size:.84rem; margin:0 0 .9rem}
+  .tag{border:1px solid var(--line); background:var(--surface-2); border-radius:999px; padding:.16rem .7rem; color:var(--muted)}
+  .tag b{color:var(--ink); font-weight:650}
+  .tag.accent{background:var(--accent-soft); border-color:var(--accent); color:var(--accent-ink)}
+  .bar{height:5px; background:var(--surface-2); border-radius:999px; overflow:hidden; margin:0 0 1.3rem}
+  .bar > i{display:block; height:100%; background:var(--accent); width:0%; transition:width .2s ease}
+  .qtext{font-size:1.24rem; font-weight:600; line-height:1.45; margin:.2rem 0 1.2rem; letter-spacing:-.005em}
+  .opts{display:flex; flex-direction:column; gap:.55rem; margin:0 0 .4rem; padding:0; list-style:none}
+  .opt{display:flex; gap:.75rem; align-items:flex-start; width:100%; text-align:left; background:var(--surface);
+       border:1px solid var(--line-strong); border-radius:10px; padding:.7rem .85rem; cursor:pointer; font-size:1.02rem; line-height:1.45}
+  .opt:hover:not(:disabled){border-color:var(--accent)}
+  .opt .key{font-family:var(--mono); font-size:.8rem; border:1px solid var(--line-strong); border-radius:5px; padding:.02rem .32rem; color:var(--muted); flex:0 0 auto; margin-top:.18rem}
+  .opt.correct{border-color:var(--accent); background:var(--accent-soft)}
+  .opt.chosen-wrong{border-color:var(--wrong); background:var(--wrong-soft)}
+  .opt .mk{margin-left:auto; font-weight:700; flex:0 0 auto; font-size:.9rem}
+  .opt.correct .mk{color:var(--accent-ink)}
+  .opt.chosen-wrong .mk{color:var(--wrong)}
+  .numrow{display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; margin:.2rem 0 .6rem}
+  .numrow input{width:11rem; font-family:var(--mono)}
+  .unit{color:var(--muted); font-size:.92rem}
+  .fb{margin-top:1.1rem; border-top:1px solid var(--line); padding-top:1rem}
+  .fb .verdict{font-weight:700; letter-spacing:-.01em; margin:0 0 .45rem; font-size:1.05rem}
+  .fb.ok .verdict{color:var(--accent-ink)}
+  .fb.no .verdict{color:var(--wrong)}
+  .fb p{margin:.45rem 0; color:var(--ink-soft)}
+  .fb .num{font-family:var(--mono); font-weight:650; color:var(--ink); white-space:nowrap}
+  .fb .chapter{font-size:.88rem; color:var(--muted); margin-top:.7rem}
+  .rowbtns{display:flex; flex-wrap:wrap; gap:.55rem; align-items:center; margin-top:1.1rem}
+  .spacer{flex:1 1 auto}
+  kbd{font-family:var(--mono); font-size:.78rem; border:1px solid var(--line-strong); border-bottom-width:2px; background:var(--surface); border-radius:6px; padding:.05rem .35rem; color:var(--ink)}
+  table.res{width:100%; border-collapse:collapse; font-size:.95rem; margin-top:.3rem}
+  table.res th{text-align:left; font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:600; padding:.3rem 0; border-bottom:1px solid var(--line)}
+  table.res td{padding:.36rem 0; border-bottom:1px solid var(--line); vertical-align:top}
+  table.res td.n{text-align:right; font-family:var(--mono); white-space:nowrap}
+  table.res tr.weak td{color:var(--wrong)}
+  .score-big{font-size:2.5rem; font-weight:700; letter-spacing:-.02em; margin:.2rem 0 0}
+  .score-sub{color:var(--muted); margin:.1rem 0 1rem}
+  .hidden{display:none !important}
+  .legend{margin:1.4rem 0 0; padding-top:1rem; border-top:1px solid var(--line); font-size:.86rem; color:var(--muted)}
+  .legend ul{list-style:none; margin:.5rem 0 0; padding:0; display:flex; flex-wrap:wrap; gap:.45rem 1.3rem}
+  .legend li{display:flex; gap:.4rem; align-items:center}
+  .visually-hidden{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+  @media (max-width:640px){ body{font-size:16px} .qtext{font-size:1.12rem} .panel{padding:1.3rem 1.1rem} }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <h1 class="brand">Bootcamp self-test <span>&middot; glucose to cognition, with Chronos</span></h1>
+    <nav class="topnav" aria-label="Bootcamp navigation">
+      <a href="../README.md">&larr; Bootcamp README</a>
+      <a href="flashcards.html">Flashcards</a>
+      <button class="btn ghost" id="themeBtn" type="button" title="Switch light / dark / auto">Theme: auto</button>
+    </nav>
+  </div>
+  <p class="chapters">Sibling chapters in <code>docs/bootcamp/</code>: <code>01_FACT_SHEET.md</code> &middot; <code>02_ML_FROM_ZERO.md</code> &middot; <code>03_PREPROCESSING.md</code> &middot; <code>04_LINEAR_MODELS.md</code> &middot; <code>05_EVALUATION.md</code> &middot; <code>06_DEEP_LEARNING_CORE.md</code> &middot; <code>07_TRANSFORMERS.md</code> &middot; <code>08_CHRONOS.md</code> &middot; <code>10_RIGOR_AND_STATS.md</code> &middot; <code>11_WHAT_THE_SCORES_ARE.md</code> &middot; <code>12_EXAM_DRILL.md</code>.</p>
+</header>
+
+<main class="wrap">
+
+  <!-- ================= SETUP ================= -->
+  <section class="panel" id="setup" aria-labelledby="setupTitle">
+    <h2 id="setupTitle">Set up a round</h2>
+    <p class="lede">Answer out loud before you click. Every question reveals the reasoning, the arithmetic or the mechanism &mdash; not just a tick. All numbers come from <code>01_FACT_SHEET.md</code>.</p>
+
+    <h3>Topics</h3>
+    <div class="topicgrid" id="topicGrid" role="group" aria-label="Topics"></div>
+    <div class="setuprow">
+      <button class="btn ghost" id="allTopics" type="button">Select all</button>
+      <button class="btn ghost" id="noTopics" type="button">Clear all</button>
+    </div>
+
+    <h3>Round</h3>
+    <div class="setuprow">
+      <label for="countSel">Questions
+        <select id="countSel">
+          <option value="10">10</option>
+          <option value="20" selected>20</option>
+          <option value="30">30</option>
+          <option value="40">40</option>
+          <option value="999">All available</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="calcOnly"> Calculation questions only</label>
+      <label><input type="checkbox" id="shuffleOpt" checked> Shuffle question order</label>
+    </div>
+
+    <div class="rowbtns">
+      <button class="btn primary" id="startBtn" type="button">Start &nbsp;<kbd>enter</kbd></button>
+      <button class="btn hidden" id="resumeBtn" type="button">Resume unfinished round</button>
+      <span class="spacer"></span>
+      <button class="btn ghost" id="clearStats" type="button">Clear saved scores</button>
+    </div>
+    <p class="chapter" id="bestLine" style="color:var(--muted); font-size:.9rem; margin-top:1rem"></p>
+
+    <section class="legend" aria-label="Keyboard shortcuts">
+      <strong>Keyboard</strong>
+      <ul>
+        <li><kbd>1</kbd>&ndash;<kbd>4</kbd> answer</li>
+        <li><kbd>enter</kbd> submit / next</li>
+        <li><kbd>t</kbd> theme</li>
+      </ul>
+      <p style="margin-top:.9rem">There are <b id="qTotal">0</b> questions in the bank, of which <b id="qCalc">0</b> need real calculation. Scores are kept in this browser only (<code>localStorage</code>); the page makes no network requests and works offline.</p>
+    </section>
+  </section>
+
+  <!-- ================= QUIZ ================= -->
+  <section class="panel hidden" id="quiz" aria-labelledby="qHeading">
+    <div class="meta">
+      <span class="tag" id="tagPos">Question <b>1</b> of <b>20</b></span>
+      <span class="tag accent" id="tagScore">Score <b>0</b> / <b>0</b></span>
+      <span class="tag" id="tagTopic">Topic</span>
+      <span class="tag" id="tagType">Type</span>
+    </div>
+    <div class="bar"><i id="barFill"></i></div>
+
+    <h2 id="qHeading" class="visually-hidden">Question</h2>
+    <p class="qtext" id="qText">&nbsp;</p>
+
+    <ul class="opts" id="optList"></ul>
+
+    <div class="numrow hidden" id="numRow">
+      <label class="visually-hidden" for="numIn">Your numeric answer</label>
+      <input type="text" id="numIn" inputmode="decimal" autocomplete="off" placeholder="type a number">
+      <span class="unit" id="numUnit"></span>
+      <button class="btn primary" id="submitNum" type="button">Submit</button>
+    </div>
+
+    <div class="fb hidden" id="fb" role="status" aria-live="polite">
+      <p class="verdict" id="verdict"></p>
+      <div id="explain"></div>
+      <p class="chapter" id="chapterLine"></p>
+    </div>
+
+    <div class="rowbtns">
+      <button class="btn primary hidden" id="nextBtn" type="button">Next &nbsp;<kbd>enter</kbd></button>
+      <span class="spacer"></span>
+      <button class="btn ghost" id="quitBtn" type="button">End round</button>
+    </div>
+  </section>
+
+  <!-- ================= RESULTS ================= -->
+  <section class="panel hidden" id="results" aria-labelledby="resTitle">
+    <h2 id="resTitle">Round finished</h2>
+    <p class="score-big" id="resPct">0%</p>
+    <p class="score-sub" id="resSub"></p>
+
+    <h3>By topic</h3>
+    <table class="res" id="resTable">
+      <thead><tr><th>Topic</th><th style="text-align:right">Right</th><th>What to reread</th></tr></thead>
+      <tbody></tbody>
+    </table>
+
+    <div id="weakBox"></div>
+
+    <div class="rowbtns">
+      <button class="btn primary" id="retryWrong" type="button">Retry the ones I missed</button>
+      <button class="btn" id="againBtn" type="button">New round</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------
+   Topics -> chapter to reread
+------------------------------------------------------------------ */
+const TOPICS = [
+  {key:"data",    name:"Data & Numbers",                chapter:"01_FACT_SHEET.md"},
+  {key:"ml",      name:"ML Basics",                     chapter:"02_ML_FROM_ZERO.md"},
+  {key:"prep",    name:"Preprocessing & Normalization", chapter:"03_PREPROCESSING.md"},
+  {key:"eval",    name:"Evaluation & R2",               chapter:"05_EVALUATION.md"},
+  {key:"dl",      name:"Deep Learning Core",            chapter:"06_DEEP_LEARNING_CORE.md"},
+  {key:"tf",      name:"Transformers & Attention",      chapter:"07_TRANSFORMERS.md"},
+  {key:"chronos", name:"Chronos Internals",             chapter:"08_CHRONOS.md"},
+  {key:"arms",    name:"Arm A vs Arm B",                chapter:"04_LINEAR_MODELS.md and 06_DEEP_LEARNING_CORE.md"},
+  {key:"rigor",   name:"Rigor & Statistics",            chapter:"10_RIGOR_AND_STATS.md"},
+  {key:"plain",   name:"Say It In Plain Words",         chapter:"12_EXAM_DRILL.md"}
+];
+const topicByKey = {};
+TOPICS.forEach(function(t){ topicByKey[t.key] = t; });
+
+/* ------------------------------------------------------------------
+   Question bank.
+   t = topic, type = mc | tf | num, a = correct option index (mc/tf)
+   or the expected value (num), tol = numeric tolerance,
+   calc = needs arithmetic, why = explanation (trusted inline HTML).
+------------------------------------------------------------------ */
+const Q = [
+
+/* ---------------- DATA & NUMBERS ---------------- */
+{t:"data", type:"mc", q:"How many participants and how many sessions are in the analysed dataset?",
+ opts:["19 participants, 956 sessions","20 participants, 980 sessions","20 participants, 956 sessions","14 participants, 740 sessions"], a:2, calc:true,
+ why:"<p>740 Cohort 1 rows + 240 Updated Cohort 2 rows = <span class='num'>980</span> raw rows. Twenty-four rows had an empty glucose cell (23 + 1), so <span class='num'>980 &minus; 24 = 956</span> usable sessions. Participants: 14 + 6 = <span class='num'>20</span>.</p><p>Keep the units straight: 956 counts <em>sessions</em> (one child taking one test once), 20 counts <em>participants</em>. 980 is the raw row count before cleaning, and 19 was the participant count from an earlier version of the Cohort 2 file.</p>"},
+
+{t:"data", type:"num", q:"How many raw rows were dropped because the glucose cell was empty?", a:24, tol:0, unit:"rows", calc:true,
+ why:"<p><span class='num'>24</span> &mdash; 23 from Cohort 1 and 1 from the Updated Cohort 2 file. That is the entire difference between 980 raw rows and the <span class='num'>956</span> sessions analysed. Nothing was lost to the 3-reading minimum.</p>"},
+
+{t:"data", type:"num", q:"The median session has 36 glucose readings. How many hours of glucose is that?", a:3, tol:0.05, unit:"hours", calc:true,
+ why:"<p>One reading every 5 minutes, so 36 &times; 5 = 180 minutes = <span class='num'>3.0 hours</span>. The quick conversion is readings &divide; 12 = hours, because there are 12 readings per hour.</p><p>Worth pairing with the extremes: the shortest window is 3 readings (15 minutes) and the longest is 288 (24 hours).</p>"},
+
+{t:"data", type:"mc", q:"Why is the largest glucose value in the dataset exactly 400 mg/dL?",
+ opts:["We clipped anything above 400 as an outlier","It is the Dexcom G6 upper reporting limit, and 2.16% of readings sit exactly there","It is the highest glucose a child can physically reach","It is the largest number the CSV column can hold"], a:1,
+ why:"<p>40 and 400 are the device's reporting limits. A reading of 400 means &ldquo;400 or above&rdquo;, and <span class='num'>2.16%</span> of all 68,206 readings are pinned there (0.15% sit at 40).</p><p><strong>Trap:</strong> it is tempting to describe this as outlier removal. Nobody removed anything &mdash; the values are cut off by the sensor. That matters for us, because a model trying to read the shape of a high excursion is shown a flat line at 400 instead of the real peak.</p>"},
+
+{t:"data", type:"tf", q:"Outliers were removed from the glucose data before modelling.",
+ opts:["True","False"], a:1,
+ why:"<p>False. Every one of the 68,206 readings already lies inside [40, 400] because the sensor cannot report anything else, so there is nothing to remove. The honest description is the opposite problem: values are <strong>cut off at both ends</strong> &mdash; 2.16% at 400, 0.15% at 40.</p>"},
+
+{t:"data", type:"num", q:"At one reading every 5 minutes, how many readings does a full 24 hours contain?", a:288, tol:0, unit:"readings", calc:true,
+ why:"<p>12 readings per hour &times; 24 hours = <span class='num'>288</span>. That is exactly the maximum window length in our data, which is the giveaway that the longest windows are overnight gaps between one test and the next.</p>"},
+
+{t:"data", type:"mc", q:"Which of the three scores has only 10 distinct values?",
+ opts:["Grids","Symbols","Prices","All three"], a:2,
+ why:"<p>Prices: it is a percentage in steps of 10, so the only possible values are 0, 10, 20, &hellip; 90. Mean <span class='num'>41.59</span>, sd <span class='num'>17.17</span>, n = <span class='num'>936</span>.</p><p>Consequence worth saying: a target that only moves in steps of 10 is coarse, so part of its spread is granularity rather than anything glucose could explain. Grids (mean 0.478, sd 0.500) and Symbols (mean 1.846, sd 0.560) are continuous by comparison.</p>"},
+
+{t:"data", type:"mc", q:"Which score has the largest between-participant share of variance, and what does that share mean?",
+ opts:["Grids, 0.153 &mdash; most of its spread is which child it came from","Symbols, 0.376 &mdash; 37.6% of its spread is which child it came from","Prices, 0.077 &mdash; 92.3% of its spread is which child it came from","They are all above 0.5, which is why grouped folds are needed"], a:1,
+ why:"<p>Between-participant shares: grids <span class='num'>0.153</span>, symbols <span class='num'>0.376</span>, prices <span class='num'>0.077</span>. Symbols is the highest, meaning 37.6% of its variation is explained purely by which child produced it &mdash; and 62.4% is session-to-session within the same child.</p><p>This is also the reason grouped folds are needed at all: with a random row split, a model could recall a child's usual score.</p>"},
+
+{t:"data", type:"tf", q:"Most of the variation in the three scores comes from differences between children rather than differences between sessions of the same child.",
+ opts:["True","False"], a:1,
+ why:"<p>False, and this corrects an earlier claim in our own documents. The between-participant shares are <span class='num'>0.153 / 0.376 / 0.077</span>, so <strong>62% to 92% of the variation is within a child</strong>, session to session.</p><p>The consequence is subtle but important: predicting a new child is hard not mainly because children differ, but because most of the movement is session-level noise that glucose does not explain.</p>"},
+
+{t:"data", type:"num", q:"The strongest correlation between any simple glucose statistic and any score is r = -0.092. What fraction of the variance does that explain? Give r squared to 4 decimal places.",
+ a:0.0085, tol:0.0006, unit:"(r squared)", calc:true,
+ why:"<p>(&minus;0.092)&sup2; = <span class='num'>0.0085</span>, i.e. <strong>0.85% of the variation</strong>. That pairing is the fraction of readings below 70 versus Symbols.</p><p>This is the single most useful number you own, because it sets a ceiling <em>before any model exists</em>. No architecture can manufacture a relationship that is not in the numbers, so a flat result is the expected outcome rather than a suspicious one.</p>"},
+
+/* ---------------- ML BASICS ---------------- */
+{t:"ml", type:"mc", q:"R squared equals 0. Which model does that correspond to exactly?",
+ opts:["A model that predicts each child's own average","DummyRegressor(mean): always predict the training-set average score","A model whose predictions are pure random noise","Ridge with alpha = 0"], a:1,
+ why:"<p>R&sup2; = 1 &minus; SS<sub>res</sub>/SS<sub>tot</sub>, and SS<sub>tot</sub> is measured against the mean. So R&sup2; = 0 <em>is</em> the mean-guesser &mdash; <code>DummyRegressor(strategy=&quot;mean&quot;)</code>, which ignores the glucose entirely.</p><p>Random predictions would score far below 0. Predicting each child's own average would be a different (and unavailable) baseline, since in grouped folds we have never seen the test child before.</p>"},
+
+{t:"ml", type:"mc", q:"Which of these is a hyperparameter rather than a parameter?",
+ opts:["Ridge's 512 coefficients","Ridge's intercept","Ridge's alpha","The learned scale vector inside LayerNorm"], a:2,
+ why:"<p>Parameters are learned <em>from</em> the training data by the fitting procedure: Ridge's 512 coefficients and 1 intercept, and the neural head's 132,609 weights and biases (LayerNorm's scale and shift among them).</p><p>Hyperparameters are set around the fitting: alpha (searched over {0.1, 1, 10, 100, 1000}), SVR's C and gamma, learning rate 1e-3, weight decay 0.01, dropout 0.1, patience 8, batch size 64. In our runs alpha was chosen by an inner 3-fold grouped search &mdash; chosen by data, but never by the fitting of the model itself.</p>"},
+
+{t:"ml", type:"tf", q:"If the input features carry almost no information about the target, a large enough model with enough tuning can still find the relationship.",
+ opts:["True","False"], a:1,
+ why:"<p>False, and this is the central lesson of the project. A model can only re-express relationships already present in the numbers. Here the strongest raw link explains <span class='num'>0.85%</span> of the variation, and every model we tried &mdash; Ridge, SVR, a neural head, five Chronos sizes &mdash; landed at or below 0.</p><p>The failure mode of a bigger model in this situation is not discovery; it is confident wrong predictions. bolt-base (768 features) was the <em>worst</em> checkpoint at <span class='num'>&minus;0.063</span>.</p>"},
+
+{t:"ml", type:"mc", q:"Plain LinearRegression on all 512 Chronos features scored about R squared = -3 on held-out children. What does that demonstrate?",
+ opts:["A bug in the feature extraction","Overfitting: it fits its training rows and fails on new children","That linear models cannot do regression","That the targets are categorical, not numeric"], a:1,
+ why:"<p>Overfitting. With about 765 training rows and 512 free directions &mdash; roughly <span class='num'>1.5</span> rows per feature &mdash; an unrestrained least-squares fit can chase noise in almost any direction, so it reproduces its training answers and collapses on unseen children.</p><p>R&sup2; &asymp; &minus;3 means squared error about four times the mean-guesser's. It is why every model in the grid carries some restraint (Ridge's penalty, SVR's tolerance band, dropout and weight decay in Arm B).</p>"},
+
+{t:"ml", type:"mc", q:"What is regularization?",
+ opts:["Rescaling features so they have mean 0 and sd 1","Anything deliberately added that removes model freedom, trading fit for a better chance on new data","Removing outliers before fitting","Repeating training until the loss stops moving"], a:1,
+ why:"<p>Regularization is deliberately taking away freedom. Ours, all the same idea in different clothes: Ridge's alpha, weight decay 0.01, dropout 0.1, early stopping at patience 8, PCA down to 8/16/32 components, and picking a smaller checkpoint (bolt-tiny over bolt-base).</p><p>Rescaling features is standardisation, a different job (done here by <code>StandardScaler</code>).</p>"},
+
+{t:"ml", type:"tf", q:"Because Prices only takes the values 0, 10, ... 90, predicting it is a classification problem.",
+ opts:["True","False"], a:1,
+ why:"<p>False &mdash; a trap built out of a true fact. Prices really does have only 10 distinct values, but it is still a number on a scale where being close counts: predicting 40 when the truth is 50 is better than predicting 0. That is regression.</p><p>Classification would mean the 10 values were unordered labels, and it would make an error of one step as bad as an error of nine.</p>"},
+
+{t:"ml", type:"mc", q:"Why does the 43-feature hand-crafted comparison matter to the argument?",
+ opts:["It is faster to compute than Chronos embeddings","It keeps absolute glucose level, which Chronos largely discards, and it was also at or below 0","It is the model Mack used, so it must be included","It proves the Chronos features were buggy"], a:1,
+ why:"<p>Chronos-Bolt normalizes each window against itself, so absolute height is largely thrown away &mdash; from the same embeddings, mean glucose is recovered at only R&sup2; <span class='num'>0.070</span>. The hand-crafted features (mean, sd, time below 70, time in range, giving a (956, 43) matrix) <em>do</em> carry level.</p><p>They scored <span class='num'>&minus;0.065 / &minus;0.038 / &minus;0.009</span>. So &ldquo;no usable relationship&rdquo; holds for level-aware features too, not just for curve shape. That closes an obvious hole in the story.</p>"},
+
+/* ---------------- PREPROCESSING & NORMALIZATION ---------------- */
+{t:"prep", type:"mc", q:"How does Chronos-Bolt normalize a series before the transformer sees it?",
+ opts:["Divide by the mean of the absolute values, with no centering","Subtract a NaN-aware mean over time, then divide by the population standard deviation (ddof = 0)","Scale linearly into [0, 1] using the minimum and maximum","Assign each value to one of 4096 bins"], a:1,
+ why:"<p>Instance normalization, per series: <code>loc</code> = NaN-aware mean over time, <code>scale</code> = population standard deviation with <code>ddof=0</code>, then every value becomes (x &minus; loc) / scale. Each window is judged against itself.</p><p>The other options are real recipes belonging elsewhere: mean absolute scaling with no centering is <strong>Chronos-T5</strong>, and 4096 bins is T5's value vocabulary. Bolt's <code>vocab_size</code> is 2 &mdash; it has no value vocabulary at all.</p>"},
+
+{t:"prep", type:"mc", q:"embed() returns loc and scale alongside the token vectors. What does our code do with them?",
+ opts:["Uses them to rescale the predictions back into mg/dL","Appends them to the feature matrix as two extra columns","Discards them, so absolute glucose level never reaches the regressor","Uses them to fit the StandardScaler"], a:2,
+ why:"<p>They are discarded. So the 512 features describe the <em>shape</em> of the window after it has been recentred and rescaled, not how high it sat.</p><p>Evidence that this really bites: from the same embeddings, glucose variability is recovered at R&sup2; <span class='num'>0.462</span> but mean glucose only <span class='num'>0.070</span>. Keeping loc and scale is a one-line change and an obvious thing to try next &mdash; and the reason it is not fatal to the conclusion is that the 43 hand-crafted features do encode level and were flat too.</p>"},
+
+{t:"prep", type:"num", q:"A session's Grids score is 1.478. With mean 0.478 and sd 0.500, what is its z-score?", a:2, tol:0.02, unit:"standard deviations", calc:true,
+ why:"<p>z = (1.478 &minus; 0.478) / 0.500 = 1.000 / 0.500 = <span class='num'>2.0</span>. The session is two standard deviations above the average Grids score &mdash; and since lower is better on all three tests, two standard deviations <em>above</em> average means notably <strong>worse</strong> than average.</p>"},
+
+{t:"prep", type:"num", q:"A session's Symbols score is 2.406 seconds. With mean 1.846 and sd 0.560, what is its z-score?", a:1, tol:0.02, unit:"standard deviations", calc:true,
+ why:"<p>(2.406 &minus; 1.846) / 0.560 = 0.560 / 0.560 = <span class='num'>1.0</span>. Symbols is a response time in seconds, so a positive z means slower, which again means worse.</p><p>Arm B trains on exactly this transformation of the target: the MSE is computed on z-scored scores so one learning rate works for grids (spread 0&ndash;2.39) and prices (0&ndash;90) alike.</p>"},
+
+{t:"prep", type:"num", q:"Compute the population standard deviation (ddof = 0) of the three readings 40, 45, 50. Give it to two decimal places.",
+ a:4.0825, tol:0.02, unit:"mg/dL", calc:true,
+ why:"<p>Mean = 45. Deviations &minus;5, 0, +5; squared 25, 0, 25; sum 50. <strong>ddof = 0 divides by N</strong>: 50 / 3 = 16.667, and the square root is <span class='num'>4.08</span>.</p><p><strong>Trap:</strong> the sample version (ddof = 1) divides by N &minus; 1 = 2, giving 25 and a standard deviation of 5.00. Chronos-Bolt uses ddof = 0, so 4.08 is the one that matches what the model actually does.</p>"},
+
+{t:"prep", type:"mc", q:"StandardScaler is fitted on which rows?",
+ opts:["All 956 sessions, once, before cross-validation","The training fold only, then applied to the test fold","The test fold, so the test features are centred","Each participant separately"], a:1,
+ why:"<p>The training fold only. Fitting on all 956 sessions would let the means and spreads of the four held-out children influence the pipeline, so the reported score would be flattered by information the model would not have when facing a genuinely new child.</p><p>Same principle governs the inner 3-fold search that picks alpha: every decision is made inside the training fold.</p>"},
+
+{t:"prep", type:"tf", q:"Missing glucose readings inside a window are filled in by interpolation before the model sees them.",
+ opts:["True","False"], a:1,
+ why:"<p>False. Missing values are <strong>dropped</strong>, and the window simply becomes one reading shorter. Nothing is imputed by our loader.</p><p>Say this precisely, because filling gaps would be an assumption we did not make. Separately, 24 whole rows were dropped for having an empty glucose cell, which is how 980 raw rows became 956 sessions.</p>"},
+
+{t:"prep", type:"mc", q:"What did adding PCA to the Arm A pipeline do?",
+ opts:["Nothing measurable","Keeping 8, 16 or 32 components helped slightly (mean R squared -0.052 to -0.045); 128 gave the gain back","It turned the result positive for Prices","It made every target worse"], a:1,
+ why:"<p>Keeping a handful of components helped a little &mdash; mean R&sup2; from <span class='num'>&minus;0.052</span> to <span class='num'>&minus;0.045</span> at 8, 16 or 32 components &mdash; and 128 components gave the improvement back.</p><p>Mechanism: PCA compresses 512 correlated columns into a few high-variance directions, which is regularization by another name. It reduces the freedom to fit noise. It never turned anything positive.</p>"},
+
+{t:"prep", type:"mc", q:"How do a session's token vectors become one row of the feature matrix?",
+ opts:["Concatenate them, giving a variable-length row","Mean-pool over the token axis, giving 512 numbers","Take the [REG] token and drop the rest","Sum them and divide by 512"], a:1,
+ why:"<p>Mean pooling over the token axis: average the token vectors elementwise, leaving one <span class='num'>512</span>-number row per session. That is what makes rows comparable when windows contain 2 tokens or 19.</p><p>We tested the alternative: taking the last token scored <span class='num'>&minus;0.060</span> against mean pooling's <span class='num'>&minus;0.052</span>. Concatenating would give variable-length rows, which a fixed-width regressor cannot accept.</p>"},
+
+/* ---------------- EVALUATION & R2 ---------------- */
+{t:"eval", type:"num", q:"On a test fold the sum of squared prediction errors is 108.9 and the sum of squared distances from the mean is 100. What is R squared? Give three decimal places.",
+ a:-0.089, tol:0.002, unit:"R squared", calc:true,
+ why:"<p>R&sup2; = 1 &minus; SS<sub>res</sub>/SS<sub>tot</sub> = 1 &minus; 108.9/100 = <span class='num'>&minus;0.089</span> &mdash; exactly our Grids result in Arm A.</p><p>Which gives you the sentence to say out loud: <em>our squared error was about 8.9% larger than if we had simply predicted the average score for every session.</em></p>"},
+
+{t:"eval", type:"num", q:"Test sessions per fold are 189, 193, 191, 191 and 192. What do they sum to?", a:956, tol:0, unit:"sessions", calc:true,
+ why:"<p>189 + 193 + 191 + 191 + 192 = <span class='num'>956</span> &mdash; every session is in exactly one test fold, so the five test sets tile the dataset. The matching train counts are 767, 763, 765, 765, 764, and each train + test pair also sums to 956.</p><p>This is a good check to run live if someone doubts the split: it proves nothing was double-counted or dropped.</p>"},
+
+{t:"eval", type:"mc", q:"What does a negative R squared mean?",
+ opts:["The correlation is negative","The predictions are worse than always predicting the average score","There is a sign error in the code","The model predicts values below zero"], a:1,
+ why:"<p>Worse than the mean-guesser. R&sup2; = 1 &minus; SS<sub>res</sub>/SS<sub>tot</sub>, so once your squared error exceeds the mean's squared error the ratio passes 1 and R&sup2; goes below 0.</p><p>It has nothing to do with the sign of a correlation, and nothing to do with negative predictions. Our Arm A results run <span class='num'>&minus;0.089 / &minus;0.056 / &minus;0.012</span>; Arm B runs <span class='num'>&minus;0.218 / &minus;0.281 / &minus;0.168</span>.</p>"},
+
+{t:"eval", type:"tf", q:"R squared always falls between 0 and 1.",
+ opts:["True","False"], a:1,
+ why:"<p>False &mdash; a very common trap. The 0-to-1 bound only holds when you evaluate a least-squares fit on the very rows it was fitted to. On held-out data there is no lower bound at all.</p><p>Ours are all negative on held-out children, and plain LinearRegression on 512 features reached about <span class='num'>&minus;3</span>.</p>"},
+
+{t:"eval", type:"mc", q:"How does GroupKFold with 5 folds split our 20 participants?",
+ opts:["5 participants held out per fold","4 participants held out per fold, so each child is tested exactly once","Sessions are split at random, ignoring participants","4 sessions held out per fold"], a:1,
+ why:"<p>20 participants &divide; 5 folds = <span class='num'>4</span> participants held out per fold, and every child is in the test set exactly once. The corresponding session counts are 189/193/191/191/192 test against 767/763/765/765/764 train.</p><p>Grouping is what makes the question &ldquo;can we predict a child the model has never seen?&rdquo; Random session splits would let the model recall a child's usual score, and between-participant shares of 0.077 to 0.376 mean that shortcut really exists.</p>"},
+
+{t:"eval", type:"mc", q:"Which data chose Ridge's alpha?",
+ opts:["The 4 test participants of each fold","An inner 3-fold grouped search inside that fold's 16 training participants","A single search over all 956 sessions, run once","It was fixed at alpha = 10 throughout"], a:1,
+ why:"<p>An inner <span class='num'>3-fold</span> grouped <code>GridSearchCV</code>, scored on <code>neg_mean_squared_error</code>, run inside each outer training fold. The 4 test participants play no part in any decision.</p><p>Why nest it: if alpha had been picked using the test folds, the reported R&sup2; would be the best of several attempts rather than an estimate for a new child. Note the exception &mdash; the shuffle test deliberately fixes the pipeline at <code>PCA(32) &rarr; Ridge(alpha=10)</code> so all 201 runs are comparable.</p>"},
+
+{t:"eval", type:"tf", q:"The inner grid search was scored on R squared.",
+ opts:["True","False"], a:1,
+ why:"<p>False &mdash; it was scored on <code>neg_mean_squared_error</code>. scikit-learn's search always <em>maximises</em> its score, so mean squared error is fed in negated. The minus sign is bookkeeping, not a result.</p><p>R&sup2;, RMSE and MAE are what we report afterwards on the untouched test fold.</p>"},
+
+{t:"eval", type:"num", q:"Ridge has 5 alpha settings and the inner search uses 3 folds, then refits once on the whole training fold. Across the 5 outer folds, how many Ridge fits is that?",
+ a:80, tol:0, unit:"fits", calc:true,
+ why:"<p>5 settings &times; 3 inner folds = 15, plus 1 refit = 16 per outer fold, &times; 5 outer folds = <span class='num'>80</span>.</p><p>The rest of one target's budget: SVR 6 settings &times; 3 = 18, +1 = 19, &times; 5 = 95; plus 5 baseline and 5 plain-linear fits, giving <span class='num'>185</span> fits per target and <span class='num'>555</span> across the three targets.</p>"},
+
+{t:"eval", type:"mc", q:"What is the best (least bad) real result in the project, and how should it be presented?",
+ opts:["Grids at -0.089, presented as near-zero","Prices at -0.012, presented as the closest anything came to matching the average-guesser without beating it","Glucose variability at 0.462, presented as the headline","Symbols at -0.056, presented as a weak positive"], a:1,
+ why:"<p>Prices, Arm A, <span class='num'>&minus;0.012</span>. It is still below zero, so the honest framing is that it came closest to the average-guesser without beating it.</p><p>The 0.462 is a different question entirely &mdash; predicting glucose variability from the same embeddings &mdash; and quoting it as a cognition result would be a serious misstatement.</p>"},
+
+{t:"eval", type:"mc", q:"What question does within-participant centering ask, and what did it give?",
+ opts:["Can we predict a new child's average score? Results -0.089 / -0.056 / -0.012","Which of this child's own sessions were better than usual? Results -0.018 / -0.022 / -0.002","Does glucose differ between cohorts? Results 0.153 / 0.376 / 0.077","Can we predict glucose from the score? Result 0.462"], a:1,
+ why:"<p>Subtract each child's own average score, and the target becomes &ldquo;how did this session compare with this child's usual?&rdquo; Results: <span class='num'>&minus;0.018 / &minus;0.022 / &minus;0.002</span>.</p><p>Much closer to zero, still not above it. Closer is expected: removing each child's level removes the part of the spread the model was never going to get right. It does not become a win.</p>"},
+
+/* ---------------- DEEP LEARNING CORE ---------------- */
+{t:"dl", type:"num", q:"How many parameters does Linear(512 -> 256) have, counting the bias?", a:131328, tol:0, unit:"parameters", calc:true,
+ why:"<p>Weights 256 &times; 512 = <span class='num'>131,072</span>, plus one bias per output unit = <span class='num'>256</span>. Total <span class='num'>131,328</span>.</p><p>General rule: in &times; out weights plus out biases. It is 99% of the head's total, which is why the head's parameter count is dominated by this one layer.</p>"},
+
+{t:"dl", type:"num", q:"How many trainable parameters does the whole Arm B head contain?", a:132609, tol:0, unit:"parameters", calc:true,
+ why:"<p><span class='num'>132,609</span>. Add them up: LayerNorm 512 + 512 = 1,024; Linear(512&rarr;256) 131,072 + 256 = 131,328; Linear(256&rarr;1) 256 + 1 = 257. Total 1,024 + 131,328 + 257 = <span class='num'>132,609</span>.</p><p>Be able to do that out loud &mdash; it is the most likely &ldquo;show me you understand your own model&rdquo; question.</p>"},
+
+{t:"dl", type:"num", q:"With about 612 training rows and batch size 64, how many batches are in one epoch?", a:10, tol:0, unit:"batches", calc:true,
+ why:"<p>612 / 64 = 9.56, and the last partial batch still counts, so ceil(9.56) = <span class='num'>10</span> batches. One batch is one optimizer update, so <strong>1 epoch = 10 steps</strong>.</p><p>Where 612 comes from: 956 sessions, 5 grouped folds &rarr; train &asymp; 765, minus a 20% grouped validation split (&asymp; 153) &rarr; &asymp; 612.</p>"},
+
+{t:"dl", type:"num", q:"At 10 optimizer steps per epoch and max_epochs = 100, what is the largest number of steps a single Arm B training run can take?",
+ a:1000, tol:0, unit:"steps", calc:true,
+ why:"<p>10 &times; 100 = <span class='num'>1,000</span> steps, and that is an upper bound only &mdash; early stopping (monitor <code>val/loss</code>, patience 8) usually ends training well before epoch 100.</p><p>For scale: 1,000 updates for 132,609 parameters is a very short training run, which is deliberate. More steps would only let the head memorise its 612 rows faster.</p>"},
+
+{t:"dl", type:"num", q:"132,609 trainable parameters over about 612 training rows. How many parameters per training example? Round to the nearest whole number.",
+ a:217, tol:1.5, unit:"parameters per row", calc:true,
+ why:"<p>132,609 / 612 = 216.7, so about <span class='num'>217&times;</span> more parameters than training examples.</p><p>This single ratio is the one-line explanation for why Arm B is the worst arm (<span class='num'>&minus;0.218 / &minus;0.281 / &minus;0.168</span>): vastly more freedom than 612 rows can pin down. Dropout 0.1, weight decay 0.01 and early stopping at patience 8 are the three things keeping it from memorising outright.</p>"},
+
+{t:"dl", type:"num", q:"How many parameters does LayerNorm(512) own?", a:1024, tol:0, unit:"parameters", calc:true,
+ why:"<p><span class='num'>1,024</span> &mdash; a learned scale of length 512 plus a learned shift of length 512.</p><p>The normalising itself (subtract the row's mean across its 512 values, divide by the row's spread) has no parameters; only the scale and shift do.</p>"},
+
+{t:"dl", type:"mc", q:"What does Dropout(0.1) do at evaluation time?",
+ opts:["Zeroes 10% of the hidden values, as in training","Nothing &mdash; it is switched off and no values are dropped","Zeroes 10% of the inputs instead of the hidden values","Scales the predictions down by 10%"], a:1,
+ why:"<p>Nothing. Dropout is a training-time device: it randomly zeroes about 10% of the 256 hidden values on each pass so the head cannot lean on any single one. At evaluation it is off and behaviour is deterministic.</p><p>Forgetting to switch to evaluation mode is a classic bug &mdash; it makes reported numbers noisy and non-reproducible.</p>"},
+
+{t:"dl", type:"mc", q:"What does EarlyStopping with patience 8 on val/loss do?",
+ opts:["Stops after 8 epochs no matter what","Stops when the validation loss has not improved for 8 consecutive epochs","Stops when the training loss stops improving for 8 epochs","Reduces the learning rate after 8 epochs"], a:1,
+ why:"<p>It watches the loss on the held-out validation rows (20% of the outer-training participants, split by group) and stops once eight consecutive epochs pass with no improvement.</p><p>It is regularization: it caps how far the head can adapt to its own training rows. Watching <em>training</em> loss instead would defeat the purpose &mdash; training loss keeps falling while the model memorises.</p>"},
+
+{t:"dl", type:"tf", q:"Arm B fine-tunes the Chronos encoder together with its head.",
+ opts:["True","False"], a:1,
+ why:"<p>False. The encoder is frozen in <strong>both</strong> arms &mdash; run under <code>torch.no_grad()</code>, weights never updated. Only the <span class='num'>132,609</span>-parameter head trains.</p><p>Which is exactly what makes the two arms comparable: identical 512 features, identical folds, different head. And fine-tuning 47,718,016 parameters on 956 sessions from 20 children would fit those children rather than glucose in general.</p>"},
+
+{t:"dl", type:"mc", q:"Why does the head need GELU between its two linear layers?",
+ opts:["To keep the outputs positive","Because two linear layers with nothing between them collapse into a single linear layer","To normalize the hidden values","To prevent overfitting"], a:1,
+ why:"<p>Without a nonlinearity, Linear(512&rarr;256) followed by Linear(256&rarr;1) is algebraically just one linear map from 512 to 1 &mdash; the second layer buys nothing. The activation is what makes depth worth having.</p><p>GELU passes large positives through nearly unchanged and squashes negatives smoothly toward zero. Normalising is LayerNorm's job; restraint is dropout's and weight decay's.</p>"},
+
+{t:"dl", type:"tf", q:"A larger learning rate always gets you to a better answer faster.",
+ opts:["True","False"], a:1,
+ why:"<p>False. The learning rate is the size of each downhill step. Too large and the updates overshoot, so the loss bounces or diverges; too small and training crawls and may stop early for the wrong reason.</p><p>Ours is <span class='num'>1e-3</span> with AdamW, which additionally adapts the effective step per parameter from the recent gradient history &mdash; parameters with noisy gradients move more cautiously.</p>"},
+
+/* ---------------- TRANSFORMERS & ATTENTION ---------------- */
+{t:"tf", type:"mc", q:"What is one token in our Chronos setup?",
+ opts:["One glucose reading","A patch of 16 consecutive glucose readings","One session","One of 4096 glucose bins"], a:1,
+ why:"<p>A patch of <span class='num'>16</span> consecutive readings &mdash; 80 minutes of glucose &mdash; embedded into one 512-number vector. Patch size 16 with stride 16 means patches do not overlap: readings 1&ndash;16, then 17&ndash;32, and so on.</p><p>The 4096 bins belong to Chronos-T5, a different family member. Bolt keeps values continuous and has <code>vocab_size</code> 2.</p>"},
+
+{t:"tf", type:"num", q:"chronos-bolt-small has 8 attention heads with d_kv = 64. What do those multiply to, and which model dimension does it match?",
+ a:512, tol:0, unit:"= d_model", calc:true,
+ why:"<p>8 &times; 64 = <span class='num'>512</span> = <code>d_model</code>. Each head performs attention in its own 64-dimensional slice and the results are concatenated back to 512.</p><p>So multiple heads cost roughly the same as one wide head: the width is split, not multiplied. The benefit is that different heads can track different patterns instead of averaging everything into one blur.</p>"},
+
+{t:"tf", type:"mc", q:"What does self-attention compute for a given token?",
+ opts:["A weighted average of the other tokens' value vectors, with weights from query-key similarity","The difference between this token and the next one","A convolution over a fixed window of neighbouring tokens","The token's position in the sequence"], a:0,
+ why:"<p>Each token produces a query, a key and a value. The query is compared (dot product) with every key to give similarity scores; those become weights that sum to 1; the token's new vector is the weighted average of all the value vectors.</p><p>That is why a patch 200 readings back can influence the present directly, in one operation, instead of being passed hand to hand as in a recurrent model.</p>"},
+
+{t:"tf", type:"tf", q:"Chronos-Bolt turns each glucose value into one of 4096 discrete bins before the transformer sees it.",
+ opts:["True","False"], a:1,
+ why:"<p>False &mdash; the most common Chronos mix-up. <strong>Chronos-T5</strong> discretises: it scales the series, buckets values into 4096 bins and treats them as tokens in a language model. <strong>Chronos-Bolt</strong> keeps values continuous, cuts them into patches of 16 and embeds each patch directly.</p><p>The giveaway is that bolt-small's <code>vocab_size</code> is <span class='num'>2</span> &mdash; there is no value vocabulary at all.</p>"},
+
+{t:"tf", type:"num", q:"chronos-bolt-small has d_model 512 and d_ff 2048. How many times wider is the feed-forward layer than the model dimension?",
+ a:4, tol:0, unit:"times", calc:true,
+ why:"<p>2048 / 512 = <span class='num'>4</span>&times;, the standard transformer ratio. Inside each block, attention mixes information <em>between</em> positions; the feed-forward network then transforms each token on its own, widening 512 to 2048 and back.</p>"},
+
+{t:"tf", type:"mc", q:"Why patch 16 readings into one token instead of giving each reading its own token?",
+ opts:["Because the model cannot handle more than 128 tokens","Because attention cost grows with the square of the token count, and neighbouring readings are largely redundant","Because glucose is measured every 16 minutes","Because 16 is the number of attention heads"], a:1,
+ why:"<p>Attention compares every token with every other, so its cost grows with the <em>square</em> of the token count. Patching cuts the count 16&times; and each token then summarises a stretch of curve rather than a single point.</p><p>For us: a 288-reading window becomes 18 patches plus the [REG] token = <span class='num'>19</span> tokens. bolt-small has 8 heads (not 16) and readings arrive every 5 minutes (not 16).</p>"},
+
+/* ---------------- CHRONOS INTERNALS ---------------- */
+{t:"chronos", type:"num", q:"A session has 36 readings. How many tokens does embed() return?", a:4, tol:0, unit:"tokens", calc:true,
+ why:"<p>ceil(36 / 16) = ceil(2.25) = 3 patches, plus the [REG] token = <span class='num'>4</span> tokens. Full shape for one series: (1, 4, 512).</p><p>The formula to memorise: <code>(B, ceil(min(T, 2048)/16) + 1, 512)</code>.</p>"},
+
+{t:"chronos", type:"num", q:"A session has 45 readings. How many tokens does embed() return?", a:4, tol:0, unit:"tokens", calc:true,
+ why:"<p>ceil(45 / 16) = ceil(2.8125) = 3 patches, plus 1 for [REG] = <span class='num'>4</span> tokens &mdash; the same as a 36-reading window.</p><p><strong>Trap:</strong> people either forget the +1 and say 3, or round 2.8125 down. The count only changes at multiples of 16, so 33 through 48 readings all give 4 tokens.</p>"},
+
+{t:"chronos", type:"num", q:"A session has 288 readings (the longest in our data). How many tokens does embed() return?", a:19, tol:0, unit:"tokens", calc:true,
+ why:"<p>288 / 16 = 18 exactly, plus the [REG] token = <span class='num'>19</span> tokens.</p><p>Compare the shortest window: 3 readings gives ceil(3/16) = 1 patch, +1 = <span class='num'>2</span> tokens. So across our data the model sees between 2 and 19 tokens per session &mdash; and mean pooling is what turns either into the same 512-number row.</p>"},
+
+{t:"chronos", type:"num", q:"Hypothetically, a series of 5,000 readings is passed to embed(). How many tokens come back?", a:129, tol:0, unit:"tokens", calc:true,
+ why:"<p><code>context_length</code> is <span class='num'>2048</span>, so min(5000, 2048) = 2048. Then 2048 / 16 = 128 patches, plus [REG] = <span class='num'>129</span> tokens.</p><p><strong>Trap:</strong> 5000/16 + 1 = 313 ignores the context cap. In our real data it never matters &mdash; the longest window is 288 readings, far below 2048 &mdash; but the formula has to include the cap to be right.</p>"},
+
+{t:"chronos", type:"mc", q:"For a batch of 8 sessions each with 36 readings, what shape does embed() return?",
+ opts:["(8, 36, 512)","(8, 3, 512)","(8, 4, 512)","(8, 512)"], a:2,
+ why:"<p><code>(B, ceil(min(T,2048)/16) + 1, 512)</code> = (8, ceil(36/16) + 1, 512) = <span class='num'>(8, 4, 512)</span>: 8 sessions, 4 tokens each (3 patches + [REG]), 512 numbers per token.</p><p>(8, 512) is what you get <em>after</em> mean pooling &mdash; that is the row that goes into the regressor.</p>"},
+
+{t:"chronos", type:"mc", q:"chronos-bolt-small has 47,718,016 parameters. How many does embed() actually use?",
+ opts:["All 47,718,016","20,015,872 &mdash; the encoder plus the input patch embedding","132,609","512 per token"], a:1,
+ why:"<p><span class='num'>20,015,872</span>. <code>embed()</code> runs the input patch embedding and the 6 encoder layers; the 6 decoder layers and the quantile forecasting head are never executed.</p><p>Useful when someone asks how heavy the feature extraction is: less than half the checkpoint, and it runs once per session with no gradients.</p>"},
+
+{t:"chronos", type:"mc", q:"In the model-size sweep, which checkpoint did worst?",
+ opts:["bolt-tiny at -0.049","bolt-small at -0.052","bolt-base at -0.063","chronos-t5-small at -0.057"], a:2,
+ why:"<p>bolt-base, the biggest, at mean R&sup2; <span class='num'>&minus;0.063</span>. The full sweep: tiny <span class='num'>&minus;0.049</span>, mini <span class='num'>&minus;0.052</span>, small <span class='num'>&minus;0.052</span>, base <span class='num'>&minus;0.063</span>, t5-small <span class='num'>&minus;0.057</span>.</p><p><strong>Trap:</strong> the intuitive answer is that a bigger foundation model does better. Here bigger means 768 features instead of 512 for the same roughly 765 training rows &mdash; more freedom to fit noise, no extra relationship to find.</p>"},
+
+{t:"chronos", type:"tf", q:"Our longest glucose window is long enough to be truncated by Chronos's context length.",
+ opts:["True","False"], a:1,
+ why:"<p>False. <code>context_length</code> is <span class='num'>2048</span> readings and our longest window is <span class='num'>288</span>, so nothing is ever truncated &mdash; we use about 14% of the available context.</p><p>Have both numbers ready: 288 versus 2048 answers &ldquo;are you throwing any data away?&rdquo; in one line.</p>"},
+
+{t:"chronos", type:"mc", q:"What are prediction_length = 64 and the 9 quantiles for?",
+ opts:["They set the size of the embedding we extract","They are Bolt's forecasting head: 64 future steps at 9 quantiles (0.1 to 0.9) &mdash; which we never use","They control how many patches the encoder makes","They are the 9 folds of the cross-validation"], a:1,
+ why:"<p>They belong to the forecasting head: predict <span class='num'>64</span> steps ahead at <span class='num'>9</span> quantiles from 0.1 to 0.9, i.e. a spread of plausible futures rather than a single line.</p><p>We stop at the encoder and take embeddings, so that head never runs. Saying &ldquo;we forecast glucose 64 steps ahead&rdquo; would be wrong &mdash; we forecast nothing.</p>"},
+
+/* ---------------- ARM A VS ARM B ---------------- */
+{t:"arms", type:"mc", q:"Which sequence describes Arm A?",
+ opts:["Glucose -> frozen Chronos embed() -> mean pool to 512 -> StandardScaler on the training fold -> Ridge or SVR by inner 3-fold search -> prediction","Glucose -> fine-tuned Chronos -> Ridge -> prediction","43 hand-crafted features -> neural head -> prediction","Glucose -> PCA -> XGBoost -> prediction"], a:0,
+ why:"<p>Arm A is frozen features plus a classical regressor: embed, mean-pool to 512, standardise using training-fold statistics only, then Ridge (alpha over {0.1, 1, 10, 100, 1000}) or SVR (RBF, C over {0.1, 1, 10}, gamma in {scale, auto}), tuned by an inner 3-fold grouped search, with <code>DummyRegressor(mean)</code> as the yardstick.</p><p>Nothing is fine-tuned, and XGBoost never ran &mdash; it is in the code but not installed.</p>"},
+
+{t:"arms", type:"mc", q:"How did Arm B compare with Arm A?",
+ opts:["Arm B was better on Prices only","Arm B was worse on all three: -0.218 / -0.281 / -0.168 against -0.089 / -0.056 / -0.012","They tied","Arm B was better on all three but not significantly"], a:1,
+ why:"<p>Arm B lost on all three targets. Arm A: <span class='num'>&minus;0.089 / &minus;0.056 / &minus;0.012</span>. Arm B: <span class='num'>&minus;0.218 / &minus;0.281 / &minus;0.168</span>.</p><p>Mechanism: <span class='num'>132,609</span> trainable parameters over about <span class='num'>612</span> training rows is 217 parameters per example, with essentially no relationship to find. Extra flexibility can only fit noise, and Ridge's penalty suits a near-flat problem better.</p>"},
+
+{t:"arms", type:"tf", q:"Our results tables include XGBoost numbers.",
+ opts:["True","False"], a:1,
+ why:"<p>False, and this is the kind of thing a code reading catches. XGBoost is written into <code>regression.py</code> behind a <code>try/except</code> import, but the package is <strong>not installed</strong> in this environment, so it was silently skipped in every run.</p><p>If asked &ldquo;did you try gradient boosting?&rdquo;, the true answer is no &mdash; the code would have, the package is absent.</p>"},
+
+{t:"arms", type:"num", q:"Arm A costs 185 model fits per target. How many fits is a full run over all three targets?", a:555, tol:0, unit:"fits", calc:true,
+ why:"<p>185 &times; 3 = <span class='num'>555</span>. Per target: Ridge 80 (5 settings &times; 3 inner folds + 1 refit, &times; 5 outer folds), SVR 95 (6 &times; 3 + 1, &times; 5), plus 5 baseline and 5 plain-linear fits.</p><p>Arm B by contrast trains <span class='num'>15</span> networks per run (5 folds &times; 3 targets). Both are cheap; the slow part is the one-off embedding pass over 956 sessions.</p>"},
+
+{t:"arms", type:"mc", q:"What is identical between the two arms?",
+ opts:["The optimizer","The frozen 512-number embeddings and the participant folds","The number of trainable parameters","The loss function"], a:1,
+ why:"<p>Both arms consume the same frozen embeddings from the same <code>chronos-bolt-small</code> encoder and use the same 5 grouped folds. Only the thing on top differs &mdash; classical regressor versus small trained network.</p><p>That is what makes the comparison fair, and it is why the difference in results can be attributed to the head rather than to the features.</p>"},
+
+{t:"arms", type:"mc", q:"Why keep Chronos frozen instead of fine-tuning it on our data?",
+ opts:["Fine-tuning is not supported by the library","47,718,016 parameters against 956 sessions from 20 children would fit the children, not glucose in general","It would take too long on the GPU","Frozen models are always more accurate"], a:1,
+ why:"<p>Scale mismatch: <span class='num'>47,718,016</span> pretrained parameters against <span class='num'>956</span> sessions from <span class='num'>20</span> participants. Fine-tuning would learn those particular children, and grouped cross-validation would expose it immediately.</p><p>Freezing also has a practical benefit: the 512 features are computed once and shared by both arms, so the arms differ only in the head. Frozen is not automatically more accurate &mdash; it is the right call for this sample size.</p>"},
+
+/* ---------------- RIGOR & STATISTICS ---------------- */
+{t:"rigor", type:"num", q:"How many times were the scores scrambled in the shuffle test?", a:200, tol:0, unit:"shuffles",
+ why:"<p><span class='num'>200</span>. Each time, which score belongs to which session is scrambled &mdash; destroying any real link &mdash; and the whole evaluation is rerun, giving 200 results produced by random pairing alone. The real result is then placed in that pile.</p><p>The pipeline is deliberately fixed for this: <code>StandardScaler &rarr; PCA(32) &rarr; Ridge(alpha=10)</code>, no tuning, so all 201 runs are comparable.</p>"},
+
+{t:"rigor", type:"mc", q:"The shuffle test gave p = 1.000 / 1.000 / 0.995. What does that mean in plain words?",
+ opts:["The result is highly reliable","Essentially every scrambled run did as well as or better than the real one","The scrambling failed","95% of the variance is explained"], a:1,
+ why:"<p>p is the share of scrambled runs that did at least as well as the real one. At 1.000 and 0.995, essentially all of them did.</p><p>So the real result is not merely <em>inside</em> the range random pairing produces &mdash; it sits at the bad end of it. Real: <span class='num'>&minus;0.106 / &minus;0.127 / &minus;0.085</span>. Scrambled mean: <span class='num'>&minus;0.049 / &minus;0.052 / &minus;0.051</span>, sd about 0.015.</p>"},
+
+{t:"rigor", type:"tf", q:"p = 1.000 in the shuffle test means the finding is very strong.",
+ opts:["True","False"], a:1,
+ why:"<p>False, and backwards. A <em>small</em> p would mean the real result stands out from what random pairing produces. p = 1.000 means it does not stand out at all &mdash; it is at the bad end of the scrambled distribution.</p><p><strong>Trap:</strong> anyone used to reading &ldquo;p &lt; 0.05 = good&rdquo; may hear a big p as a big result. Correct them explicitly, and quote the numbers: real &minus;0.106 against a scrambled mean of &minus;0.049.</p>"},
+
+{t:"rigor", type:"mc", q:"Why is the mean of the scrambled runs about -0.05 rather than exactly 0?",
+ opts:["The scrambling was not thorough enough","Because a model fits noise in its training rows, and with whole children held out the training average is not the test children's average","Because R squared is biased upward","Because 200 shuffles is too few"], a:1,
+ why:"<p>Two mechanisms, both present even when there is nothing to find. First, the model fits noise in its training rows and carries that error onto the test fold. Second, with four whole children held out, the training-set average is not exactly the test children's average, so the mean-guesser reference is slightly off too.</p><p>Both push cross-validated R&sup2; a little below zero. That is why <strong>&minus;0.05 is the honest reference point</strong> for &ldquo;nothing there&rdquo; in this setup, not 0.00.</p>"},
+
+{t:"rigor", type:"num", q:"Using the same embeddings and the same folds, what R squared did the pipeline reach when asked to predict glucose standard deviation? Give three decimals.",
+ a:0.462, tol:0.005, unit:"R squared",
+ why:"<p><span class='num'>0.462</span>. Mean glucose reached <span class='num'>0.070</span> and the fraction of readings above 180 reached <span class='num'>0.075</span>.</p><p>The point of the check: if the same features and the same code can recover something we know is in the data, then the flat cognition result is about the data rather than a broken pipeline.</p>"},
+
+{t:"rigor", type:"mc", q:"What does R squared = 0.462 for glucose variability prove, and what does it not?",
+ opts:["That cognition is predictable after all","That the embeddings carry real information and the machinery works &mdash; but nothing about cognition being predictable","That the model overfits","That glucose variability causes cognitive change"], a:1,
+ why:"<p>It shows the pipeline can extract real information from these embeddings and evaluate it correctly. It says nothing whatsoever about cognition.</p><p>Keep the honest caveat attached: mean glucose reached only <span class='num'>0.070</span>, because instance normalization discards absolute level &mdash; so this result speaks to glucose <em>shape</em>. That is why it matters that the 43 hand-crafted features, which do encode level, were also at or below 0.</p>"},
+
+{t:"rigor", type:"mc", q:"The main table reports Grids at -0.089 but the shuffle-test table reports -0.106 for the same target. Why?",
+ opts:["A different random seed","Different pipelines: the main table tunes alpha per fold, the shuffle test fixes StandardScaler -> PCA(32) -> Ridge(alpha=10)","One is Arm A, the other Arm B","A typo in the results file"], a:1,
+ why:"<p>Different pipelines by design. The shuffle test must use one fixed, untuned pipeline so all 201 runs are directly comparable, so it fixes <code>StandardScaler &rarr; PCA(32) &rarr; Ridge(alpha=10)</code>. The main table lets the inner search choose alpha per fold, which does slightly better: <span class='num'>&minus;0.089</span> against <span class='num'>&minus;0.106</span>.</p><p>Know this or it reads as an inconsistency in your own tables.</p>"},
+
+{t:"rigor", type:"tf", q:"The rigor script printed its built-in check-passed line for the known-signal check.",
+ opts:["True","False"], a:1,
+ why:"<p>False. The code prints that line only if <strong>all three</strong> known-signal targets exceed 0.5. The values are <span class='num'>0.462</span>, <span class='num'>0.070</span> and <span class='num'>0.075</span> &mdash; only one is even close, and none is above 0.5 &mdash; so the line never printed and does not appear in the results file.</p><p>Never claim the check &ldquo;passed&rdquo;. Say: variability is recovered well, absolute level is not, and here is why (instance normalization discards level).</p>"},
+
+/* ---------------- SAY IT IN PLAIN WORDS ---------------- */
+{t:"plain", type:"mc", q:"Your supervisor has banned the phrase &ldquo;null result&rdquo;. How should you state the finding?",
+ opts:["&ldquo;We obtained a null result on all three targets.&rdquo;","&ldquo;The model was no better than guessing the average score.&rdquo;","&ldquo;There was no signal beyond chance.&rdquo;","&ldquo;The effect was not statistically significant.&rdquo;"], a:1,
+ why:"<p>Say what happened in ordinary words: the predictions were no better than guessing the average score &mdash; every R&sup2; at or below 0, best case <span class='num'>&minus;0.012</span> on Prices.</p><p>&ldquo;Null result&rdquo; and &ldquo;no signal beyond chance&rdquo; are both on the banned list; &ldquo;not statistically significant&rdquo; imports a framing we did not test. Describe the number, not the label.</p>"},
+
+{t:"plain", type:"mc", q:"The subgroup table shows 201 and 19 for sessions with a reading below 70. How do you say it?",
+ opts:["201 patients from 19 cohorts","201 sessions from 19 participants","19 sessions from 201 participants","201 participants, 19 of whom had low glucose"], a:1,
+ why:"<p><strong>201 sessions from 19 participants.</strong> Counts of tests are sessions; counts of children are participants; &ldquo;patients&rdquo; is not our word for either.</p><p>This has already been corrected once, so getting it wrong again is expensive. The same subgroup scored <span class='num'>&minus;0.187 / &minus;0.094 / &minus;0.090</span> &mdash; narrowing to low-glucose sessions did not help.</p>"},
+
+{t:"plain", type:"mc", q:"Say &ldquo;the pre-test window&rdquo; without the jargon.",
+ opts:["&ldquo;The lookback interval preceding the assessment.&rdquo;","&ldquo;The glucose readings recorded before that test.&rdquo;","&ldquo;The exposure period.&rdquo;","&ldquo;The context length.&rdquo;"], a:1,
+ why:"<p>&ldquo;The glucose readings recorded before that test.&rdquo; Then add the honest detail unprompted: how much of it there is varies from <span class='num'>3</span> readings to <span class='num'>288</span>, median <span class='num'>36</span> &mdash; about 3 hours.</p><p>&ldquo;Context length&rdquo; is something else entirely: Chronos's 2048-reading input cap, which we never reach.</p>"},
+
+{t:"plain", type:"mc", q:"How should you describe the fact that some sessions have 3 readings and others 288?",
+ opts:["&ldquo;Window length is a confound.&rdquo;","&ldquo;The amount of glucose history differs from session to session.&rdquo;","&ldquo;The data are missing at random.&rdquo;","&ldquo;We imputed the short windows.&rdquo;"], a:1,
+ why:"<p>Describe it directly: the amount of history differs from session to session, because the stored array appears to be all glucose since that child's previous test rather than a fixed lookback.</p><p><strong>Trap:</strong> &ldquo;confound&rdquo; is the wrong word here &mdash; a confound involves two variables getting tangled, and this is one variable taking different values. (Time of day versus the glucose series <em>would</em> be a fair use of the word.) Nothing was imputed, either: missing readings are dropped.</p>"},
+
+{t:"plain", type:"mc", q:"Give the plain-words version of &ldquo;the positive control passed&rdquo;.",
+ opts:["&ldquo;Our positive control validated the pipeline.&rdquo;","&ldquo;We asked the same pipeline to predict something we know is in the data &mdash; how much the glucose moved around &mdash; and it did that well, R squared 0.462. Absolute level it did not: 0.070.&rdquo;","&ldquo;The sanity check was significant.&rdquo;","&ldquo;The model works, so the cognition result must be real.&rdquo;"], a:1,
+ why:"<p>Name the procedure, give the number, and give the honest half. The check recovered glucose variability at <span class='num'>0.462</span> but mean glucose at only <span class='num'>0.070</span>, so it supports claims about glucose <em>shape</em>.</p><p>Also avoid the word &ldquo;passed&rdquo; outright: the code's own pass line requires all three known-signal targets above 0.5, and none is.</p>"}
+];
+
+/* ------------------------------------------------------------------
+   Persistence
+------------------------------------------------------------------ */
+const LS_KEY = "cgm-bootcamp-quiz-v1";
+let store = {best:null, topicStats:{}, rounds:0, theme:"auto", run:null};
+try{
+  const raw = localStorage.getItem(LS_KEY);
+  if(raw){
+    const p = JSON.parse(raw);
+    if(p && typeof p === "object"){
+      store.best = p.best || null;
+      store.topicStats = p.topicStats && typeof p.topicStats === "object" ? p.topicStats : {};
+      store.rounds = p.rounds || 0;
+      store.theme = p.theme || "auto";
+      store.run = p.run || null;
+    }
+  }
+}catch(e){}
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(store)); }catch(e){} }
+
+/* ------------------------------------------------------------------
+   Elements
+------------------------------------------------------------------ */
+const el = {
+  setup:document.getElementById("setup"), quiz:document.getElementById("quiz"), results:document.getElementById("results"),
+  topicGrid:document.getElementById("topicGrid"), allTopics:document.getElementById("allTopics"), noTopics:document.getElementById("noTopics"),
+  countSel:document.getElementById("countSel"), calcOnly:document.getElementById("calcOnly"), shuffleOpt:document.getElementById("shuffleOpt"),
+  startBtn:document.getElementById("startBtn"), resumeBtn:document.getElementById("resumeBtn"), clearStats:document.getElementById("clearStats"),
+  bestLine:document.getElementById("bestLine"), qTotal:document.getElementById("qTotal"), qCalc:document.getElementById("qCalc"),
+  tagPos:document.getElementById("tagPos"), tagScore:document.getElementById("tagScore"), tagTopic:document.getElementById("tagTopic"), tagType:document.getElementById("tagType"),
+  barFill:document.getElementById("barFill"), qText:document.getElementById("qText"), optList:document.getElementById("optList"),
+  numRow:document.getElementById("numRow"), numIn:document.getElementById("numIn"), numUnit:document.getElementById("numUnit"), submitNum:document.getElementById("submitNum"),
+  fb:document.getElementById("fb"), verdict:document.getElementById("verdict"), explain:document.getElementById("explain"), chapterLine:document.getElementById("chapterLine"),
+  nextBtn:document.getElementById("nextBtn"), quitBtn:document.getElementById("quitBtn"),
+  resPct:document.getElementById("resPct"), resSub:document.getElementById("resSub"), resTable:document.getElementById("resTable"),
+  weakBox:document.getElementById("weakBox"), retryWrong:document.getElementById("retryWrong"), againBtn:document.getElementById("againBtn"),
+  themeBtn:document.getElementById("themeBtn")
+};
+
+/* ------------------------------------------------------------------
+   Theme
+------------------------------------------------------------------ */
+function applyTheme(){
+  document.documentElement.setAttribute("data-theme", store.theme);
+  el.themeBtn.textContent = "Theme: " + store.theme;
+}
+el.themeBtn.addEventListener("click", function(){
+  store.theme = store.theme === "auto" ? "light" : (store.theme === "light" ? "dark" : "auto");
+  applyTheme(); save();
+});
+applyTheme();
+
+/* ------------------------------------------------------------------
+   Setup screen
+------------------------------------------------------------------ */
+el.qTotal.textContent = Q.length;
+el.qCalc.textContent = Q.filter(function(q){ return q.calc; }).length;
+
+(function buildTopicGrid(){
+  TOPICS.forEach(function(t){
+    const n = Q.filter(function(q){ return q.t === t.key; }).length;
+    const lab = document.createElement("label");
+    const cb = document.createElement("input");
+    cb.type = "checkbox"; cb.checked = true; cb.value = t.key; cb.className = "topicCb";
+    const span = document.createElement("span");
+    span.innerHTML = t.name + " <span class='n'>(" + n + ")</span>";
+    lab.appendChild(cb); lab.appendChild(span);
+    el.topicGrid.appendChild(lab);
+  });
+})();
+function selectedTopics(){
+  return Array.prototype.slice.call(document.querySelectorAll(".topicCb"))
+    .filter(function(c){ return c.checked; }).map(function(c){ return c.value; });
+}
+el.allTopics.addEventListener("click", function(){
+  document.querySelectorAll(".topicCb").forEach(function(c){ c.checked = true; });
+});
+el.noTopics.addEventListener("click", function(){
+  document.querySelectorAll(".topicCb").forEach(function(c){ c.checked = false; });
+});
+
+function showBest(){
+  let txt = "";
+  if(store.best){
+    txt = "Best round so far: " + store.best.pct + "% (" + store.best.correct + " of " + store.best.total + ") on " + store.best.date + ". Rounds played: " + store.rounds + ".";
+  }else{
+    txt = "No rounds recorded yet in this browser.";
+  }
+  const st = store.topicStats;
+  const weak = TOPICS.filter(function(t){ return st[t.key] && st[t.key].n >= 3 && (st[t.key].c / st[t.key].n) < 0.7; });
+  if(weak.length){
+    txt += " Weakest so far: " + weak.map(function(t){
+      return t.name + " (" + Math.round(100 * st[t.key].c / st[t.key].n) + "%)";
+    }).join(", ") + ".";
+  }
+  el.bestLine.textContent = txt;
+}
+showBest();
+
+if(store.run && store.run.bank === Q.length && store.run.i < store.run.ids.length){
+  el.resumeBtn.classList.remove("hidden");
+  el.resumeBtn.textContent = "Resume unfinished round (question " + (store.run.i + 1) + " of " + store.run.ids.length + ")";
+}
+
+el.clearStats.addEventListener("click", function(){
+  if(!window.confirm("Clear the best score, the per-topic history and any unfinished round?")) return;
+  store.best = null; store.topicStats = {}; store.rounds = 0; store.run = null; save();
+  el.resumeBtn.classList.add("hidden"); showBest();
+});
+
+/* ------------------------------------------------------------------
+   Round state
+------------------------------------------------------------------ */
+let run = null; /* {ids:[], i:0, score:0, log:[], answered:bool} */
+
+function startRound(ids){
+  run = {ids:ids, i:0, score:0, log:[], answered:false, bank:Q.length};
+  store.run = {ids:ids, i:0, score:0, log:[], bank:Q.length}; save();
+  el.setup.classList.add("hidden");
+  el.results.classList.add("hidden");
+  el.quiz.classList.remove("hidden");
+  renderQuestion();
+}
+
+el.startBtn.addEventListener("click", function(){
+  const topics = selectedTopics();
+  if(!topics.length){ window.alert("Pick at least one topic."); return; }
+  let pool = Q.map(function(q, i){ return i; }).filter(function(i){
+    const q = Q[i];
+    if(topics.indexOf(q.t) < 0) return false;
+    if(el.calcOnly.checked && !q.calc) return false;
+    return true;
+  });
+  if(!pool.length){ window.alert("No questions match that combination. Try clearing the calculation-only box."); return; }
+  if(el.shuffleOpt.checked) pool = shuffle(pool);
+  const want = parseInt(el.countSel.value, 10);
+  if(pool.length > want) pool = pool.slice(0, want);
+  startRound(pool);
+});
+
+el.resumeBtn.addEventListener("click", function(){
+  const r = store.run;
+  if(!r) return;
+  run = {ids:r.ids, i:r.i, score:r.score, log:r.log || [], answered:false, bank:Q.length};
+  el.setup.classList.add("hidden");
+  el.quiz.classList.remove("hidden");
+  renderQuestion();
+});
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+/* ------------------------------------------------------------------
+   Question rendering
+------------------------------------------------------------------ */
+const TYPE_LABEL = {mc:"multiple choice", tf:"true or false", num:"type a number"};
+
+function currentQ(){ return Q[run.ids[run.i]]; }
+
+function renderQuestion(){
+  const q = currentQ();
+  run.answered = false;
+
+  el.tagPos.innerHTML = "Question <b>" + (run.i + 1) + "</b> of <b>" + run.ids.length + "</b>";
+  el.tagScore.innerHTML = "Score <b>" + run.score + "</b> / <b>" + run.i + "</b>";
+  el.tagTopic.textContent = topicByKey[q.t].name;
+  el.tagType.textContent = TYPE_LABEL[q.type] + (q.calc ? " &middot; calculation" : "");
+  el.tagType.innerHTML = TYPE_LABEL[q.type] + (q.calc ? " &middot; calculation" : "");
+  el.barFill.style.width = ((run.i / run.ids.length) * 100).toFixed(1) + "%";
+
+  el.qText.innerHTML = q.q;
+  el.optList.innerHTML = "";
+  el.fb.classList.add("hidden");
+  el.fb.classList.remove("ok","no");
+  el.nextBtn.classList.add("hidden");
+  el.nextBtn.textContent = (run.i === run.ids.length - 1) ? "See results" : "Next";
+
+  if(q.type === "num"){
+    el.numRow.classList.remove("hidden");
+    el.numIn.value = "";
+    el.numIn.disabled = false;
+    el.submitNum.disabled = false;
+    el.numUnit.textContent = q.unit ? q.unit : "";
+    el.numIn.focus();
+  }else{
+    el.numRow.classList.add("hidden");
+    q.opts.forEach(function(text, idx){
+      const li = document.createElement("li");
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt";
+      b.setAttribute("data-idx", String(idx));
+      b.innerHTML = "<span class='key'>" + (idx + 1) + "</span><span class='txt'>" + text + "</span><span class='mk'></span>";
+      b.addEventListener("click", function(){ answerChoice(idx); });
+      li.appendChild(b);
+      el.optList.appendChild(li);
+    });
+    const first = el.optList.querySelector(".opt");
+    if(first) first.focus();
+  }
+}
+
+function parseNum(s){
+  if(s === null || s === undefined) return NaN;
+  let t = String(s).trim().replace(/,/g, "").replace(/%/g, "").replace(/−/g, "-").replace(/\s+/g, "");
+  if(t === "") return NaN;
+  const v = parseFloat(t);
+  return isFinite(v) ? v : NaN;
+}
+
+function answerChoice(idx){
+  if(run.answered) return;
+  const q = currentQ();
+  const ok = (idx === q.a);
+  const btns = el.optList.querySelectorAll(".opt");
+  btns.forEach(function(b){
+    const i = parseInt(b.getAttribute("data-idx"), 10);
+    b.disabled = true;
+    if(i === q.a){ b.classList.add("correct"); b.querySelector(".mk").textContent = "correct"; }
+    if(i === idx && !ok){ b.classList.add("chosen-wrong"); b.querySelector(".mk").textContent = "your answer"; }
+  });
+  finish(ok, q.opts[idx]);
+}
+
+function answerNum(){
+  if(run.answered) return;
+  const q = currentQ();
+  const v = parseNum(el.numIn.value);
+  if(isNaN(v)){ el.numIn.focus(); return; }
+  const tol = (typeof q.tol === "number") ? q.tol : 0.001;
+  const ok = Math.abs(v - q.a) <= tol + 1e-12;
+  el.numIn.disabled = true;
+  el.submitNum.disabled = true;
+  finish(ok, String(v));
+}
+
+function finish(ok, given){
+  const q = currentQ();
+  run.answered = true;
+  if(ok) run.score++;
+  run.log.push({qi:run.ids[run.i], ok:ok, given:given});
+
+  const st = store.topicStats[q.t] || {c:0, n:0};
+  st.n++; if(ok) st.c++;
+  store.topicStats[q.t] = st;
+
+  el.fb.classList.remove("hidden");
+  el.fb.classList.add(ok ? "ok" : "no");
+  el.verdict.textContent = ok ? "Correct" : "Not quite";
+  let head = "";
+  if(q.type === "num"){
+    head = "<p>Expected <span class='num'>" + q.a + "</span>" + (q.unit ? " " + q.unit : "") +
+           (q.tol ? " (tolerance &plusmn;" + q.tol + ")" : "") + ". You typed <span class='num'>" + given + "</span>.</p>";
+  }else if(!ok){
+    head = "<p>The answer is <strong>" + q.opts[q.a] + "</strong>.</p>";
+  }
+  el.explain.innerHTML = head + q.why;
+  el.chapterLine.innerHTML = "Topic: " + topicByKey[q.t].name + " &mdash; review <code>" + topicByKey[q.t].chapter + "</code>";
+
+  el.tagScore.innerHTML = "Score <b>" + run.score + "</b> / <b>" + (run.i + 1) + "</b>";
+  el.nextBtn.classList.remove("hidden");
+  el.nextBtn.focus();
+
+  store.run = {ids:run.ids, i:run.i + 1, score:run.score, log:run.log, bank:Q.length};
+  save();
+}
+
+el.submitNum.addEventListener("click", answerNum);
+el.numIn.addEventListener("keydown", function(e){
+  if(e.key === "Enter"){ e.preventDefault(); answerNum(); }
+});
+
+el.nextBtn.addEventListener("click", function(){
+  if(run.i >= run.ids.length - 1){ showResults(); return; }
+  run.i++;
+  renderQuestion();
+});
+el.quitBtn.addEventListener("click", function(){
+  if(!run.log.length){ el.quiz.classList.add("hidden"); el.setup.classList.remove("hidden"); return; }
+  if(window.confirm("End the round here and see results for the " + run.log.length + " questions answered?")) showResults();
+});
+
+/* ------------------------------------------------------------------
+   Results
+------------------------------------------------------------------ */
+function showResults(){
+  el.quiz.classList.add("hidden");
+  el.results.classList.remove("hidden");
+
+  const answered = run.log.length;
+  const pct = answered ? Math.round(100 * run.score / answered) : 0;
+  el.resPct.textContent = pct + "%";
+  el.resSub.textContent = run.score + " correct out of " + answered + " answered" +
+    (answered < run.ids.length ? " (round ended early; " + run.ids.length + " were selected)" : "") + ".";
+
+  /* per-topic breakdown for this round */
+  const byTopic = {};
+  run.log.forEach(function(entry){
+    const t = Q[entry.qi].t;
+    byTopic[t] = byTopic[t] || {c:0, n:0};
+    byTopic[t].n++; if(entry.ok) byTopic[t].c++;
+  });
+
+  const tbody = el.resTable.querySelector("tbody");
+  tbody.innerHTML = "";
+  const weakTopics = [];
+  TOPICS.forEach(function(t){
+    const r = byTopic[t.key];
+    if(!r) return;
+    const p = Math.round(100 * r.c / r.n);
+    const weak = p < 70;
+    if(weak) weakTopics.push({t:t, pct:p, miss:r.n - r.c});
+    const tr = document.createElement("tr");
+    if(weak) tr.className = "weak";
+    tr.innerHTML = "<td>" + t.name + "</td><td class='n'>" + r.c + " / " + r.n + " (" + p + "%)</td>" +
+                   "<td><code>" + t.chapter + "</code></td>";
+    tbody.appendChild(tr);
+  });
+
+  let box = "";
+  if(weakTopics.length){
+    box = "<h3>Weak areas &mdash; reread these first</h3><ul>";
+    weakTopics.sort(function(a,b){ return a.pct - b.pct; }).forEach(function(w){
+      box += "<li><strong>" + w.t.name + "</strong> &mdash; " + w.pct + "%, " + w.miss + " missed &rarr; review <code>" + w.t.chapter + "</code></li>";
+    });
+    box += "</ul>";
+  }else if(answered){
+    box = "<h3>No weak areas in this round</h3><p>Every topic you touched came in at 70% or better. Raise the question count, switch on <em>calculation questions only</em>, or run the whole bank of " + Q.length + " to find the gaps.</p>";
+  }
+  const wrongIds = run.log.filter(function(e){ return !e.ok; }).map(function(e){ return e.qi; });
+  if(wrongIds.length){
+    box += "<h3>Missed questions</h3><ul>";
+    wrongIds.forEach(function(qi){
+      box += "<li>" + Q[qi].q.replace(/<[^>]+>/g, "") + "</li>";
+    });
+    box += "</ul>";
+  }
+  el.weakBox.innerHTML = box;
+
+  el.retryWrong.disabled = wrongIds.length === 0;
+  el.retryWrong.textContent = wrongIds.length
+    ? "Retry the " + wrongIds.length + " I missed"
+    : "Nothing missed to retry";
+  el.retryWrong.onclick = function(){ if(wrongIds.length) startRound(wrongIds); };
+
+  store.rounds++;
+  if(answered >= 5 && (!store.best || pct > store.best.pct)){
+    store.best = {pct:pct, correct:run.score, total:answered, date:new Date().toISOString().slice(0,10)};
+  }
+  store.run = null;
+  save();
+  showBest();
+  el.resumeBtn.classList.add("hidden");
+  el.results.scrollIntoView({block:"start"});
+}
+
+el.againBtn.addEventListener("click", function(){
+  el.results.classList.add("hidden");
+  el.setup.classList.remove("hidden");
+  showBest();
+  window.scrollTo(0,0);
+});
+
+/* ------------------------------------------------------------------
+   Keyboard
+------------------------------------------------------------------ */
+document.addEventListener("keydown", function(e){
+  if(e.metaKey || e.ctrlKey || e.altKey) return;
+  const tag = (e.target && e.target.tagName || "").toLowerCase();
+  const typing = (tag === "input" && e.target.type === "text");
+
+  if(!typing && (e.key === "t" || e.key === "T")){ el.themeBtn.click(); return; }
+
+  /* setup screen: enter starts */
+  if(!el.setup.classList.contains("hidden")){
+    if(e.key === "Enter" && tag !== "button"){ e.preventDefault(); el.startBtn.click(); }
+    return;
+  }
+  if(!el.quiz.classList.contains("hidden")){
+    const q = currentQ();
+    if(e.key === "Enter"){
+      if(run.answered){ e.preventDefault(); el.nextBtn.click(); }
+      return;
+    }
+    if(!run.answered && q.type !== "num" && /^[1-4]$/.test(e.key)){
+      const idx = parseInt(e.key, 10) - 1;
+      if(idx < q.opts.length){ e.preventDefault(); answerChoice(idx); }
+    }
+    return;
+  }
+  if(!el.results.classList.contains("hidden")){
+    if(e.key === "Enter" && tag !== "button"){ e.preventDefault(); el.againBtn.click(); }
+  }
+});
+</script>
+</body>
+</html>
