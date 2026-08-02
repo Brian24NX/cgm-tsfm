@@ -208,13 +208,81 @@ Practise saying these out loud. If you can't say one without reading, you don't 
 
 ---
 
+## 6a. The one check that needs unpacking: "R² of 0.46"
+
+The third summary sentence below compresses a whole argument into one clause. Don't say it until you can expand it, because *"the machinery works"* is precisely the claim he'll push on.
+
+### The problem it solves
+
+When a model fails to predict something, there are **two** explanations and they look identical from outside:
+
+1. **The relationship isn't in the data.** Glucose genuinely doesn't predict the scores.
+2. **The pipeline is broken.** A bug, dead features, wrong wiring — the relationship might be there and you'd never see it.
+
+A flat number alone cannot distinguish these. So you need a test that does.
+
+### The trick
+
+Give the **same machinery** a question you already know the answer to. If it answers *that* well, explanation 2 is ruled out and explanation 1 is what's left.
+
+### The question we picked
+
+*"How much did this child's glucose swing around during this session?"* — formally, the standard deviation of that session's readings.
+
+It's a fair test because **you can compute it directly from the input in one line** (`np.std(w)`). The information is unquestionably in there. A pipeline that cannot recover something derivable from its own input is broken.
+
+### The result
+
+Identical 512 numbers, identical 5 participant-grouped folds, identical Ridge model. The only thing that changes is what we ask it to predict:
+
+| Asked to predict… | R² |
+|---|--:|
+| Grids score | **−0.107** |
+| Symbols score | **−0.096** |
+| Prices score | **−0.069** |
+| **Glucose variability** | **+0.443** |
+
+R² = 0 means "no better than guessing the average". So +0.44 is a real answer; −0.10 is slightly worse than guessing.
+
+**That contrast is the entire argument.** Same features, same folds, same model — one question gets answered, the other doesn't. So the flat cognition result is about the data, not the plumbing.
+
+*(The 0.462 quoted elsewhere is the better of Ridge and SVR; Ridge alone gives 0.443. Both are fine to say — just know which you're quoting.)*
+
+### Say it out loud like this
+
+> *"The worry with a flat result is that you can't tell whether the relationship isn't there or your code is broken. So I gave the exact same setup a question I already knew the answer to — how much the glucose swung during the session, which you can compute straight from the input. It got R² 0.44 on that, while the cognitive scores come out around −0.1. Same features, same folds, same model. So the machinery does extract information when there is some to extract."*
+
+### Two caveats — volunteer them
+
+**1. It only shows the pipeline isn't dead.** It does *not* show there's no glucose→cognition relationship anywhere. It shows that if one existed at roughly this strength, this setup could have found it.
+
+**2. It only half-passes.** Glucose *variability* comes back at 0.46, but *mean* glucose at only **0.042**, because Chronos subtracts each series' own mean before the encoder sees it (see `08_CHRONOS.md` §4). So the honest phrasing is *"it recovers the shape of the curve well and the absolute level poorly, and I know why"* — **never** *"the check passed."* The code only prints a pass if all three glucose properties clear 0.5, and only one comes close.
+
+### If he asks "isn't that just window length?"
+
+A good challenge — longer windows have more room to swing (r = +0.384 between length and variability). Checked:
+
+| Predictor | R² for glucose variability |
+|---|--:|
+| Window length alone (1 number) | +0.134 |
+| Chronos 512 | **+0.443** |
+| Chronos 512 + window length | +0.443 |
+
+Length alone gets 0.134, so it's part of the story. But Chronos reaches 0.443, and *adding* length to Chronos changes nothing — meaning Chronos already encodes the length, and most of the 0.44 is genuine curve-shape information rather than a length artifact.
+
+### If he asks "why only 0.46, why not 0.95?"
+
+Three reasons, and it's worth knowing them: it is predicting **held-out participants** it has never seen, not re-describing sessions it trained on; Chronos **divides the variability out** during normalization, so the model has to infer it from shape cues rather than read it off; and the check runs through **PCA(32)**, which compresses 512 numbers to 32 before the regression.
+
+---
+
 ## 6. The three sentences that summarise the whole project
 
 If you're asked "what did you do," lead with these, then stop and let him ask.
 
 1. **"We took the glucose readings before each cognitive test and asked a big pretrained time-series model to summarise each one as 512 numbers, then tried to predict the test score from those numbers."**
 2. **"It didn't work — no better than just guessing the average score. That's true for all three tests, for five model sizes, for every window length and setting we tried, and for the older hand-built-features method too."**
-3. **"So we checked whether that's a real finding or a broken pipeline. When we scramble the scores, we get the same accuracy as with the real scores. And when we ask the same setup to predict something about the glucose itself — how variable it was — it does that well, R² of 0.46. So the machinery works; the relationship just isn't in this data."**
+3. **"So we checked whether that's a real finding or a broken pipeline. When we scramble the scores, we get the same accuracy as with the real scores. And when we ask the same setup to predict something about the glucose itself — how variable it was — it does that well, R² of 0.46. So the machinery works; the relationship just isn't in this data."** — *unpack this before you say it: see §6a above.*
 
 ---
 
