@@ -12,9 +12,15 @@ It is worth being precise about the criticism, because it was not only "you don'
 
 **Complaint 1 — the knowledge gap.** You couldn't explain early stopping, epochs, normalization, why a transformer, how the MLP head works. Fix: chapters 02–11 of this bootcamp.
 
-**Complaint 2 — and this is the one people miss.** In his written comments he said:
+**Complaint 2 — and this is the one people miss.** It is easy to miss literally: it is a **Word comment**, not body text, so it only shows in the margin or under Review → Show Comments. Verbatim (comment id 1, `Ideas_and_questions_2026-07 - Liuyi_answers.docx`, dated 2026-07-24 00:31 UTC — one of **7** comments left that night):
 
-> *"I feel your reliance on AI is beyond the extent I was expecting. First, I would think **asking questions using your own language/words** would make it easier to understand. At least, you could **edit the AI's text into your language** so that I can spend less time understanding your points. Second, **whenever AI produce any logic/code, you would be able to understand before present it to me.** If you don't first understand, your direct presentation of AI's logic/code seems **equal to asking me to make sure AI is doing right thing.**"*
+> *"I cannot sense the details of these two steps although I can roughly guess what you meant here. I cannot fully understand partially because the words/phrases in this part are not commonly used in my daily life in this project, e.g., "there is no signal beyong chance", "positive control". Because I don't use these terms often, so I have hard time to concretely understand what you meant. **I feel your reliance on AI is beyond the extent I was expecting.** First, I would think **asking questions using your own language/words** would make it easier to understand. At least, you could **edit the AI's text into your language** so that I can spend less time understanding your points. Second, I would think **whenever AI produce any logic/code, you would be able to understand before present it to me.** If you don't first understand, your direct presentation of AI's logic/code seems **equal to asking me to make sure AI is doing right thing.** I hope to see you spend more time in understanding AI's logic/code before you have to talk about your progress/ideas."*
+
+> **How to verify this yourself**, and a caveat. Open the .docx and turn comments on, or run:
+> ```bash
+> unzip -p "Ideas_and_questions_2026-07 - Liuyi_answers.docx" word/comments.xml | sed 's/<[^>]*>//g'
+> ```
+> **Caveat on attribution:** Word stripped the author names from this file — every comment reads `author="Unknown Author"` with no initials. So the authorship is inferred from the filename, the content (a supervisor answering your questions), and consistency with the red inline answers in the same document. Near-certain, but not provable from the file's metadata. Don't assert in a meeting that you can prove who wrote it.
 
 Read that last sentence again. His objection is not that you used a tool. It is that he felt he was being asked to **audit** output that you hadn't audited yourself. From his side of the table, unexplained polished text is not evidence of work — it is a request that he do the checking.
 
@@ -253,7 +259,25 @@ Don't answer for him. Give him the state of things and one recommendation:
 
 ---
 
-## 9. One last thing
+## 9. Appendix — all seven Word comments, verbatim
+
+These are the sharpest material in the whole correspondence and **they are invisible unless comments are switched on**, which is how they got overlooked. All from `Ideas_and_questions_2026-07 - Liuyi_answers.docx`, `word/comments.xml`, 2026-07-24 between 00:15 and 01:00 UTC. Attribution caveat as in §1.
+
+| # | Time | Verbatim | What it means for you |
+|---|---|---|---|
+| 0 | 00:15 | *"Should this 'patients' be 'sessions'?"* | Unit-of-analysis discipline. 201/449 are **sessions**; 19/20 are **participants**. |
+| 1 | 00:31 | *(the long one — quoted in full in §1)* | Explain in your own words; understand before presenting. |
+| 2 | 00:46 | *"What does 'Power note' mean? What does 'sensitivity' mean?"* | He does not use this vocabulary. See `10_RIGOR_AND_STATS.md`. |
+| 3 | 00:48 | *"To me, this does not seem to happen in a near future. I feel we have several other things to do before changing models/pipelines."* | **A soft rejection of switching models** (MOMENT / TimesFM / LoRA). Do not propose a new model as a next step. |
+| 4 | 00:50 | *"This could be promising after you fully understand your code python code and all technical terms, e.g., token, patch, epoch."* | **Conditional approval** — the clearest "yes, but earn it first" in the set. This is the gate the bootcamp exists to clear. |
+| 5 | 00:50 | *"Unless necessary, in all docs/slides/meetings/code, can we try to stop introducing new terms, e.g., 'pre-test window', 'lever'? Are these two referring to 'CGM sessions'? If yes, let's use commonly used terms to minimize potential confusion and communication costs."* | The source of the banned-words table in §2. Note **"and code"** — it applies to identifiers and comments too. |
+| 6 | 01:00 | *"I feel we already had answered this similar question before, our current CGM data is 'raw continuous CGM stream'. Why is this the cleanest test of K01 hypothesis."* | **A direct question you have not answered**, asked twice. Your answer is in §3.3. |
+
+**Two things to take from the set as a whole.** First, comment 3 rules out "try a different foundation model" as a next step — so lead with the cheap fixes inside the current pipeline instead. Second, comments 4 and 1 together say the same thing: understanding the existing code is the precondition for anything new. That is the whole reason this bootcamp exists, and it is worth saying out loud that you took it seriously.
+
+---
+
+## 10. One last thing
 
 You're walking in with something better than a rehearsed defence: you found a **real bug** in the embedding code this week, you measured whether it changed the conclusion, and it didn't. You also found that our 512-number representation adds nothing over the single number "average glucose."
 
