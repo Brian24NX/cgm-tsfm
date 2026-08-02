@@ -76,7 +76,7 @@ Everything in this chapter exists to make the first sentence airtight and to kee
 
 Liuyi's demand was:
 
-> *"if it turns out no signal, we want very concrete evidence to make this 'no signal' claim convincible."*
+> *"In the end, if it turns to be no signal, we want to provide very concrete evidence to make this \"no signal\" claim convincible."*
 
 So "concrete evidence" for low accuracy means answering four suspicions an examiner will have, in this order:
 

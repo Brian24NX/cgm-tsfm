@@ -48,7 +48,7 @@ This is where our own documents got it wrong, so be careful.
 
 ## 3. Patches and tokens — the two words Liuyi told you to master
 
-He wrote: *"this could be promising after you fully understand your python code and all technical terms, e.g., token, patch, epoch."* So these definitions have to be exact.
+He wrote: *"This could be promising after you fully understand your code python code [sic] and all technical terms, e.g., token, patch, epoch."* So these definitions have to be exact.
 
 ### Patch
 

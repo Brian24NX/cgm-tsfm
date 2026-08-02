@@ -3,7 +3,7 @@
 > ⚠️ **Numbers updated 2026-08-01.** The pooling bug described in [`15_FINDINGS_TO_REPORT.md`](15_FINDINGS_TO_REPORT.md) has been **fixed in the code and all results regenerated**. Current headline values under grouped cross-validation are **Arm A −0.114 / −0.052 / −0.012** and **Arm B −0.313 / −0.412 / −0.360** (grids / symbols / prices). Worked examples in this chapter may still quote the pre-fix figures (Arm A −0.089 / −0.056 / −0.012, Arm B −0.218 / −0.281 / −0.168) — the arithmetic and the teaching point are unaffected, but [`01_FACT_SHEET.md`](01_FACT_SHEET.md) and `results/` are authoritative for current values. **The conclusion did not change: everything is still at or below zero.**
 
 
-> **The brief, from Liuyi's own words.** Length: *"Short term (e.g., 2-3 weeks), a 40-min presentation justifying what we have done, the results we obtained is convincible and rigorously verified, no matter what the results are."* Emphasis, when asked directly whether to weight method or results: **"Result + rigor."**
+> **The brief, from Liuyi's own words.** Length: *"Short term (e.g., 2-3 weeks), a 40-min presentation justifying what we have done is reasonable, the results we obtained is convincible and rigorously verified, no [matter] what the results are good results (e.g., high prediction accuracy) or bad results (e.g., low prediction accuracy)."* Emphasis, when asked directly whether to weight method or results: **"Result + rigor."**
 >
 > So: not a methods tour. The centre of gravity is *what we found* and *why you should believe it*. Method appears in service of credibility, and you must be able to go deeper on any of it on demand — because he separately demands to understand the pipeline and asked twice about input shapes.
 

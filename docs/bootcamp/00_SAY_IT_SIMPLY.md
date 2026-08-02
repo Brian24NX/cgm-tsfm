@@ -137,7 +137,7 @@ That's honest, it concedes his point, it makes the argument with a real number, 
 
 ### 3.4 "What is an epoch / a token / a patch?"
 
-He named these three specifically as things you must fully understand before he'll consider new ideas: *"This could be promising after you fully understand your python code and all technical terms, e.g., token, patch, epoch."*
+He named these three specifically as things you must fully understand before he'll consider new ideas: *"This could be promising after you fully understand your code python code [sic] and all technical terms, e.g., token, patch, epoch."*
 
 - **Patch** — *"A chunk of 16 consecutive glucose readings. Chronos doesn't look at readings one at a time; it groups them into blocks of 16 first. Since a reading is 5 minutes, one patch is 80 minutes of glucose."*
 - **Token** — *"One patch after it's been turned into 512 numbers. It's the unit the model actually processes. A 36-reading session becomes 4 tokens."*
@@ -145,7 +145,7 @@ He named these three specifically as things you must fully understand before he'
 
 ### 3.5 "Is the 20th participant real, and how was the missing glucose recovered?"
 
-He said: *"I did not work with 20 patients before, I only worked with 19 patients before"* and *"the CGM monitoring is continuous, i.e., always on. So there is no need for imputation."*
+He said: *"I did not work with 20 patients before, I only worked with 19 patients before"* and *"As far as I know, the CGM monitoring is continuous, i.e., always on. So, from my understanding, there is no need for imputation."*
 
 **Do not paper over this.** Say:
 
@@ -274,6 +274,33 @@ These are the sharpest material in the whole correspondence and **they are invis
 | 6 | 01:00 | *"I feel we already had answered this similar question before, our current CGM data is 'raw continuous CGM stream'. Why is this the cleanest test of K01 hypothesis."* | **A direct question you have not answered**, asked twice. Your answer is in §3.3. |
 
 **Two things to take from the set as a whole.** First, comment 3 rules out "try a different foundation model" as a next step — so lead with the cheap fixes inside the current pipeline instead. Second, comments 4 and 1 together say the same thing: understanding the existing code is the precondition for anything new. That is the whole reason this bootcamp exists, and it is worth saying out loud that you took it seriously.
+
+### Where every quote in this bootcamp comes from — three different levels of evidence
+
+Not all the quotes attributed to Liuyi in these files have the same standing. Know which is which, because "you said X" is a claim you can be challenged on.
+
+**Class A — written, in a document, verified word-for-word.** Every quote in this class was diffed against the raw `.docx` XML and matches exactly.
+- `QUESTIONS2_LiuyiAnswers.docx` — round 1, his answers typed in red.
+- `Ideas_and_questions_2026-07 - Liuyi_answers.docx` — round 2, red answers **plus the 7 comments above**.
+
+These you can quote with confidence. Examples: *"let's always say 'lower accuracy' instead of 'null'"*, *"Result + rigor"*, *"For all three scores, the lower the better"*, *"I did not work with 20 patients before"*.
+
+**Class B — spoken in a meeting, from your own recollection.** These appear nowhere in any file:
+- *"what is early-stopping, you don't know"*
+- *"how does the epoch work"*
+- *"how chronos works under the hood"*
+- *"How MLP head works for arm B and what is that"*
+- *"Why do we need transformer for our this project"*
+- *"an exact and right and knowledgeable answer with confidence"*
+
+They come from your account of the meeting. That is perfectly good grounds for organising your studying around them — but **do not quote them back at him as if they were written.** If it comes up, say *"my understanding from our conversation was…"* rather than *"you said…"*. Paraphrasing someone's spoken words back to them with quotation marks is a good way to start an argument you don't need.
+
+**Class C — second-hand, via your own earlier notes.** One quote sits in this class:
+- *"adapt/generalize Ben's code to accept one channel of CGM"* — appears in `docs/00_PROJECT_OVERVIEW.md`, `cgm_tsfm/ben_adapter/model.py:5` and `ben_adapter/README.md`, all written by you, each attributing it to him. There is **no primary document** containing it.
+
+Almost certainly an accurate record of an instruction. But it is your note of his words, not his words, so treat it as Class B when speaking.
+
+**Two verbatim details worth preserving rather than tidying.** His text contains *"your code python code"* (comment 4) and *"no what the results are"* in the deliverable answer. Both are obvious slips, and it is tempting to silently repair them when quoting. Don't — quote them as written with `[sic]` or `[matter]`, because a quote that has been quietly improved is no longer a quote. (I made exactly that mistake in the first draft of these files and had to go back and fix it.)
 
 ---
 
