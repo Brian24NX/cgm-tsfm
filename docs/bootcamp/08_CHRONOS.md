@@ -25,6 +25,76 @@ A **foundation model** is a large network trained once, at expense, on a huge am
 
 ---
 
+## 1a. What "frozen" actually means
+
+Worth nailing down before anything else, because "frozen Chronos" appears on every diagram in this project.
+
+### The short version
+
+**We run it forwards only. It never learns anything from our data. Its 47,718,016 weights are exactly the numbers Amazon shipped, before and after we use it.**
+
+### Proof 1 — the weights don't move
+
+Pick a weight, use the model three times, look again:
+
+```
+watching shared.weight, shape (2, 512)
+  value at [0,0] BEFORE : -0.0352615491
+  value at [0,0] AFTER  : -0.0352615491
+  any weight changed?     False
+```
+
+### Proof 2 — the same input always gives the same output
+
+```
+same session, embedded three times:
+  run 1: [-0.10005  -0.047023  0.025279  0.137272]
+  run 2: [-0.10005  -0.047023  0.025279  0.137272]
+  run 3: [-0.10005  -0.047023  0.025279  0.137272]
+  identical: True
+```
+
+This determinism is **why we can cache**. Embeddings are computed once and written to `.npy` (`encoders.py`), because there is no possibility the answer changes later. A model that was still learning could not be cached that way. If you ever see cached and freshly-computed embeddings disagree, something is wrong with the freezing — not with the cache.
+
+### What it is contrasted with
+
+| Option | Chronos's weights | Feasible for us? |
+|---|---|---|
+| **Frozen** ← what we do | never change | Yes |
+| **Fine-tuned** | all 47.7M adjust to our data | No — 20 participants; it would memorize instantly |
+| **Trained from scratch** | we build and train our own | Hopeless — 956 sessions is nothing |
+
+Arm B trains **132,609 numbers of its own** on top of the frozen encoder — **0.28%** of the combined total. Nothing inside Chronos moves.
+
+**A good analogy:** Chronos is a measuring instrument. You don't reshape a ruler while measuring with it.
+
+### ⚠️ Common misunderstanding: it does NOT return 512 numbers per session
+
+It returns **512 numbers per token**:
+
+```
+a session with 118 readings
+  → embed() gives shape (1, 9, 512)          9 tokens, each 512 wide
+     118 readings = 8 chunks of 16, +1 summary token = 9 tokens
+  → WE average over the token axis ourselves
+     (1, 9, 512)  ──mean over tokens──▶  (1, 512)
+```
+
+**The single 512-number vector per session is our choice, not Chronos's output.** Chronos describes each 80-minute chunk separately; collapsing those into one vector is a decision made in `encoders.py`. Two consequences:
+
+1. A longer session yields **more** tokens (288 readings → 19), so what Chronos returns varies in size with the session even though what we keep is always 512.
+2. That collapsing step is exactly where the batch-invariance bug lived (§11) — it was averaging padding positions in as well.
+
+### The honest subtlety
+
+**Nothing in the downloaded checkpoint is marked "frozen."** All 47,718,016 weights load with `requires_grad=True`. Freezing is enforced by *how we call the model*: `torch.no_grad()` (no gradients computed) plus eval mode (dropout inactive). In Arm B it is also enforced explicitly by setting `requires_grad = False` on every encoder parameter and by only handing trainable parameters to the optimizer.
+
+Practical consequence: if the model were ever switched to `.train()`, `dropout_rate = 0.1` would activate and the bit-identical runs above would stop matching. The determinism is a property of how we use it, not of the file.
+
+**Say it in your own words:** *"Frozen means we only ever run it forwards — it never learns from our data, and its 47.7 million numbers are exactly what Amazon shipped. Same glucose in, same numbers out, every time, which is why we can compute them once and cache them. The only thing that learns in our pipeline is the small head on top, 132,609 numbers, about a quarter of a percent of the whole thing."*
+
+---
+
 ## 2. Two different Chronos families — and we must not mix them up
 
 This is where our own documents got it wrong, so be careful.
