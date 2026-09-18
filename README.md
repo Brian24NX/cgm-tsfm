@@ -1,5 +1,14 @@
 # CGM → Cognition via Time-Series Foundation Models
 
+> ## 📌 2026-09 — project handover. **New to this project? Read [`docs/HANDOVER.md`](docs/HANDOVER.md) first.**
+>
+> The real data is **in** (20 participants, 956 sessions) and the real runs are **done**. Headline:
+> nothing predicts the cognitive scores better than a trivial mean-predictor, across 13 separate
+> attempts — full numbers and the evidence that this is the data rather than the pipeline are in
+> [`docs/HANDOVER.md`](docs/HANDOVER.md) and [`results/README.md`](results/README.md).
+> **Wording below this banner that says the data has not arrived, or that results are synthetic
+> placeholders, is out of date.**
+
 > 🟢 **New here / want the plain-English version?** Read **[`PLAIN_ENGLISH_SUMMARY.md`](PLAIN_ENGLISH_SUMMARY.md)** — a no-jargon catch-up on what we built and what to tell the advisor. Start there; come back here for the technical details/commands.
 
 Predict a youth-with-T1D's cognitive-test score (Grids / Symbols / Prices) from the
@@ -13,7 +22,8 @@ reshaped the plan) →
 `docs/04_OPEN_QUESTIONS.md` (decisions needed from the advisor).
 
 **Results:** `results/README.md` stitches the auto-generated sweep + head-to-head
-tables into one narrative (currently synthetic placeholders; regenerate with `--real`).
+tables into one narrative. The `_real` tables are the actual findings (20 participants,
+916 sessions, uniform 2 h window); the `_synthetic` ones are a pipeline harness check only.
 
 ## Layout
 

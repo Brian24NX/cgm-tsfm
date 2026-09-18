@@ -267,9 +267,34 @@ Checkpoint sizes tried: `bolt-tiny` (d=256), `bolt-mini` (384), `bolt-small` (51
 
 ---
 
-## I. The results (real data, 20 participants, 956 sessions)
+## I. The results (real data, 20 participants, **916 sessions, uniform 2 h**)
 
-> ### 🔧 REGENERATED 2026-08-01 after the pooling fix
+> ### 📏 SUPERSEDED 2026-09 — the window is now uniform
+>
+> The pipeline default changed: every session now uses exactly the **24 readings (2.0 h) before the test**, and sessions with less are dropped. **916 of 956 kept (95.8%), all 20 participants.** Previously the input ran from 3 to 288 readings, and its *length* carried time-of-day information (long window ⇔ morning test, r = −0.506).
+>
+> **Current headline (grouped CV, R²):**
+>
+> | | grids | symbols | prices |
+> |---|--:|--:|--:|
+> | Arm A (Chronos + Ridge/SVR) | **−0.135** | **−0.290** | **−0.015** |
+> | Arm B (Chronos + MLP head) | −0.329 | −0.581 | −0.170 |
+> | Hand-crafted 43 features | −0.088 | −0.257 | −0.012 |
+> | *"guess the average" itself* | *−0.071* | *−0.253* | *−0.011* |
+> | **gap (model − guessing)** | **−0.064** | **−0.036** | **−0.004** |
+>
+> Sessions per target: 911 / 882 / 897. Within-participant centred: −0.042 / −0.045 / −0.001.
+> Shuffle test p = **1.000 / 1.000 / 0.801**. Known-answer check: glucose variability **0.416**, mean glucose **−0.114**, % above 180 **−0.079**.
+>
+> ⚠️ **`symbols` is unstable: fold-to-fold spread ±0.266, bigger than the number itself.** Quote grids and prices with more confidence.
+> ⚠️ **The excursion subgroups shrank**: sessions with a reading below 70 went 201 → **111**, above 250 went 449 → **314**, because 2 h holds fewer excursions than 24 h.
+> ⚠️ **Level recovery got weaker**: with only 2 h the embedding recovers variability (0.416) but essentially nothing about absolute level (−0.114). Say that plainly.
+>
+> Why 2 h: the K01 hypothesis concerns roughly the 2 h before a test, so it was the **pre-committed** choice — not the best-scoring one. All windows 15 min–3 h were measured; the differences are ~80× smaller than the fold-to-fold spread. Full write-up: `results/uniform_window_real.md`.
+>
+> The tables below this box are the **previous** (variable-window) numbers, kept for comparison.
+
+> ### 🔧 Earlier: regenerated 2026-08-01 after the pooling fix
 >
 > The batch-invariance bug described in `15_FINDINGS_TO_REPORT.md` has now been **fixed in the code** (`cgm_tsfm/encoders.py`, `ben_adapter/model.py`) and **every result file below was regenerated** from corrected embeddings. Pre-fix outputs are preserved in `results/archive_prebugfix_2026-07-07/`.
 >
@@ -422,8 +447,9 @@ Note: `EncoderConfig.device` defaults to `"cpu"` (`config.py:85`). The GPU is us
 6. Chronos-bolt-small → **512** numbers per session; matrix **(956, 512)**.
 7. **5** outer grouped folds, **4** participants held out each time.
 8. MLP head = **132,609** trainable parameters on **~612** training rows.
-9. Best real R² = **−0.012** (Prices, Arm A). Everything is ≤ 0. The mean-predictor itself scores **−0.078 / −0.050 / −0.004**, so we *tie* it.
-10. Shuffle-test p = **1.000 / 0.995 / 0.910**. Glucose-variability check = **0.462**; mean glucose only **0.042**.
+9. Best real R² = **−0.015** (Prices, Arm A). Everything is ≤ 0. The mean-predictor itself scores **−0.071 / −0.253 / −0.011**, so we *tie or slightly trail* it.
+10. Shuffle-test p = **1.000 / 1.000 / 0.801**. Glucose-variability check = **0.416**; mean glucose **−0.114**.
+11. Window is now **uniform 2 h**: 24 readings, **916 sessions**, all 20 children.
 
 *(Items 9 and 10 are post-fix values, regenerated 2026-08-01.)*
 

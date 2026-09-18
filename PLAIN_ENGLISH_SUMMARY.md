@@ -1,5 +1,14 @@
 # Plain-English Summary — What We Built, What Everything Means, & What's Next
 
+> ## 📌 2026-09 — project handover. **New to this project? Read [`docs/HANDOVER.md`](docs/HANDOVER.md) first.**
+>
+> The real data is **in** (20 participants, 956 sessions) and the real runs are **done**. Headline:
+> nothing predicts the cognitive scores better than a trivial mean-predictor, across 13 separate
+> attempts — full numbers and the evidence that this is the data rather than the pipeline are in
+> [`docs/HANDOVER.md`](docs/HANDOVER.md) and [`results/README.md`](results/README.md).
+> **Wording below this banner that says the data has not arrived, or that results are synthetic
+> placeholders, is out of date.**
+
 *A no-jargon catch-up + a meticulous deep-dive on every confusing concept. If you read one file in this project, read this one. It defines every technical word and draws pictures.*
 
 **This file has two parts:**
