@@ -47,6 +47,23 @@ R² against each configuration's **own** "always guess the average" predictor, i
 
 **Row D** answers the second item on that slide: adding back how high or low the glucose was makes no difference either (−0.064 vs −0.064).
 
+### Why the *headline* R² looks much worse even though the gap barely moved
+
+The headline numbers in `headtohead_real.md` are raw R², not gaps, and raw R² moved a lot. Symbols
+is the extreme case:
+
+| Symbols | model | its own mean-predictor | **gap** |
+|---|--:|--:|--:|
+| variable window, 956 sessions | −0.052 | −0.050 | **−0.002** |
+| uniform 2 h, 916 sessions | −0.290 | −0.253 | **−0.036** |
+| | *moved 0.238* | *moved 0.203* | ***moved 0.034*** |
+
+**The baseline moved almost as far as the model did.** `r2_score` measures each test fold against
+*that fold's own* mean while the model was trained on the training fold's mean; with 4
+participants held out those differ, and how much they differ depends on which sessions are in the
+set. So changing the session set moves the baseline. Read the gap, not the raw value — a raw R²
+from one configuration is not comparable to a raw R² from another.
+
 ## 4. Two things we can now state as fact
 
 **The window is the stretch since the child's previous test.** Confirmed against the timestamp columns: the time since the previous test and the span of the stored window correlate at **r = +0.977**, and agree to within 10 minutes in **87%** of sessions.
