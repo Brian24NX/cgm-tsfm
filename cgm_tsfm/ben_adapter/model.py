@@ -46,7 +46,15 @@ def _valid_series(glucose: torch.Tensor, mask: torch.Tensor | None) -> list[torc
 
 
 class ChronosTorchEmbedder(nn.Module):
-    """Frozen Chronos encoder returning mean-pooled (B, d_model) torch embeddings."""
+    """Frozen Chronos encoder returning pooled (B, d_model) torch embeddings.
+
+    Pooling is **batch-invariant**: series are grouped by token count before
+    being handed to `embed()`, so no series is ever padded out to match a longer
+    one in the same batch. Without this, `emb.mean(dim=1)` averages over padding
+    positions and a sample's embedding depends on its batch-mates — see the
+    detailed note in `cgm_tsfm/encoders.py`. The geometry helpers are imported
+    from there so the fix lives in exactly one place.
+    """
 
     def __init__(self, pretrained_model: str = "amazon/chronos-bolt-small",
                  device: str = "cpu", pooling: str = "mean"):
@@ -56,6 +64,13 @@ class ChronosTorchEmbedder(nn.Module):
             pretrained_model, device_map=device, torch_dtype=torch.float32)
         self.pooling = pooling
         self._d_model: int | None = None
+        self._geom: tuple[int, int, int] | None = None
+
+    def _geometry(self) -> tuple[int, int, int]:
+        from ..encoders import probe_token_geometry
+        if self._geom is None:
+            self._geom = probe_token_geometry(self.pipeline, torch)
+        return self._geom
 
     @property
     def embedding_dim(self) -> int:
@@ -68,11 +83,26 @@ class ChronosTorchEmbedder(nn.Module):
 
     @torch.no_grad()
     def forward(self, glucose: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
+        from ..encoders import bucket_by_tokens, pool_tokens
+
         series = _valid_series(glucose, mask)
-        emb, _ = self.pipeline.embed(series)            # (B, P+1, d_model)
-        pooled = emb[:, -1, :] if self.pooling == "last" else emb.mean(dim=1)
-        self._d_model = pooled.shape[-1]
-        return pooled.to(torch.float32)
+        geom = self._geometry()
+        buckets = bucket_by_tokens([s.numel() for s in series], geom)
+
+        out: torch.Tensor | None = None
+        for n_tok, idxs in buckets.items():
+            emb, _ = self.pipeline.embed([series[j] for j in idxs])
+            assert emb.shape[1] == n_tok, (
+                f"token-count mismatch: expected {n_tok}, got {emb.shape[1]}. "
+                "Padding would no longer be homogeneous — refusing to pool."
+            )
+            pooled = pool_tokens(emb, self.pooling).to(torch.float32)
+            if out is None:
+                out = pooled.new_empty((len(series), pooled.shape[-1]))
+            out[torch.as_tensor(idxs, device=pooled.device)] = pooled
+
+        self._d_model = out.shape[-1]
+        return out
 
 
 class MockTorchEmbedder(nn.Module):
