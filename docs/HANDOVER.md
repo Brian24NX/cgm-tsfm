@@ -242,6 +242,14 @@ $PY -m cgm_tsfm.run_headtohead --encoder chronos --real --variable-window
 
 ## 9. What is actually open — the decisions you inherit
 
+> **Update 2026-09-18 — read [`results/incremental_value_real.md`](../results/incremental_value_real.md)
+> alongside this section.** Giving the model the child's own earlier scores (strictly causal: only
+> sessions before the one being predicted, only from that child) produces the project's **first
+> positive R² — Symbols +0.413, rank correlation +0.70**. A per-fold residual test then shows
+> **glucose contributes −0.011** of it. That reframes the question from "can glucose predict
+> cognition?" (unanswerable at N=20) to "does glucose add anything over what we already know about
+> the child?" (answerable, and the answer is no). It also closes two items below.
+
 **These two were raised with the previous lead and never answered. Everything else waits on them.**
 
 1. **Is a rigorous "low prediction accuracy + characterisation" the deliverable, or do we keep
@@ -255,10 +263,10 @@ $PY -m cgm_tsfm.run_headtohead --encoder chronos --real --variable-window
 
 Smaller, genuinely useful items:
 
-- **Grids needs a different likelihood.** 31% exact zeros with a hard floor is not a Gaussian
-  target. This is the one modelling change with a real argument behind it — though note the
-  previous lead assigned mixed-effects/association work to Phil and told me to stay on prediction,
-  so it may not be ours.
+- ~~**Grids needs a different likelihood.**~~ **Done 2026-09-18** — asked as a classification
+  instead (*was this round perfect?*), glucose scores AUROC 0.447–0.479 against a 0.500 coin flip.
+  The wrong-likelihood objection is closed; it was not hiding a signal.
+  See [`results/incremental_value_real.md`](../results/incremental_value_real.md) §5.
 - **Concatenate Chronos's `loc`/`scale` onto the features** so absolute glucose level is available
   at all (§4a). Cheap, and closes a real gap.
 - **Arm B hyperparameters were never swept.** The harness exists; the capacity argument in §3

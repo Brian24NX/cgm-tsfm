@@ -8,6 +8,7 @@ Narrative index stitching together the two auto-generated results files in this 
 - [`sweep_real.md`](sweep_real.md) — full sweep: encoder size / window length / pooling / PCA / within-subject target-norm.
 - [`subgroups_real.md`](subgroups_real.md) — signal search by glucose regime (hypo / hyper / in-range).
 - [`rigor_real.md`](rigor_real.md) — the shuffle test (do scrambled scores do just as well?) + the known-answer check (can the pipeline predict a property of the glucose itself?).
+- [`incremental_value_real.md`](incremental_value_real.md) — **2026-09-18:** giving the model the child's own earlier scores produces the project's first positive R² (Symbols +0.413). Also shows, with a per-fold residual test, that glucose contributes −0.01 of it.
 
 **Synthetic (pipeline harness check only):**
 - [`sweep_synthetic.md`](sweep_synthetic.md) — Arm A hyperparameter **sweeps** (encoder checkpoint / window / pooling / PCA / within-subject target-norm).
