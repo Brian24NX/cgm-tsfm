@@ -35,6 +35,28 @@ COHORT_COL = "cohort"
 
 CGM_SAMPLING_MINUTES = 5   # Dexcom G6 cadence (per diabetes-fitbit + K01)
 
+# ---------------------------------------------------------------------------
+# DEFAULT WINDOW (changed 2026-08, after the window sweep).
+# Every session now uses the SAME span of glucose: the 24 readings (2.0 h)
+# immediately before the test. Sessions with fewer than 24 readings are dropped.
+# Cost: 916 of 956 sessions kept (95.8%), all 20 participants.
+#
+# Why 2 h, and why it was chosen this way: the K01 hypothesis concerns roughly
+# the 2 h before a test, so this is the PRE-COMMITTED choice on physiological
+# grounds. It was NOT picked because it scored best -- it did not. Windows from
+# 15 min to 3 h were all measured (results/uniform_window_real.md) and the
+# differences between them are ~80x smaller than the fold-to-fold spread, so the
+# data cannot distinguish them. Picking the best-scoring of 48 measured cells
+# would have been reading noise.
+#
+# Before this change the input length varied from 3 to 288 readings per session,
+# and length itself carried time-of-day information (longer window <=> morning
+# test, r = -0.506). The uniform window removes that.
+# Pass --variable-window to any runner to reproduce the old behaviour.
+# ---------------------------------------------------------------------------
+DEFAULT_MAX_READINGS = 24      # 24 * 5 min = 2.0 h
+DEFAULT_REQUIRE_FULL = True
+
 # Reproducibility / CV — mirrors diabetes-fitbit config.py:9-11
 RANDOM_STATE = 42
 OUTER_CV_SPLITS = 5
@@ -69,8 +91,19 @@ class WindowConfig:
     before a test).
     """
     min_readings: int = 3        # drop sessions with fewer valid readings
-    max_readings: int | None = None  # keep only the most-recent N (None = keep all)
+    max_readings: int | None = DEFAULT_MAX_READINGS  # keep only the most-recent N (None = keep all)
     # e.g. 30 readings * 5 min = 2.5 h (the window diabetes-fitbit's augmenter used)
+
+    # UNIFORM WINDOWS (added 2026-08). With require_full=False (the default),
+    # `max_readings` only CAPS long sessions -- short ones are kept at whatever
+    # length they happen to be, so the input length still varies session to
+    # session. That is what every earlier "window sweep" actually measured.
+    # With require_full=True, sessions with fewer than `max_readings` readings
+    # are DROPPED, so every surviving session has EXACTLY the same span. That
+    # removes session length as a source of variation between sessions.
+    # Cost on the real data: 24 readings (2.0 h) keeps 916/956 sessions and all
+    # 20 participants; 36 readings (3.0 h) keeps only 490.
+    require_full: bool = DEFAULT_REQUIRE_FULL
 
 
 @dataclass
@@ -81,7 +114,13 @@ class EncoderConfig:
     # no model download (useful for smoke tests / CI / offline).
     encoder_type: str = "chronos"
     pretrained_model: str = "amazon/chronos-bolt-small"
-    pooling: str = "mean"        # "mean" | "last"  (mean over patch/token axis)
+    # Pooling over the token axis of embed()'s (B, num_patches+1, d_model) output:
+    #   "mean"          -> average of all tokens (patches + the summary token)
+    #   "mean_patches"  -> average of the patch tokens only, excluding the summary token
+    #   "reg" / "last"  -> the trailing summary token itself ([REG] for Bolt, EOS for T5).
+    #                      NOTE "last" means the SUMMARY token, not the most-recent patch.
+    # All three are batch-invariant as of the 2026-07-30 fix (see encoders.py).
+    pooling: str = "mean"
     device: str = "cpu"          # "cpu" | "cuda" | "mps"
     torch_dtype: str = "float32"
     batch_size: int = 32

@@ -120,13 +120,16 @@ def main() -> None:
     ap.add_argument("--model", default="amazon/chronos-bolt-small")
     ap.add_argument("--device", default="cpu")
     ap.add_argument("--real", action="store_true")
-    ap.add_argument("--max-readings", type=int, default=None)
+    ap.add_argument("--max-readings", type=int, default=C.DEFAULT_MAX_READINGS)
+    ap.add_argument("--variable-window", action="store_true",
+                    help="revert to the pre-2026-08 behaviour: keep every session at whatever length it happens to be")
     ap.add_argument("--max-epochs", type=int, default=100)
     ap.add_argument("--target-norm", choices=["none", "center", "zscore"], default="none",
                     help="within-subject target normalization (see data.within_subject_normalize)")
     args = ap.parse_args()
 
-    window = C.WindowConfig(max_readings=args.max_readings)
+    window = C.WindowConfig(max_readings=None if args.variable_window else args.max_readings,
+                              require_full=not args.variable_window)
     ds = load_real_data(window=window) if args.real else generate_synthetic_data(window=window)
     print(ds.summary())
 

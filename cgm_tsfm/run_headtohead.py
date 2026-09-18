@@ -85,7 +85,9 @@ def main() -> None:
     ap.add_argument("--model", default="amazon/chronos-bolt-small")
     ap.add_argument("--device", default="cpu")
     ap.add_argument("--real", action="store_true")
-    ap.add_argument("--max-readings", type=int, default=None)
+    ap.add_argument("--max-readings", type=int, default=C.DEFAULT_MAX_READINGS)
+    ap.add_argument("--variable-window", action="store_true",
+                    help="revert to the pre-2026-08 behaviour: keep every session at whatever length it happens to be")
     ap.add_argument("--cv", choices=["group", "session"], default="group")
     ap.add_argument("--with-arm-b", action="store_true",
                     help="also train the Chronos + MLP-head arm (slower: trains nets over folds)")
@@ -101,7 +103,8 @@ def main() -> None:
                     help="markdown output path (default results/headtohead_<synthetic|real>.md)")
     args = ap.parse_args()
 
-    window = C.WindowConfig(max_readings=args.max_readings)
+    window = C.WindowConfig(max_readings=None if args.variable_window else args.max_readings,
+                              require_full=not args.variable_window)
     if args.real:
         print(f"Loading real data from {C.DATA_DIR} ...")
         ds = load_real_data(window=window)

@@ -31,13 +31,16 @@ def main() -> None:
     ap.add_argument("--model", default="amazon/chronos-bolt-small")
     ap.add_argument("--device", default="cpu")
     ap.add_argument("--real", action="store_true", help="use real CSVs instead of synthetic")
-    ap.add_argument("--max-readings", type=int, default=None,
-                    help="cap window to most-recent N readings (e.g. 30 = 2.5h)")
+    ap.add_argument("--max-readings", type=int, default=C.DEFAULT_MAX_READINGS,
+                    help="give every session exactly N readings (default 24 = 2.0 h)")
+    ap.add_argument("--variable-window", action="store_true",
+                    help="revert to the pre-2026-08 behaviour: variable-length input")
     ap.add_argument("--signal", type=float, default=0.25,
                     help="synthetic true-effect strength (0 = null dataset)")
     args = ap.parse_args()
 
-    window = C.WindowConfig(max_readings=args.max_readings)
+    window = C.WindowConfig(max_readings=None if args.variable_window else args.max_readings,
+                              require_full=not args.variable_window)
 
     if args.real:
         print(f"Loading real data from {C.DATA_DIR} ...")

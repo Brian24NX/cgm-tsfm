@@ -35,7 +35,9 @@ CHECKPOINTS = [
     "amazon/chronos-bolt-base",
     "amazon/chronos-t5-small",
 ]
-WINDOWS = [24, 30, 36, None]      # 2h, 2.5h, 3h, full  (5-min cadence)
+# Uniform windows (every session gets exactly this many readings; shorter
+# sessions are dropped). 5-min cadence, so readings*5 = minutes.
+WINDOWS = [3, 6, 12, 18, 24, 36, None]  # 15min..3h uniform, + variable reference
 POOLINGS = ["mean", "last"]
 PCA_COMPONENTS = [None, 8, 16, 32, 64, 128]   # None = full-dim (no PCA)
 TARGET_NORMS = ["none", "center", "zscore"]   # within-subject target normalization
@@ -43,7 +45,8 @@ RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 
 
 def _make_dataset(real: bool, max_readings: int | None):
-    window = C.WindowConfig(max_readings=max_readings)
+    window = C.WindowConfig(max_readings=max_readings,
+                            require_full=max_readings is not None)
     return load_real_data(window=window) if real else generate_synthetic_data(window=window)
 
 
@@ -149,7 +152,10 @@ def main() -> None:
     args = ap.parse_args()
     tn = args.target_norm
 
-    ds_full = _make_dataset(args.real, None)
+    # Base dataset for every axis except the window axis: the project default
+    # (uniform 2 h). Before 2026-08 this was the full variable-length window,
+    # which made the sweep inconsistent with the headline results.
+    ds_full = _make_dataset(args.real, C.DEFAULT_MAX_READINGS)
     targets = list(ds_full.targets.keys())
     summary = ("REAL" if args.real else "SYNTHETIC") + f" data (target_norm={tn} for non-targetnorm axes):\n" + ds_full.summary()
     print(summary)
@@ -157,34 +163,34 @@ def main() -> None:
     sections: list[tuple[str, list[dict]]] = []
 
     if args.kind in ("checkpoint", "all"):
-        print("\n>>> CHECKPOINT SWEEP (window=full, pooling=mean, no PCA)")
+        print("\n>>> CHECKPOINT SWEEP (window=2h uniform, pooling=mean, no PCA)")
         cfgs = [(m.split("/")[-1], m, "mean", ds_full, None, tn) for m in CHECKPOINTS]
-        _do_axis(f"Checkpoint sweep (window=full, pooling=mean, no PCA, target_norm={tn})", cfgs, args.device, targets, sections)
+        _do_axis(f"Checkpoint sweep (window=2h uniform, pooling=mean, no PCA, target_norm={tn})", cfgs, args.device, targets, sections)
 
     if args.kind in ("window", "all"):
         print("\n>>> WINDOW SWEEP (model=bolt-small, pooling=mean, no PCA)")
         cfgs = []
         for w in WINDOWS:
-            lab = "full" if w is None else f"{w}rd (~{w*C.CGM_SAMPLING_MINUTES/60:.1f}h)"
+            lab = "variable (old behaviour)" if w is None else f"{w*C.CGM_SAMPLING_MINUTES:g} min ({w} readings)"
             cfgs.append((lab, BASELINE_MODEL, "mean", _make_dataset(args.real, w), None, tn))
         _do_axis(f"Window sweep (model=chronos-bolt-small, pooling=mean, no PCA, target_norm={tn})", cfgs, args.device, targets, sections)
 
     if args.kind in ("pooling", "all"):
         print("\n>>> POOLING SWEEP (model=bolt-small, window=full, no PCA)")
         cfgs = [(p, BASELINE_MODEL, p, ds_full, None, tn) for p in POOLINGS]
-        _do_axis(f"Pooling sweep (model=chronos-bolt-small, window=full, no PCA, target_norm={tn})", cfgs, args.device, targets, sections)
+        _do_axis(f"Pooling sweep (model=chronos-bolt-small, window=2h uniform, no PCA, target_norm={tn})", cfgs, args.device, targets, sections)
 
     if args.kind in ("pca", "all"):
-        print("\n>>> PCA SWEEP (model=bolt-small, window=full, pooling=mean)")
+        print("\n>>> PCA SWEEP (model=bolt-small, window=2h uniform, pooling=mean)")
         cfgs = [("no PCA (full-dim)" if k is None else f"PCA={k}", BASELINE_MODEL, "mean", ds_full, k, tn)
                 for k in PCA_COMPONENTS]
-        _do_axis(f"PCA sweep (model=chronos-bolt-small, window=full, pooling=mean, target_norm={tn})", cfgs, args.device, targets, sections)
+        _do_axis(f"PCA sweep (model=chronos-bolt-small, window=2h uniform, pooling=mean, target_norm={tn})", cfgs, args.device, targets, sections)
 
     if args.kind in ("targetnorm", "all"):
-        print("\n>>> TARGET-NORM SWEEP (model=bolt-small, window=full, pooling=mean, no PCA)")
+        print("\n>>> TARGET-NORM SWEEP (model=bolt-small, window=2h uniform, pooling=mean, no PCA)")
         labels = {"none": "none (raw score)", "center": "within-subj center", "zscore": "within-subj zscore"}
         cfgs = [(labels[t], BASELINE_MODEL, "mean", ds_full, None, t) for t in TARGET_NORMS]
-        _do_axis("Target-norm sweep (model=chronos-bolt-small, window=full, pooling=mean); center/zscore R² = within-subject variance explained (oracle centering)",
+        _do_axis("Target-norm sweep (model=chronos-bolt-small, window=2h uniform, pooling=mean); center/zscore R² = within-subject variance explained (oracle centering)",
                  cfgs, args.device, targets, sections)
 
     out = Path(args.out) if args.out else RESULTS_DIR / f"sweep_{'real' if args.real else 'synthetic'}.md"

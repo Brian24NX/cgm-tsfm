@@ -49,11 +49,22 @@ def parse_glucose(raw) -> np.ndarray | None:
 
 
 def apply_window(glucose: np.ndarray, window: C.WindowConfig) -> np.ndarray | None:
-    """Cap a glucose array to the most-recent `max_readings`; drop if too short."""
+    """Cut a glucose array down to the most-recent `max_readings`.
+
+    Two modes, and the difference matters (see WindowConfig.require_full):
+      * require_full=False (default) -- CAP only. Long sessions are trimmed to
+        the last `max_readings`; short ones are kept as-is. Session length still
+        varies, so length itself remains a difference between sessions.
+      * require_full=True -- UNIFORM. Sessions shorter than `max_readings` are
+        dropped, so every surviving session covers exactly the same span.
+    """
     if glucose is None or glucose.size < window.min_readings:
         return None
-    if window.max_readings is not None and glucose.size > window.max_readings:
-        glucose = glucose[-window.max_readings:]   # most-recent readings
+    if window.max_readings is not None:
+        if window.require_full and glucose.size < window.max_readings:
+            return None                            # too short for a full window
+        if glucose.size > window.max_readings:
+            glucose = glucose[-window.max_readings:]   # most-recent readings
     return glucose
 
 
