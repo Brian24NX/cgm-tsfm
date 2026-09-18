@@ -1,7 +1,7 @@
 # Subgroup signal search — glucose regimes
 
 - **Data**: REAL  ·  **Encoder**: `amazon/chronos-bolt-small`  ·  **target-norm**: `none`
-- **Generated**: 2026-09-05T19:15:21
+- **Generated**: 2026-08-01T17:46:46
 - Per subgroup we re-run Arm A (Chronos embeddings + Ridge/SVR) under subject-grouped CV.
 - **R² vs a mean-predictor; higher = better; 0 = no better than guessing the subgroup's average.**
 
@@ -9,8 +9,8 @@
 
 | subgroup | sessions | subjects | grids | symbols | prices | note |
 |---|--:|--:|--:|--:|--:|---|
-| all sessions (reference) | 916 | 20 | -0.135 | -0.290 | -0.015 | grouped CV, 5 folds |
-| hypo  (any reading < 70) | 111 | 19 | -0.349 | -0.179 | -0.122 | grouped CV, 5 folds |
-| hyper (any reading > 250) | 314 | 19 | -0.099 | -0.681 | -0.027 | grouped CV, 5 folds |
-| any excursion (low OR high) | 416 | 20 | -0.204 | -0.109 | 0.001 | grouped CV, 5 folds |
-| in-range only (70–180) | 253 | 20 | -0.015 | -0.183 | -0.203 | grouped CV, 5 folds |
+| all sessions (reference) | 956 | 20 | -0.114 | -0.052 | -0.012 | grouped CV, 5 folds |
+| hypo  (any reading < 70) | 201 | 19 | -0.224 | -0.109 | -0.086 | grouped CV, 5 folds |
+| hyper (any reading > 250) | 449 | 20 | -0.094 | -0.134 | -0.087 | grouped CV, 5 folds |
+| any excursion (low OR high) | 577 | 20 | -0.118 | -0.246 | -0.018 | grouped CV, 5 folds |
+| in-range only (70–180) | 143 | 19 | -0.153 | -0.289 | -0.110 | grouped CV, 5 folds |
