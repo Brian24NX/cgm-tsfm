@@ -1,17 +1,27 @@
 """Rigor checks that make the 'low prediction accuracy' conclusion convincing
 (the advisor: "if it turns out no signal, we want very concrete evidence").
 
+Wording note: these two checks are conventionally called a "positive control"
+and a "permutation test". The advisor asked us not to use that vocabulary, so
+the output of this script says "known-answer check" and "shuffle test" instead.
+Same procedures, plainer names.
+
 Two checks, both reusing the frozen Chronos embeddings + subject-grouped CV:
 
-  1) POSITIVE CONTROL — predict a *glucose-derived* property (mean glucose, SD,
-     % time high) from the SAME embeddings under the SAME grouped CV. These
-     SHOULD be highly predictable (the embedding encodes the curve). If they are
-     but cognition is ~0, the null is real — not a broken pipeline / dead
-     embeddings.
+  1) THE KNOWN-ANSWER CHECK — predict a *glucose-derived* property (mean glucose,
+     SD, % time high) from the SAME embeddings under the SAME grouped CV. These
+     should be well predicted, since the embedding describes the curve. If they
+     are but the cognitive scores sit near zero, the low accuracy reflects the
+     data rather than a broken pipeline / dead embeddings.
+     Caveat measured on the real data: glucose VARIABILITY comes back at
+     R²~0.46, but absolute LEVEL only ~0.04, because Chronos-Bolt subtracts each
+     series' own mean and divides by its own standard deviation before encoding.
+     So this check passes for shape and not for level -- report it that way.
 
-  2) PERMUTATION TEST — shuffle the cognitive scores many times and recompute
-     grouped-CV R². If the real R² sits inside this random-chance distribution
-     (large p-value), there is no signal beyond chance.
+  2) THE SHUFFLE TEST — randomly reassign the cognitive scores to the wrong
+     sessions many times and recompute grouped-CV R². If the real R² sits inside
+     the scrambled range (large p-value), scrambled scores do as well as real
+     ones, i.e. there is no measurable relationship.
 
     python -m cgm_tsfm.run_rigor --encoder chronos --real --device cuda --n-perm 200
 """
@@ -55,7 +65,7 @@ def grouped_cv_r2(X, y, g, estimator, pca: int | None = 32, k: int = 5) -> float
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Rigor checks: positive control + permutation test")
+    ap = argparse.ArgumentParser(description="Rigor checks: the known-answer check + the shuffle test")
     ap.add_argument("--encoder", choices=["mock", "chronos"], default="chronos")
     ap.add_argument("--model", default="amazon/chronos-bolt-small")
     ap.add_argument("--device", default="cpu")
@@ -74,14 +84,14 @@ def main() -> None:
 
     ridge = Ridge(alpha=10.0, random_state=C.RANDOM_STATE)   # one fixed model (no tuning) for a clean test
 
-    # ---- 1) POSITIVE CONTROL -------------------------------------------------
+    # ---- 1) THE KNOWN-ANSWER CHECK -------------------------------------------
     W = ds.windows
     controls = {
         "mean glucose (mg/dL)": np.array([float(np.mean(w)) for w in W]),
         "glucose SD":           np.array([float(np.std(w)) for w in W]),
         "% time > 180":         np.array([float(np.mean(w > 180)) for w in W]),
     }
-    print("\n=== POSITIVE CONTROL — predict a glucose property from the embeddings (should be HIGH) ===")
+    print("\n=== KNOWN-ANSWER CHECK — predict a glucose property from the embeddings (should be high) ===")
     ctrl_rows = []
     for name, yc in controls.items():
         r_ridge = grouped_cv_r2(X, yc, g_all, ridge)
@@ -90,8 +100,8 @@ def main() -> None:
         ctrl_rows.append((name, r_ridge, r_svr, best))
         print(f"  {name:22s} Ridge={r_ridge:+.3f}  SVR={r_svr:+.3f}  best={best:+.3f}")
 
-    # ---- 2) PERMUTATION TEST -------------------------------------------------
-    print(f"\n=== PERMUTATION TEST — cognition R² vs {args.n_perm} shuffled-label runs ===")
+    # ---- 2) THE SHUFFLE TEST -------------------------------------------------
+    print(f"\n=== SHUFFLE TEST — real cognition R² vs {args.n_perm} scrambled-score runs ===")
     rng = np.random.default_rng(C.RANDOM_STATE)
     perm_rows = []
     for target in ds.targets:
@@ -103,13 +113,30 @@ def main() -> None:
         p95 = float(np.percentile(null, 95))
         perm_rows.append((target, real, float(null.mean()), float(null.std()), p95, p))
         print(f"  {target.replace('_cognitive_score',''):9s} real={real:+.3f}  "
-              f"chance={null.mean():+.3f}±{null.std():.3f}  95th={p95:+.3f}  p={p:.3f}")
+              f"scrambled={null.mean():+.3f}±{null.std():.3f}  95th={p95:+.3f}  p={p:.3f}")
 
     verdicts = []
+    best_ctrl = max(b for *_, b in ctrl_rows)
     if all(b > 0.5 for _, _, _, b in ctrl_rows):
-        verdicts.append("✅ Positive control passes: the embeddings + pipeline DO predict glucose properties well.")
+        verdicts.append("✅ Known-answer check: the embeddings + pipeline predict every glucose property well.")
+    elif best_ctrl > 0.3:
+        verdicts.append(
+            f"⚠️ Known-answer check is PARTIAL: the best glucose property reaches R²={best_ctrl:.3f} "
+            "(so the pipeline does extract real information), but not all of them clear 0.5. "
+            "Absolute level is recovered poorly because Chronos-Bolt subtracts each series' own mean and "
+            "divides by its own standard deviation before the encoder sees it. Do NOT report this as "
+            "a clean pass — say which properties are recovered and which are not."
+        )
+    else:
+        verdicts.append(
+            f"❌ Known-answer check FAILED: best glucose property only R²={best_ctrl:.3f}. "
+            "Investigate the pipeline before interpreting any cognition result."
+        )
     if all(p > 0.05 for *_, p in perm_rows):
-        verdicts.append("✅ Permutation test: cognition R² is NOT above chance (p>0.05 for every score) → no signal beyond chance.")
+        verdicts.append(
+            "✅ Shuffle test: scrambled scores do about as well as the real ones for every score "
+            "(p > 0.05), so there is no measurable relationship between the glucose and the score."
+        )
     for v in verdicts:
         print("\n" + v)
 
@@ -117,15 +144,16 @@ def main() -> None:
     out = Path(args.out) if args.out else RESULTS_DIR / f"rigor_{'real' if args.real else 'synthetic'}.md"
     out.parent.mkdir(parents=True, exist_ok=True)
     L = [
-        "# Rigor checks — positive control + permutation test",
+        "# Rigor checks — the known-answer check + the shuffle test",
         "",
         f"- **Data**: {'REAL' if args.real else 'SYNTHETIC'}  ·  **Encoder**: "
-        f"`{args.model if args.encoder=='chronos' else 'mock'}`  ·  **Permutations**: {args.n_perm}",
+        f"`{args.model if args.encoder=='chronos' else 'mock'}`  ·  **Shuffle rounds**: {args.n_perm}",
         f"- **Generated**: {datetime.now().isoformat(timespec='seconds')}",
         "- Model: `StandardScaler → PCA(32) → Ridge(alpha=10)`, subject-grouped 5-fold CV (same for every row).",
         "",
-        "## 1. Positive control — can the SAME embeddings predict a *glucose* property?",
-        "*(Sanity: these should be HIGH. If they are but cognition ≈ 0, the null is real — not a broken pipeline.)*",
+        "## 1. Known-answer check — can the SAME embeddings predict a property of the *glucose*?",
+        "*(These should be high. If they are, but the cognitive scores stay near zero, then the low accuracy "
+        "reflects the data rather than a broken pipeline.)*",
         "",
         "| glucose target | Ridge R² | SVR R² | best |",
         "|---|--:|--:|--:|",
@@ -134,11 +162,14 @@ def main() -> None:
         L.append(f"| {name} | {rr:.3f} | {rs:.3f} | **{b:.3f}** |")
     L += [
         "",
-        "## 2. Permutation test — is the cognition R² better than chance?",
-        f"*Shuffle each score {args.n_perm}× and recompute grouped-CV R². `p` = fraction of shuffles ≥ the real R². "
-        "**p > 0.05 ⇒ the real R² is within the random-chance range ⇒ no signal beyond chance.***",
+        "## 2. The shuffle test — do we do any better than scrambled scores?",
+        f"*Randomly reassign the scores to the wrong sessions {args.n_perm}× (destroying any real relationship) and "
+        "recompute grouped-CV R² each time. `p` = the fraction of scrambled runs that did at least as well as the "
+        "real one. **p > 0.05 means scrambled scores do about as well as the real ones — i.e. no measurable "
+        "relationship.*** Note the scrambled runs average about −0.05 rather than 0, because R² is measured against "
+        "each test fold's own average.",
         "",
-        "| score | real R² | chance mean ± sd | chance 95th %ile | p-value |",
+        "| score | real R² | scrambled mean ± sd | scrambled 95th %ile | p-value |",
         "|---|--:|--:|--:|--:|",
     ]
     for t, real, nm, ns, p95, p in perm_rows:
